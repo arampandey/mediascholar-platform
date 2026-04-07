@@ -107,6 +107,18 @@ export async function sendReviewerApplicationDecision(to: string, name: string, 
     <p>Best regards,<br>Editorial Team</p>`);
 }
 
+export async function sendPasswordReset(to: string, name: string, resetUrl: string) {
+  await send(to, "Reset Your Password — Media Scholar", `
+    <p>Dear <strong>${name}</strong>,</p>
+    <p>We received a request to reset your password for your Media Scholar account.</p>
+    <div style="background:#eff6ff;border-left:4px solid #3b82f6;padding:16px;margin:16px 0;border-radius:4px;">
+      <p style="margin:0 0 12px;">Click the button below to reset your password. This link expires in <strong>1 hour</strong>.</p>
+      <a href="${resetUrl}" style="background:#1a2744;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold;display:inline-block;">Reset Password →</a>
+    </div>
+    <p style="color:#6b7280;font-size:13px;">If you did not request this, please ignore this email. Your password will not change.</p>
+    <p>Best regards,<br>Editorial Team<br><em>Media Scholar — Journal of Media Studies and Humanities</em></p>`);
+}
+
 export async function sendPlagiarismFailed(to: string, authorName: string, title: string, score: number) {
   await send(to, `Action Required — High Similarity Detected: ${title}`, `
     <p>Dear <strong>${authorName}</strong>,</p>

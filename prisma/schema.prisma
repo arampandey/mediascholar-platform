@@ -40,10 +40,12 @@ model User {
   role         Role     @default(AUTHOR)
   institution  String?
   designation  String?
-  bio          String?
-  orcid        String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  bio               String?
+  orcid             String?
+  resetToken        String?
+  resetTokenExpiry  DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   submissions     Submission[]
   reviews         Review[]
