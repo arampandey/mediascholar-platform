@@ -1,0 +1,152 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  AUTHOR
+  REVIEWER
+  SUB_EDITOR
+  EDITOR
+}
+
+enum SubmissionStatus {
+  SUBMITTED
+  PLAGIARISM_CHECK
+  UNDER_REVIEW
+  REVISION_REQUESTED
+  RESUBMITTED
+  ACCEPTED
+  REJECTED
+  PUBLISHED
+}
+
+enum ReviewDecision {
+  ACCEPT
+  MINOR_REVISION
+  MAJOR_REVISION
+  REJECT
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  password     String
+  role         Role     @default(AUTHOR)
+  institution  String?
+  designation  String?
+  bio          String?
+  orcid        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  submissions     Submission[]
+  reviews         Review[]
+  applications    ReviewerApplication[]
+  assignedReviews SubmissionReviewer[]
+}
+
+model Submission {
+  id              String           @id @default(cuid())
+  title           String
+  abstract        String
+  keywords        String[]
+  language        String           @default("en")
+  fileUrl         String
+  status          SubmissionStatus @default(SUBMITTED)
+  coAuthors       String[]         @default([])
+  plagiarismScore Float?
+  plagiarismReport String?
+  doi             String?
+  publishedAt     DateTime?
+  editorDecision  String?
+  decisionNotes   String?
+  decisionAt      DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  authorId  String
+  author    User    @relation(fields: [authorId], references: [id])
+  issueId   String?
+  issue     Issue?  @relation(fields: [issueId], references: [id])
+
+  reviews   Review[]
+  reviewers SubmissionReviewer[]
+  revisions Revision[]
+}
+
+model Review {
+  id               String         @id @default(cuid())
+  clarityScore     Float?
+  methodologyScore Float?
+  relevanceScore   Float?
+  originalityScore Float?
+  remarks          String?
+  decision         ReviewDecision?
+  submittedAt      DateTime?
+  createdAt        DateTime       @default(now())
+
+  submissionId String
+  submission   Submission @relation(fields: [submissionId], references: [id])
+  reviewerId   String
+  reviewer     User       @relation(fields: [reviewerId], references: [id])
+}
+
+model SubmissionReviewer {
+  id           String     @id @default(cuid())
+  submissionId String
+  submission   Submission @relation(fields: [submissionId], references: [id])
+  userId       String
+  user         User       @relation(fields: [userId], references: [id])
+  assignedAt   DateTime   @default(now())
+
+  @@unique([submissionId, userId])
+}
+
+model ReviewerApplication {
+  id        String   @id @default(cuid())
+  status    String   @default("PENDING")
+  note      String?
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model Revision {
+  id           String     @id @default(cuid())
+  fileUrl      String
+  notes        String?
+  createdAt    DateTime   @default(now())
+
+  submissionId String
+  submission   Submission @relation(fields: [submissionId], references: [id])
+}
+
+model Volume {
+  id        String   @id @default(cuid())
+  number    Int      @unique
+  year      Int
+  createdAt DateTime @default(now())
+
+  issues Issue[]
+}
+
+model Issue {
+  id          String    @id @default(cuid())
+  number      Int
+  title       String?
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  volumeId    String
+  volume      Volume     @relation(fields: [volumeId], references: [id])
+  submissions Submission[]
+
+  @@unique([volumeId, number])
+}
