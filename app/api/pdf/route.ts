@@ -14,16 +14,15 @@ export async function GET(req: NextRequest) {
   if (!publicId) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
   try {
-    // Generate a signed URL valid for 1 hour
-    const signedUrl = cloudinary.utils.private_download_url(publicId, "pdf", {
+    // Generate signed download URL valid for 2 hours
+    const signedUrl = cloudinary.utils.private_download_url(publicId, "", {
       resource_type: "raw",
-      expires_at: Math.floor(Date.now() / 1000) + 3600,
+      expires_at: Math.floor(Date.now() / 1000) + 7200,
       attachment: true,
     });
 
-    // Redirect to signed URL
-    return NextResponse.redirect(signedUrl);
-  } catch (e) {
-    return NextResponse.json({ error: "Failed to generate download link" }, { status: 500 });
+    return NextResponse.redirect(signedUrl, { status: 302 });
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }
