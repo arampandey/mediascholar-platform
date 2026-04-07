@@ -69,6 +69,7 @@ export default function JournalClient({ articles }: { articles: any[] }) {
                       {a.publishedAt && <span>Published {new Date(a.publishedAt).toLocaleDateString("en-IN",{day:"numeric",month:"long",year:"numeric"})}</span>}
                       <span className={`px-2 py-0.5 rounded-full font-medium ${a.language==="hi"?"bg-orange-100 text-orange-700":"bg-blue-100 text-blue-700"}`}>{a.language==="hi"?"हिंदी":"English"}</span>
                     </div>
+
                   </div>
                   {a.fileUrl && <a href={a.fileUrl} target="_blank" rel="noopener noreferrer" className="shrink-0 px-4 py-2 bg-indigo-700 text-white text-sm font-semibold rounded-lg hover:bg-indigo-800 transition-colors">📄 PDF</a>}
                 </div>

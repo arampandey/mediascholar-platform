@@ -6,7 +6,7 @@ const transporter = nodemailer.createTransport({
 });
 
 const ISSN = "ISSN: 3048-5029";
-const JOURNAL = "MediaScholar — Journal of Media Scholars";
+const JOURNAL = "MediaScholar — Journal of Media Studies and Humanities";
 const ADDR = "Galgotias University, Greater Noida | mediascholarjournal@gmail.com | +91 9911893074";
 
 function wrap(body: string): string {
@@ -105,6 +105,43 @@ export async function sendReviewerApplicationDecision(to: string, name: string, 
     </div>
     ${approved ? "<p>You can now log in and review assigned papers from your dashboard.</p>" : "<p>Thank you for your interest.</p>"}
     <p>Best regards,<br>Editorial Team</p>`);
+}
+
+export async function sendPlagiarismFailed(to: string, authorName: string, title: string, score: number) {
+  await send(to, `Action Required — High Similarity Detected: ${title}`, `
+    <p>Dear <strong>${authorName}</strong>,</p>
+    <p>Thank you for submitting your manuscript to <em>${JOURNAL}</em>. After conducting a plagiarism check using Turnitin, we regret to inform you that your submission has exceeded the acceptable similarity threshold.</p>
+    <div style="background:#fef2f2;border-left:4px solid #ef4444;padding:16px;margin:16px 0;border-radius:4px;">
+      <strong>Paper:</strong> ${title}<br>
+      <strong>Similarity Score:</strong> <span style="color:#ef4444;font-weight:bold;font-size:18px;">${score}%</span><br>
+      <strong>Acceptable Limit:</strong> 20%<br><br>
+      <strong>Status:</strong> <span style="color:#ef4444;font-weight:bold;">Not Considered for Review</span>
+    </div>
+    <p><strong>What this means:</strong> Your manuscript has not been forwarded for peer review at this stage. You are requested to revise the manuscript to reduce similarity and ensure originality before resubmitting.</p>
+    <p><strong>What you should do:</strong></p>
+    <ul style="color:#374151;font-size:14px;">
+      <li>Review your manuscript carefully for unintentional similarity</li>
+      <li>Ensure all borrowed ideas, data, or text are properly cited</li>
+      <li>Paraphrase and add your original analysis where needed</li>
+      <li>Resubmit after bringing the similarity score below 20%</li>
+    </ul>
+    <p>If you have any questions, please contact us at <a href="mailto:mediascholarjournal@gmail.com">mediascholarjournal@gmail.com</a>.</p>
+    <p>Best regards,<br>Editorial Team<br><em>${JOURNAL}</em></p>`);
+}
+
+export async function sendPlagiarismPassed(editorEmail: string, authorName: string, title: string, score: number) {
+  await send(editorEmail, `Plagiarism Check Passed — Ready for Review: ${title}`, `
+    <p>Dear Editor,</p>
+    <p>A submitted manuscript has cleared the plagiarism check and is ready to be assigned for peer review.</p>
+    <div style="background:#f0fdf4;border-left:4px solid #22c55e;padding:16px;margin:16px 0;border-radius:4px;">
+      <strong>Paper Title:</strong> ${title}<br>
+      <strong>Author:</strong> ${authorName}<br>
+      <strong>Similarity Score:</strong> <span style="color:#16a34a;font-weight:bold;font-size:18px;">${score}%</span><br>
+      <strong>Status:</strong> <span style="color:#16a34a;font-weight:bold;">✅ Cleared — Ready for Reviewer Assignment</span>
+    </div>
+    <p>Please log in to the editor dashboard to assign a reviewer for this manuscript.</p>
+    <p><a href="https://mediascholar.in/dashboard/editor" style="background:#1a2744;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:bold;display:inline-block;margin-top:8px;">Go to Editor Dashboard →</a></p>
+    <p>Best regards,<br>MediaScholar Platform</p>`);
 }
 
 export async function sendReviewThankYou(to: string, reviewerName: string, title: string) {

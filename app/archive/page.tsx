@@ -17,8 +17,8 @@ export default async function ArchivePage() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1 max-w-4xl mx-auto px-4 py-12 w-full">
-        <h1 className="text-3xl font-extrabold text-gray-900 mb-2">Archive</h1>
-        <p className="text-gray-500 mb-8">All published volumes and issues of MediaScholar</p>
+        <h1 className="text-3xl font-extrabold text-gray-900 mb-2">All Issues</h1>
+        <p className="text-gray-500 mb-8">All published volumes and issues of Media Scholar</p>
         {volumes.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
             <div className="text-4xl mb-3">📚</div>

@@ -6,7 +6,7 @@ import SessionProvider from "@/components/SessionProvider";
 const geist = Geist({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "MediaScholar — Journal of Media Scholars",
+  title: "MediaScholar — Journal of Media Studies and Humanities",
   description: "A peer-reviewed bilingual journal (Hindi & English) for media studies and communication research. ISSN: 3048-5029",
 };
 

@@ -1,7 +1,12 @@
 import type { NextConfig } from "next";
+
 const nextConfig: NextConfig = {
+  allowedDevOrigins: [
+    "erik-utilities-sender-powell.trycloudflare.com",
+    "*.trycloudflare.com",
+  ],
   images: { remotePatterns: [{ protocol: "https", hostname: "mediascholar.in" }] },
-  eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
 };
+
 export default nextConfig;
