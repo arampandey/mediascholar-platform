@@ -8,8 +8,14 @@ export default auth((req) => {
 
   if (pathname.startsWith("/dashboard")) {
     if (!session) return NextResponse.redirect(new URL("/login", req.url));
+    // Sub-editor can access submission detail pages under editor route
+    const isSubmissionDetail = pathname.startsWith("/dashboard/editor/submission/");
     if ((pathname.startsWith("/dashboard/editor") || pathname.startsWith("/dashboard/admin")) && role !== "EDITOR") {
-      return NextResponse.redirect(new URL("/dashboard", req.url));
+      if (isSubmissionDetail && role === "SUB_EDITOR") {
+        // Allow sub-editor to access submission details
+      } else {
+        return NextResponse.redirect(new URL("/dashboard", req.url));
+      }
     }
     if (pathname.startsWith("/dashboard/sub-editor") && !["EDITOR","SUB_EDITOR"].includes(role)) {
       return NextResponse.redirect(new URL("/dashboard", req.url));
