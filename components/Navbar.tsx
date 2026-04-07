@@ -43,7 +43,7 @@ export default function Navbar() {
           {session ? (
             <>
               <Link href="/dashboard" onClick={() => setOpen(false)} className="text-sm px-3 py-2 bg-blue-700 rounded-lg hover:bg-blue-600 transition-colors ml-0 sm:ml-2 mt-1 sm:mt-0">
-                {ROLE_LABELS[role] === "Editor" ? "Editor Dashboard" : `${session.user?.name?.split(" ")[0]} (${ROLE_LABELS[role] || role})`}
+                {role === "EDITOR" ? "Editor Dashboard" : role === "SUB_EDITOR" ? "Sub Editor Dashboard" : `${session.user?.name?.split(" ")[0]} (${ROLE_LABELS[role] || role})`}
               </Link>
               <button onClick={() => signOut({ callbackUrl: "/" })} className="text-sm px-3 py-2 text-blue-300 hover:text-white transition-colors">Logout</button>
             </>
