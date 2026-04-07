@@ -108,18 +108,14 @@ export default function EditorialBoardPage() {
         <p className="text-gray-500 mb-8">Media Scholar — Journal of Media Studies and Humanities</p>
 
         {/* Editor-in-Chief */}
-        <div style={{ background: "linear-gradient(135deg, #1a2744, #2d4a8a)" }} className="rounded-2xl p-8 text-white mb-6">
-          <span className="text-xs font-bold uppercase tracking-widest text-blue-300 bg-blue-900/40 px-3 py-1 rounded-full">Editor-in-Chief</span>
-          <h2 className="text-2xl font-extrabold mt-3 mb-1">{EDITOR_IN_CHIEF.name}</h2>
-          <p className="text-blue-200 text-sm">{EDITOR_IN_CHIEF.affiliation}</p>
-          <p className="text-blue-300 text-sm mb-3">{EDITOR_IN_CHIEF.institution}</p>
+        <div className="bg-white rounded-xl border border-gray-200 p-5 mb-6">
+          <span className="text-xs font-medium uppercase tracking-widest text-indigo-500 bg-indigo-50 px-2.5 py-1 rounded-full">Editor-in-Chief</span>
+          <h2 className="text-base font-semibold text-gray-900 mt-2 mb-0.5">{EDITOR_IN_CHIEF.name}</h2>
+          <p className="text-sm text-gray-600">{EDITOR_IN_CHIEF.affiliation}</p>
+          <p className="text-sm text-gray-500 mb-3">{EDITOR_IN_CHIEF.institution}</p>
           <div className="flex gap-5 flex-wrap text-sm">
-            <a href={`mailto:${EDITOR_IN_CHIEF.email}`} className="text-blue-200 hover:text-white transition-colors">
-              ✉ {EDITOR_IN_CHIEF.email}
-            </a>
-            <a href={EDITOR_IN_CHIEF.profile} target="_blank" rel="noopener noreferrer" className="text-blue-300 hover:text-white transition-colors">
-              🔗 View Profile
-            </a>
+            <a href={`mailto:${EDITOR_IN_CHIEF.email}`} className="text-gray-400 hover:text-indigo-600 transition-colors text-xs">✉ {EDITOR_IN_CHIEF.email}</a>
+            <a href={EDITOR_IN_CHIEF.profile} target="_blank" rel="noopener noreferrer" className="text-indigo-500 hover:text-indigo-700 transition-colors text-xs">🔗 Profile</a>
           </div>
         </div>
 
