@@ -59,7 +59,11 @@ export default function JournalClient({ articles }: { articles: any[] }) {
               <div key={a.id} className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-sm transition-shadow">
                 <div className="flex items-start justify-between gap-4 flex-wrap">
                   <div className="flex-1 min-w-0">
-                    <h2 className="text-lg font-bold text-gray-900">{a.title}</h2>
+                    {a.fileUrl ? (
+                      <a href={a.fileUrl} target="_blank" rel="noopener noreferrer" className="text-lg font-bold text-indigo-800 hover:text-indigo-600 hover:underline transition-colors leading-snug block">{a.title}</a>
+                    ) : (
+                      <h2 className="text-lg font-bold text-gray-900">{a.title}</h2>
+                    )}
                     <p className="text-sm text-gray-500 mt-0.5">{a.author?.name}{a.author?.institution ? ` · ${a.author.institution}` : ""}</p>
                     {a.issue && <p className="text-xs text-indigo-600 font-medium mt-1">Vol. {a.issue.volume.number} ({a.issue.volume.year}) · Issue {a.issue.number}{a.issue.title ? ` — ${a.issue.title}` : ""}</p>}
                     <p className="text-sm text-gray-600 mt-2 line-clamp-3">{a.abstract}</p>

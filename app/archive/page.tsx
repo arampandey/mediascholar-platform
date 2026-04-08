@@ -39,7 +39,11 @@ export default async function ArchivePage() {
                         {iss.submissions.map(s => (
                           <div key={s.id} className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg hover:bg-gray-50">
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-gray-900 truncate">{s.title}</p>
+                              {s.fileUrl ? (
+                            <a href={s.fileUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-indigo-800 hover:text-indigo-600 hover:underline transition-colors">{s.title}</a>
+                          ) : (
+                            <p className="text-sm font-medium text-gray-900">{s.title}</p>
+                          )}
                               <p className="text-xs text-gray-400">{s.author?.name}</p>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">

@@ -66,7 +66,11 @@ export default async function HomePage() {
                   <div key={paper.id} className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-sm transition-shadow">
                     <div className="flex items-start justify-between gap-4 flex-wrap">
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-lg font-bold text-gray-900 leading-snug">{paper.title}</h3>
+                        {paper.fileUrl ? (
+                      <a href={paper.fileUrl} target="_blank" rel="noopener noreferrer" className="text-lg font-bold text-indigo-800 hover:text-indigo-600 hover:underline transition-colors leading-snug block">{paper.title}</a>
+                    ) : (
+                      <h3 className="text-lg font-bold text-gray-900 leading-snug">{paper.title}</h3>
+                    )}
                         <p className="text-sm text-gray-500 mt-1">
                           {paper.author?.name}
                           {paper.author?.institution ? ` — ${paper.author.institution}` : ""}
