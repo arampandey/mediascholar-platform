@@ -55,7 +55,7 @@ export default async function HomePage() {
 
                 </h2>
               </div>
-              <Link href="/archive" className="text-sm text-indigo-700 font-semibold hover:underline">View all issues →</Link>
+              <Link href="/archive" className="text-sm text-indigo-700 font-semibold hover:underline">Archive →</Link>
             </div>
 
             {latestIssue.submissions.length === 0 ? (
