@@ -16,8 +16,9 @@ export default function ReviewPage() {
 
   useEffect(() => {
     fetch(`/api/submissions/${id}`).then(r => r.json()).then(d => setSub(d.submission));
-    fetch(`/api/reviews/${id}`).then(r => r.json()).then(d => {
-      const r = d.reviews?.[0];
+    // Fetch MY review specifically (not all reviews)
+    fetch(`/api/reviewer/my-review/${id}`).then(r => r.json()).then(d => {
+      const r = d.review;
       if (r) { setReview(r); if (r.submittedAt) setDone(true); setForm({ clarityScore: r.clarityScore||"", methodologyScore: r.methodologyScore||"", relevanceScore: r.relevanceScore||"", originalityScore: r.originalityScore||"", remarks: r.remarks||"", decision: r.decision||"" }); }
     });
   }, [id]);
@@ -25,7 +26,7 @@ export default function ReviewPage() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
-    await fetch(`/api/reviews/${id}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...form, clarityScore: +form.clarityScore, methodologyScore: +form.methodologyScore, relevanceScore: +form.relevanceScore, originalityScore: +form.originalityScore, reviewId: review.id }) });
+    await fetch(`/api/reviews/${id}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...form, clarityScore: +form.clarityScore, methodologyScore: +form.methodologyScore, relevanceScore: +form.relevanceScore, originalityScore: +form.originalityScore, reviewId: review?.id }) });
     setSubmitting(false);
     setDone(true);
   }

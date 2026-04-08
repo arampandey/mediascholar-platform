@@ -21,8 +21,8 @@ export default function ReviewerDashboard() {
         {loading ? <div className="text-center py-20 text-gray-400">Loading…</div> :
          assignments.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
-            <div className="text-4xl mb-3">📋</div>
-            <p className="font-semibold text-gray-600">No papers assigned yet</p>
+            <p className="font-semibold text-gray-600">No papers assigned yet.</p>
+            <p className="text-sm text-gray-400 mt-1">Papers assigned to you will appear here.</p>
           </div>
         ) : (
           <div className="space-y-3">
