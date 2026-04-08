@@ -5,209 +5,251 @@ const transporter = nodemailer.createTransport({
   auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD },
 });
 
+const JOURNAL = "Media Scholar — Journal of Media Studies and Humanities";
 const ISSN = "ISSN: 3048-5029";
-const JOURNAL = "MediaScholar — Journal of Media Studies and Humanities";
-const ADDR = "Galgotias University, Greater Noida | mediascholarjournal@gmail.com | +91 9911893074";
+const ADDR = "Galgotias University, Greater Noida, Uttar Pradesh, India";
+const EMAIL = "mediascholarjournal@gmail.com";
+const PHONE = "+91 9911893074";
+const WEBSITE = "https://mediascholar.in";
 
 function wrap(body: string): string {
-  return `
-<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
-  <div style="background:#1a2744;padding:20px 24px;border-radius:8px 8px 0 0;">
-    <h2 style="color:#fff;margin:0;font-size:18px;">${JOURNAL}</h2>
-    <p style="color:#aab;margin:4px 0 0;font-size:12px;">${ISSN}</p>
-  </div>
-  <div style="border:1px solid #e5e7eb;border-top:none;padding:24px;border-radius:0 0 8px 8px;">
-    ${body}
-  </div>
-  <p style="text-align:center;color:#9ca3af;font-size:11px;margin-top:12px;">${ADDR}</p>
-</div>`;
+  return `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background:#f9fafb;font-family:Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9fafb;padding:32px 16px;">
+  <tr><td align="center">
+    <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+      <!-- Header -->
+      <tr>
+        <td style="background:#1a2744;padding:24px 28px;border-radius:6px 6px 0 0;">
+          <p style="margin:0;color:#ffffff;font-size:17px;font-weight:bold;">${JOURNAL}</p>
+          <p style="margin:6px 0 0;color:#a0aec0;font-size:12px;">${ISSN} &nbsp;|&nbsp; ${WEBSITE}</p>
+        </td>
+      </tr>
+      <!-- Body -->
+      <tr>
+        <td style="background:#ffffff;padding:32px 28px;border:1px solid #e2e8f0;border-top:none;">
+          ${body}
+        </td>
+      </tr>
+      <!-- Footer -->
+      <tr>
+        <td style="background:#f1f5f9;padding:16px 28px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 6px 6px;">
+          <p style="margin:0;font-size:11px;color:#718096;line-height:1.6;">
+            ${JOURNAL}<br>
+            ${ADDR}<br>
+            ${EMAIL} &nbsp;|&nbsp; ${PHONE}
+          </p>
+        </td>
+      </tr>
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>`;
 }
+
+const P = `style="margin:0 0 14px;font-size:14px;color:#2d3748;line-height:1.7;"`;
+const LABEL = `style="font-size:13px;color:#4a5568;"`;
+const BOX = `style="border:1px solid #e2e8f0;border-left:3px solid #1a2744;padding:14px 18px;margin:20px 0;border-radius:4px;background:#f8fafc;"`;
+const SIGN = `style="margin:24px 0 0;font-size:14px;color:#2d3748;line-height:1.8;"`;
 
 async function send(to: string, subject: string, html: string) {
   try {
-    await transporter.sendMail({ from: `"${JOURNAL}" <${process.env.GMAIL_USER}>`, to, subject, html: wrap(html) });
-  } catch (e) { console.error("Email error:", e); }
+    await transporter.sendMail({
+      from: `"${JOURNAL}" <${process.env.GMAIL_USER}>`,
+      to,
+      subject,
+      html: wrap(html),
+    });
+  } catch (e) {
+    console.error("Email error:", e);
+  }
 }
 
 export async function sendSubmissionConfirmation(to: string, authorName: string, title: string) {
-  await send(to, `Submission Received: ${title}`, `
-    <p>Dear <strong>${authorName}</strong>,</p>
-    <p>Thank you for submitting your paper to <em>${JOURNAL}</em>.</p>
-    <div style="background:#eff6ff;border-left:4px solid #3b82f6;padding:12px 16px;margin:16px 0;border-radius:4px;">
-      <strong>Paper Title:</strong> ${title}
+  await send(to, `Manuscript Received — ${title}`, `
+    <p ${P}>Dear <strong>${authorName}</strong>,</p>
+    <p ${P}>Thank you for submitting your manuscript to <em>${JOURNAL}</em>. We confirm receipt of your submission and will notify you as the editorial process progresses.</p>
+    <div ${BOX}>
+      <p style="margin:0 0 6px;font-size:13px;color:#4a5568;"><strong>Manuscript Title:</strong></p>
+      <p style="margin:0;font-size:14px;color:#1a202c;">${title}</p>
     </div>
-    <p>Your submission is now under editorial review. We will notify you of any updates.</p>
-    <p>Best regards,<br>Editorial Team</p>`);
+    <p ${P}>If you have any queries, please write to us at <a href="mailto:${EMAIL}" style="color:#1a2744;">${EMAIL}</a>.</p>
+    <p ${SIGN}>Yours sincerely,<br><strong>Editorial Team</strong><br>${JOURNAL}</p>`);
 }
 
 export async function sendReviewerAssignment(to: string, reviewerName: string, title: string) {
-  await send(to, `Review Assignment: ${title}`, `
-    <p>Dear <strong>${reviewerName}</strong>,</p>
-    <p>You have been assigned to review the following paper:</p>
-    <div style="background:#f5f3ff;border-left:4px solid #8b5cf6;padding:12px 16px;margin:16px 0;border-radius:4px;">
-      <strong>${title}</strong>
+  await send(to, `Peer Review Assignment — ${title}`, `
+    <p ${P}>Dear <strong>${reviewerName}</strong>,</p>
+    <p ${P}>We request your expert opinion as a reviewer for the manuscript submitted to <em>${JOURNAL}</em>. Kindly log in to your reviewer account and submit your evaluation at the earliest.</p>
+    <div ${BOX}>
+      <p style="margin:0 0 6px;" ${LABEL}><strong>Manuscript Title:</strong></p>
+      <p style="margin:0;font-size:14px;color:#1a202c;">${title}</p>
     </div>
-    <p>Please log in to your reviewer dashboard to complete the review.</p>
-    <p>Best regards,<br>Editorial Team</p>`);
-}
-
-export async function sendRevisionRequest(to: string, authorName: string, title: string, notes: string) {
-  await send(to, `Revision Requested: ${title}`, `
-    <p>Dear <strong>${authorName}</strong>,</p>
-    <p>The editorial team has reviewed your submission and requests revisions:</p>
-    <div style="background:#fff7ed;border-left:4px solid #f97316;padding:12px 16px;margin:16px 0;border-radius:4px;">
-      <strong>Paper:</strong> ${title}<br><strong>Notes:</strong> ${notes}
-    </div>
-    <p>Please log in to your dashboard to submit the revised version.</p>
-    <p>Best regards,<br>Editorial Team</p>`);
-}
-
-export async function sendReviewSubmitted(editorEmail: string, reviewerName: string, title: string, decision: string) {
-  await send(editorEmail, `Review Submitted for: ${title}`, `
-    <p>A review has been submitted.</p>
-    <div style="background:#f0fdf4;border-left:4px solid #22c55e;padding:12px 16px;margin:16px 0;border-radius:4px;">
-      <strong>Paper:</strong> ${title}<br>
-      <strong>Reviewer:</strong> ${reviewerName}<br>
-      <strong>Decision:</strong> ${decision}
-    </div>
-    <p>Please log in to the editor dashboard to review.</p>`);
-}
-
-export async function sendFinalDecision(to: string, authorName: string, title: string, decision: string, notes: string) {
-  const isAccept = decision === "ACCEPT";
-  const color = isAccept ? "#22c55e" : decision === "REJECT" ? "#ef4444" : "#f97316";
-  await send(to, `Editorial Decision: ${title}`, `
-    <p>Dear <strong>${authorName}</strong>,</p>
-    <p>The editor has made a final decision on your submission:</p>
-    <div style="background:#f9fafb;border-left:4px solid ${color};padding:12px 16px;margin:16px 0;border-radius:4px;">
-      <strong>Paper:</strong> ${title}<br>
-      <strong>Decision:</strong> <span style="color:${color};font-weight:bold;">${decision.replace("_", " ")}</span><br>
-      ${notes ? `<strong>Notes:</strong> ${notes}` : ""}
-    </div>
-    <p>Best regards,<br>Editorial Team</p>`);
-}
-
-export async function sendReviewerApplicationAck(to: string, name: string) {
-  await send(to, "Reviewer Application Received", `
-    <p>Dear <strong>${name}</strong>,</p>
-    <p>Thank you for applying to join the reviewer panel of <em>${JOURNAL}</em>.</p>
-    <p>Your application is under review. You will be notified once a decision is made.</p>
-    <p>Best regards,<br>Editorial Team</p>`);
-}
-
-export async function sendReviewerApplicationDecision(to: string, name: string, approved: boolean) {
-  const color = approved ? "#22c55e" : "#ef4444";
-  const status = approved ? "APPROVED" : "DECLINED";
-  await send(to, `Reviewer Application ${status}`, `
-    <p>Dear <strong>${name}</strong>,</p>
-    <div style="background:#f9fafb;border-left:4px solid ${color};padding:12px 16px;margin:16px 0;border-radius:4px;">
-      Your reviewer application has been <strong style="color:${color};">${status}</strong>.
-    </div>
-    ${approved ? "<p>You can now log in and review assigned papers from your dashboard.</p>" : "<p>Thank you for your interest.</p>"}
-    <p>Best regards,<br>Editorial Team</p>`);
+    <p ${P}>Please log in at <a href="${WEBSITE}" style="color:#1a2744;">${WEBSITE}</a> to access the manuscript and submit your review.</p>
+    <p ${SIGN}>Yours sincerely,<br><strong>Editorial Team</strong><br>${JOURNAL}</p>`);
 }
 
 export async function sendReviewerAssignment2(to: string, reviewerName: string, title: string, deadlineDays: number, isReplacement: boolean = false) {
-  const deadlineDate = new Date(Date.now() + deadlineDays * 24 * 60 * 60 * 1000).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
-  const subject = isReplacement ? `Replacement Review Request: ${title}` : `Peer Review Assignment: ${title}`;
-  await send(to, subject, `
-    <p>Dear <strong>${reviewerName}</strong>,</p>
-    <p>${isReplacement ? 'You have been assigned as a <strong>replacement reviewer</strong> for the following manuscript:' : 'You have been invited to review the following manuscript for <em>Media Scholar — Journal of Media Studies and Humanities</em>:'}</p>
-    <div style="background:#f5f3ff;border-left:4px solid #8b5cf6;padding:16px;margin:16px 0;border-radius:4px;">
-      <strong>Paper Title:</strong> ${title}<br><br>
-      <strong>Review Deadline:</strong> <span style="color:#7c3aed;font-weight:bold;">${deadlineDate} (${deadlineDays} days)</span>
+  const deadlineDate = new Date(Date.now() + deadlineDays * 24 * 60 * 60 * 1000)
+    .toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
+  const subjectPrefix = isReplacement ? "Review Request (Replacement)" : "Peer Review Assignment";
+  await send(to, `${subjectPrefix} — ${title}`, `
+    <p ${P}>Dear <strong>${reviewerName}</strong>,</p>
+    <p ${P}>${isReplacement
+      ? `You have been requested to serve as a replacement reviewer for the following manuscript submitted to <em>${JOURNAL}</em>.`
+      : `We request your expert opinion as a reviewer for the following manuscript submitted to <em>${JOURNAL}</em>.`
+    }</p>
+    <div ${BOX}>
+      <p style="margin:0 0 8px;" ${LABEL}><strong>Manuscript Title:</strong></p>
+      <p style="margin:0 0 12px;font-size:14px;color:#1a202c;">${title}</p>
+      <p style="margin:0;" ${LABEL}><strong>Review Deadline:</strong> ${deadlineDate} (${deadlineDays} days)</p>
     </div>
-    <p><strong>Instructions:</strong></p>
-    <ul style="color:#374151;font-size:14px;line-height:1.8;">
-      <li>Log in to <a href="https://mediascholar.in">mediascholar.in</a> using your registered email</li>
-      <li>Go to your <strong>Reviewer Dashboard</strong></li>
-      <li>Download and read the manuscript</li>
-      <li>Submit your scores and comments before the deadline</li>
-    </ul>
-    <p><strong>Review Criteria:</strong> Clarity, Methodology, Relevance, Originality (each scored 0–10)</p>
-    <p>Please log in at your earliest convenience. If you are unable to review, kindly inform us immediately so we can arrange an alternate reviewer.</p>
-    <p>Best regards,<br>Editorial Team<br><em>Media Scholar — Journal of Media Studies and Humanities</em></p>`);
+    <p ${P}>Kindly evaluate the manuscript on the following criteria, each scored on a scale of 0 to 10:</p>
+    <table width="100%" cellpadding="6" cellspacing="0" style="border-collapse:collapse;font-size:13px;color:#4a5568;margin-bottom:16px;">
+      <tr style="background:#f1f5f9;"><td style="padding:8px 12px;border:1px solid #e2e8f0;">Clarity of Writing</td><td style="padding:8px 12px;border:1px solid #e2e8f0;">Score: 0–10</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #e2e8f0;">Research Methodology</td><td style="padding:8px 12px;border:1px solid #e2e8f0;">Score: 0–10</td></tr>
+      <tr style="background:#f1f5f9;"><td style="padding:8px 12px;border:1px solid #e2e8f0;">Relevance to Media Studies</td><td style="padding:8px 12px;border:1px solid #e2e8f0;">Score: 0–10</td></tr>
+      <tr><td style="padding:8px 12px;border:1px solid #e2e8f0;">Originality and Contribution</td><td style="padding:8px 12px;border:1px solid #e2e8f0;">Score: 0–10</td></tr>
+    </table>
+    <p ${P}>To submit your review, please log in at <a href="${WEBSITE}" style="color:#1a2744;">${WEBSITE}</a> and navigate to your Reviewer Dashboard. Should you be unable to undertake this review, kindly inform us promptly so that an alternate reviewer may be arranged.</p>
+    <p ${SIGN}>Yours sincerely,<br><strong>Editorial Team</strong><br>${JOURNAL}</p>`);
+}
+
+export async function sendRevisionRequest(to: string, authorName: string, title: string, notes: string) {
+  await send(to, `Revision Required — ${title}`, `
+    <p ${P}>Dear <strong>${authorName}</strong>,</p>
+    <p ${P}>The editorial team has reviewed your manuscript and requests revisions before a final decision can be made.</p>
+    <div ${BOX}>
+      <p style="margin:0 0 8px;" ${LABEL}><strong>Manuscript Title:</strong></p>
+      <p style="margin:0 0 12px;font-size:14px;color:#1a202c;">${title}</p>
+      <p style="margin:0 0 6px;" ${LABEL}><strong>Reviewer Comments:</strong></p>
+      <p style="margin:0;font-size:14px;color:#1a202c;">${notes}</p>
+    </div>
+    <p ${P}>Please log in to your author dashboard at <a href="${WEBSITE}" style="color:#1a2744;">${WEBSITE}</a> to submit the revised manuscript.</p>
+    <p ${SIGN}>Yours sincerely,<br><strong>Editorial Team</strong><br>${JOURNAL}</p>`);
+}
+
+export async function sendReviewSubmitted(editorEmail: string, reviewerName: string, title: string, decision: string) {
+  await send(editorEmail, `Review Submitted — ${title}`, `
+    <p ${P}>Dear Editor,</p>
+    <p ${P}>A peer review has been submitted for the following manuscript.</p>
+    <div ${BOX}>
+      <p style="margin:0 0 6px;" ${LABEL}><strong>Manuscript:</strong> ${title}</p>
+      <p style="margin:0 0 6px;" ${LABEL}><strong>Reviewer:</strong> ${reviewerName}</p>
+      <p style="margin:0;" ${LABEL}><strong>Recommendation:</strong> ${decision.replace(/_/g, " ")}</p>
+    </div>
+    <p ${P}>Please log in to the editor dashboard at <a href="${WEBSITE}/dashboard/editor" style="color:#1a2744;">${WEBSITE}</a> to view the complete review.</p>
+    <p ${SIGN}>Regards,<br><strong>Media Scholar Platform</strong></p>`);
+}
+
+export async function sendFinalDecision(to: string, authorName: string, title: string, decision: string, notes: string) {
+  const decisionText = decision === "ACCEPT" ? "Accepted for Publication" : decision === "REJECT" ? "Rejected" : "Major Revision Required";
+  await send(to, `Editorial Decision — ${title}`, `
+    <p ${P}>Dear <strong>${authorName}</strong>,</p>
+    <p ${P}>The editorial board has reached a decision on your manuscript submitted to <em>${JOURNAL}</em>.</p>
+    <div ${BOX}>
+      <p style="margin:0 0 8px;" ${LABEL}><strong>Manuscript Title:</strong></p>
+      <p style="margin:0 0 12px;font-size:14px;color:#1a202c;">${title}</p>
+      <p style="margin:0 0 6px;" ${LABEL}><strong>Decision:</strong> <strong style="color:#1a2744;">${decisionText}</strong></p>
+      ${notes ? `<p style="margin:8px 0 0;" ${LABEL}><strong>Editor's Comments:</strong> ${notes}</p>` : ""}
+    </div>
+    <p ${P}>For any queries, please write to us at <a href="mailto:${EMAIL}" style="color:#1a2744;">${EMAIL}</a>.</p>
+    <p ${SIGN}>Yours sincerely,<br><strong>Prof. (Dr.) A. Ram Pandey</strong><br>Editor-in-Chief<br>${JOURNAL}</p>`);
+}
+
+export async function sendReviewerApplicationAck(to: string, name: string) {
+  await send(to, "Application Received — Reviewer Panel", `
+    <p ${P}>Dear <strong>${name}</strong>,</p>
+    <p ${P}>Thank you for expressing your interest in joining the reviewer panel of <em>${JOURNAL}</em>. We have received your application and it is currently under consideration.</p>
+    <p ${P}>You will be notified once a decision has been made. We appreciate your willingness to contribute to academic publishing.</p>
+    <p ${SIGN}>Yours sincerely,<br><strong>Editorial Team</strong><br>${JOURNAL}</p>`);
+}
+
+export async function sendReviewerApplicationDecision(to: string, name: string, approved: boolean) {
+  const status = approved ? "approved" : "not approved at this time";
+  await send(to, `Reviewer Application — ${approved ? "Approved" : "Decision"}`, `
+    <p ${P}>Dear <strong>${name}</strong>,</p>
+    <p ${P}>We thank you for your interest in joining the reviewer panel of <em>${JOURNAL}</em>.</p>
+    <p ${P}>We are pleased to inform you that your application has been <strong>${status}</strong>.</p>
+    ${approved ? `<p ${P}>You may now log in to <a href="${WEBSITE}" style="color:#1a2744;">${WEBSITE}</a> using your registered credentials to access your reviewer dashboard.</p>` : `<p ${P}>We encourage you to apply again in the future and thank you for your support of academic publishing.</p>`}
+    <p ${SIGN}>Yours sincerely,<br><strong>Editorial Team</strong><br>${JOURNAL}</p>`);
 }
 
 export async function sendReviewReminder(to: string, reviewerName: string, title: string, daysLeft: number) {
-  await send(to, `Reminder: Review Due in ${daysLeft} Days — ${title}`, `
-    <p>Dear <strong>${reviewerName}</strong>,</p>
-    <p>This is a friendly reminder that your review is due in <strong>${daysLeft} days</strong>.</p>
-    <div style="background:#fff7ed;border-left:4px solid #f97316;padding:16px;margin:16px 0;border-radius:4px;">
-      <strong>Paper:</strong> ${title}<br>
-      <strong>Days Remaining:</strong> <span style="color:#ea580c;font-weight:bold;">${daysLeft} days</span>
+  await send(to, `Reminder: Review Pending — ${title}`, `
+    <p ${P}>Dear <strong>${reviewerName}</strong>,</p>
+    <p ${P}>This is a gentle reminder that your peer review for the manuscript listed below is due in <strong>${daysLeft} day${daysLeft > 1 ? "s" : ""}</strong>. We request you to kindly submit your review at the earliest.</p>
+    <div ${BOX}>
+      <p style="margin:0 0 6px;" ${LABEL}><strong>Manuscript Title:</strong></p>
+      <p style="margin:0 0 10px;font-size:14px;color:#1a202c;">${title}</p>
+      <p style="margin:0;" ${LABEL}><strong>Days Remaining:</strong> ${daysLeft} day${daysLeft > 1 ? "s" : ""}</p>
     </div>
-    <p>Please log in to <a href="https://mediascholar.in">mediascholar.in</a> and complete your review at the earliest.</p>
-    <p>Best regards,<br>Editorial Team</p>`);
+    <p ${P}>Please log in at <a href="${WEBSITE}" style="color:#1a2744;">${WEBSITE}</a> to submit your review. Should you be unable to complete the review, please inform us immediately.</p>
+    <p ${SIGN}>Yours sincerely,<br><strong>Editorial Team</strong><br>${JOURNAL}</p>`);
 }
 
 export async function sendReviewRetraction(to: string, reviewerName: string, title: string) {
   await send(to, `Review Assignment Withdrawn — ${title}`, `
-    <p>Dear <strong>${reviewerName}</strong>,</p>
-    <p>We regret to inform you that your review assignment for the following manuscript has been <strong>withdrawn</strong> due to non-submission of the review within the stipulated time.</p>
-    <div style="background:#fef2f2;border-left:4px solid #ef4444;padding:16px;margin:16px 0;border-radius:4px;">
-      <strong>Paper:</strong> ${title}
+    <p ${P}>Dear <strong>${reviewerName}</strong>,</p>
+    <p ${P}>We regret to inform you that your review assignment for the manuscript listed below has been withdrawn, as the review was not submitted within the stipulated time period.</p>
+    <div ${BOX}>
+      <p style="margin:0 0 6px;" ${LABEL}><strong>Manuscript Title:</strong></p>
+      <p style="margin:0;font-size:14px;color:#1a202c;">${title}</p>
     </div>
-    <p>We appreciate your willingness to review and hope you will be available for future assignments.</p>
-    <p>Best regards,<br>Editorial Team<br><em>Media Scholar — Journal of Media Studies and Humanities</em></p>`);
-}
-
-export async function sendPasswordReset(to: string, name: string, resetUrl: string) {
-  await send(to, "Reset Your Password — Media Scholar", `
-    <p>Dear <strong>${name}</strong>,</p>
-    <p>We received a request to reset your password for your Media Scholar account.</p>
-    <div style="background:#eff6ff;border-left:4px solid #3b82f6;padding:16px;margin:16px 0;border-radius:4px;">
-      <p style="margin:0 0 12px;">Click the button below to reset your password. This link expires in <strong>1 hour</strong>.</p>
-      <a href="${resetUrl}" style="background:#1a2744;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold;display:inline-block;">Reset Password →</a>
-    </div>
-    <p style="color:#6b7280;font-size:13px;">If you did not request this, please ignore this email. Your password will not change.</p>
-    <p>Best regards,<br>Editorial Team<br><em>Media Scholar — Journal of Media Studies and Humanities</em></p>`);
-}
-
-export async function sendPlagiarismFailed(to: string, authorName: string, title: string, score: number) {
-  await send(to, `Action Required — High Similarity Detected: ${title}`, `
-    <p>Dear <strong>${authorName}</strong>,</p>
-    <p>Thank you for submitting your manuscript to <em>${JOURNAL}</em>. After conducting a plagiarism check using Turnitin, we regret to inform you that your submission has exceeded the acceptable similarity threshold.</p>
-    <div style="background:#fef2f2;border-left:4px solid #ef4444;padding:16px;margin:16px 0;border-radius:4px;">
-      <strong>Paper:</strong> ${title}<br>
-      <strong>Similarity Score:</strong> <span style="color:#ef4444;font-weight:bold;font-size:18px;">${score}%</span><br>
-      <strong>Acceptable Limit:</strong> 20%<br><br>
-      <strong>Status:</strong> <span style="color:#ef4444;font-weight:bold;">Not Considered for Review</span>
-    </div>
-    <p><strong>What this means:</strong> Your manuscript has not been forwarded for peer review at this stage. You are requested to revise the manuscript to reduce similarity and ensure originality before resubmitting.</p>
-    <p><strong>What you should do:</strong></p>
-    <ul style="color:#374151;font-size:14px;">
-      <li>Review your manuscript carefully for unintentional similarity</li>
-      <li>Ensure all borrowed ideas, data, or text are properly cited</li>
-      <li>Paraphrase and add your original analysis where needed</li>
-      <li>Resubmit after bringing the similarity score below 20%</li>
-    </ul>
-    <p>If you have any questions, please contact us at <a href="mailto:mediascholarjournal@gmail.com">mediascholarjournal@gmail.com</a>.</p>
-    <p>Best regards,<br>Editorial Team<br><em>${JOURNAL}</em></p>`);
-}
-
-export async function sendPlagiarismPassed(editorEmail: string, authorName: string, title: string, score: number) {
-  await send(editorEmail, `Plagiarism Check Passed — Ready for Review: ${title}`, `
-    <p>Dear Editor,</p>
-    <p>A submitted manuscript has cleared the plagiarism check and is ready to be assigned for peer review.</p>
-    <div style="background:#f0fdf4;border-left:4px solid #22c55e;padding:16px;margin:16px 0;border-radius:4px;">
-      <strong>Paper Title:</strong> ${title}<br>
-      <strong>Author:</strong> ${authorName}<br>
-      <strong>Similarity Score:</strong> <span style="color:#16a34a;font-weight:bold;font-size:18px;">${score}%</span><br>
-      <strong>Status:</strong> <span style="color:#16a34a;font-weight:bold;">✅ Cleared — Ready for Reviewer Assignment</span>
-    </div>
-    <p>Please log in to the editor dashboard to assign a reviewer for this manuscript.</p>
-    <p><a href="https://mediascholar.in/dashboard/editor" style="background:#1a2744;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:bold;display:inline-block;margin-top:8px;">Go to Editor Dashboard →</a></p>
-    <p>Best regards,<br>MediaScholar Platform</p>`);
+    <p ${P}>We appreciate your initial willingness to review and hope to have your valuable contribution on future manuscripts. Please do not hesitate to contact us at <a href="mailto:${EMAIL}" style="color:#1a2744;">${EMAIL}</a>.</p>
+    <p ${SIGN}>Yours sincerely,<br><strong>Editorial Team</strong><br>${JOURNAL}</p>`);
 }
 
 export async function sendReviewThankYou(to: string, reviewerName: string, title: string) {
-  await send(to, `Thank You for Your Review`, `
-    <p>Dear <strong>${reviewerName}</strong>,</p>
-    <p>Thank you for completing your review of:</p>
-    <div style="background:#f0fdf4;border-left:4px solid #22c55e;padding:12px 16px;margin:16px 0;border-radius:4px;">
-      <strong>${title}</strong>
+  await send(to, `Thank You for Your Review — ${title}`, `
+    <p ${P}>Dear <strong>${reviewerName}</strong>,</p>
+    <p ${P}>We sincerely thank you for completing your peer review for the manuscript submitted to <em>${JOURNAL}</em>.</p>
+    <div ${BOX}>
+      <p style="margin:0 0 6px;" ${LABEL}><strong>Manuscript Title:</strong></p>
+      <p style="margin:0;font-size:14px;color:#1a202c;">${title}</p>
     </div>
-    <p>Your contribution to academic publishing is greatly appreciated.</p>
-    <p>Best regards,<br>Editorial Team</p>`);
+    <p ${P}>Your expert evaluation is a vital contribution to the quality and integrity of academic publishing. We value your continued support.</p>
+    <p ${SIGN}>Yours sincerely,<br><strong>Editorial Team</strong><br>${JOURNAL}</p>`);
+}
+
+export async function sendPlagiarismFailed(to: string, authorName: string, title: string, score: number) {
+  await send(to, `Manuscript Not Considered — High Similarity Score: ${title}`, `
+    <p ${P}>Dear <strong>${authorName}</strong>,</p>
+    <p ${P}>Thank you for submitting your manuscript to <em>${JOURNAL}</em>. We have conducted a plagiarism check using Turnitin and regret to inform you that your submission has exceeded the acceptable similarity threshold.</p>
+    <div ${BOX}>
+      <p style="margin:0 0 6px;" ${LABEL}><strong>Manuscript Title:</strong> ${title}</p>
+      <p style="margin:0 0 6px;" ${LABEL}><strong>Similarity Score:</strong> ${score}%</p>
+      <p style="margin:0;" ${LABEL}><strong>Acceptable Limit:</strong> Up to 20%</p>
+    </div>
+    <p ${P}>Your manuscript will not be forwarded for peer review at this stage. You are requested to revise it to reduce similarity, ensure all sources are properly cited, and resubmit once the similarity score is within acceptable limits.</p>
+    <p ${P}>For guidance, please write to us at <a href="mailto:${EMAIL}" style="color:#1a2744;">${EMAIL}</a>.</p>
+    <p ${SIGN}>Yours sincerely,<br><strong>Editorial Team</strong><br>${JOURNAL}</p>`);
+}
+
+export async function sendPlagiarismPassed(editorEmail: string, authorName: string, title: string, score: number) {
+  await send(editorEmail, `Plagiarism Check Cleared — Assign Reviewer: ${title}`, `
+    <p ${P}>Dear Editor,</p>
+    <p ${P}>The following manuscript has cleared the plagiarism check and is ready for reviewer assignment.</p>
+    <div ${BOX}>
+      <p style="margin:0 0 6px;" ${LABEL}><strong>Manuscript Title:</strong> ${title}</p>
+      <p style="margin:0 0 6px;" ${LABEL}><strong>Author:</strong> ${authorName}</p>
+      <p style="margin:0;" ${LABEL}><strong>Similarity Score:</strong> ${score}% (within acceptable limit)</p>
+    </div>
+    <p ${P}>Please log in to the editor dashboard to assign reviewers for this manuscript.</p>
+    <p ${P}><a href="${WEBSITE}/dashboard/editor" style="display:inline-block;background:#1a2744;color:#ffffff;padding:10px 22px;border-radius:4px;text-decoration:none;font-size:14px;">Go to Editor Dashboard</a></p>
+    <p ${SIGN}>Regards,<br><strong>Media Scholar Platform</strong></p>`);
+}
+
+export async function sendPasswordReset(to: string, name: string, resetUrl: string) {
+  await send(to, "Password Reset Request — Media Scholar", `
+    <p ${P}>Dear <strong>${name}</strong>,</p>
+    <p ${P}>We received a request to reset the password for your Media Scholar account. Please click the link below to set a new password. This link will expire in one hour.</p>
+    <p style="margin:24px 0;">
+      <a href="${resetUrl}" style="display:inline-block;background:#1a2744;color:#ffffff;padding:12px 28px;border-radius:4px;text-decoration:none;font-size:14px;font-weight:bold;">Reset My Password</a>
+    </p>
+    <p ${P}>If you did not request a password reset, please disregard this email. Your account will remain secure.</p>
+    <p ${SIGN}>Yours sincerely,<br><strong>Editorial Team</strong><br>${JOURNAL}</p>`);
 }
