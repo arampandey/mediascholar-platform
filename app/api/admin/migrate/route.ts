@@ -7,11 +7,8 @@ export async function POST(req: NextRequest) {
 
   try {
     if (action === "fix-emails") {
-      // Update editor login email to real Gmail
       await prisma.$executeRaw`UPDATE "User" SET email = 'mediascholarjournal@gmail.com' WHERE email = 'editor@mediascholar.in'`;
-      // Update sub-editor email (keep a real email)
-      await prisma.$executeRaw`UPDATE "User" SET email = 'apoorva.smcs@galgotiasuniversity.edu.in' WHERE email = 'subeditor@mediascholar.in'`;
-      // Make sure all editors/sub-editors route notifications to Gmail
+      await prisma.$executeRaw`UPDATE "User" SET email = 'apoorvaagnihotri8@gmail.com' WHERE email = 'subeditor@mediascholar.in' OR email = 'apoorva.smcs@galgotiasuniversity.edu.in'`;
       return NextResponse.json({ success: true, message: "Editor emails updated" });
     }
 
