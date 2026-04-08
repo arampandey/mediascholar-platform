@@ -23,7 +23,7 @@ export default function LoginPage() {
     });
 
     if (!check.ok) {
-      setError("Invalid email or password");
+      setError("Invalid email or password. If you just registered, please verify your email first.");
       setLoading(false);
       return;
     }

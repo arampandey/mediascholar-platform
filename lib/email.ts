@@ -289,6 +289,17 @@ export async function sendConflictingReviews(editorEmail: string, title: string,
     <p ${SIGN}>Regards,<br><strong>Media Scholar Platform</strong></p>`);
 }
 
+export async function sendEmailVerification(to: string, name: string, verifyUrl: string) {
+  await send(to, "Please Verify Your Email Address — Media Scholar", `
+    <p ${P}>Dear <strong>${name}</strong>,</p>
+    <p ${P}>Thank you for registering with <em>${JOURNAL}</em>. To activate your account, please verify your email address by clicking the button below.</p>
+    <p style="margin:24px 0;">
+      <a href="${verifyUrl}" style="display:inline-block;background:#1a2744;color:#ffffff;padding:12px 28px;border-radius:4px;text-decoration:none;font-size:14px;font-weight:bold;">Verify Email Address</a>
+    </p>
+    <p ${P}>This link will expire in 24 hours. If you did not register on our platform, please disregard this email.</p>
+    <p ${SIGN}>Yours sincerely,<br><strong>Editorial Team</strong><br>${JOURNAL}</p>`);
+}
+
 export async function sendPasswordReset(to: string, name: string, resetUrl: string) {
   await send(to, "Password Reset Request — Media Scholar", `
     <p ${P}>Dear <strong>${name}</strong>,</p>

@@ -14,6 +14,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!user) return null;
         const valid = await bcrypt.compare(credentials.password as string, user.password);
         if (!valid) return null;
+        // Block unverified accounts (skip check for existing accounts without emailVerified field)
+        if (user.emailVerified === false) return null;
         return { id: user.id, name: user.name, email: user.email, role: user.role } as any;
       },
     }),

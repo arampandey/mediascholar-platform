@@ -37,7 +37,7 @@ export default function Navbar() {
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={open ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} /></svg>
         </button>
         <div className={`${open ? "flex" : "hidden"} sm:flex flex-col sm:flex-row absolute sm:static top-16 left-0 right-0 sm:top-auto bg-[#1a2744] sm:bg-transparent z-50 sm:z-auto gap-0 sm:gap-1 items-start sm:items-center px-4 sm:px-0 pb-4 sm:pb-0 border-t sm:border-0 border-blue-800`}>
-          {[["Home", "/"], ["Journal", "/journal"], ["Archive", "/archive"], ["Editorial Board", "/editorial-board"], ["Guidelines", "/guidelines"], ["Contact", "/contact"]].map(([label, href]) => (
+          {[["Home", "/"], ["Journal", "/journal"], ["Archive", "/archive"], ["Editorial Board", "/editorial-board"], ["Guidelines", "/guidelines"], ["Contact", "/contact"], ["Apply as Reviewer", "/register-reviewer"]].map(([label, href]) => (
             <Link key={href} href={href} onClick={() => setOpen(false)} className="text-sm px-3 py-2 hover:text-blue-300 transition-colors whitespace-nowrap">{label}</Link>
           ))}
           {session ? (
