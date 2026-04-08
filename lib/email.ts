@@ -243,6 +243,52 @@ export async function sendPlagiarismPassed(editorEmail: string, authorName: stri
     <p ${SIGN}>Regards,<br><strong>Media Scholar Platform</strong></p>`);
 }
 
+export async function sendBothReviewersAccepted(to: string, authorName: string, title: string) {
+  await send(to, `Congratulations — Manuscript Accepted: ${title}`, `
+    <p ${P}>Dear <strong>${authorName}</strong>,</p>
+    <p ${P}>We are pleased to inform you that your manuscript has been reviewed by two independent peer reviewers and both have recommended it for publication in <em>${JOURNAL}</em>.</p>
+    <div ${BOX}>
+      <p style="margin:0 0 6px;" ${LABEL}><strong>Manuscript Title:</strong></p>
+      <p style="margin:0 0 10px;font-size:14px;color:#1a202c;">${title}</p>
+      <p style="margin:0;" ${LABEL}><strong>Status:</strong> Accepted for Publication</p>
+    </div>
+    <p ${P}>You will be notified of the publication details, including volume, issue, and DOI, in due course. Kindly ensure your manuscript is in its final form.</p>
+    <p ${P}>We congratulate you on this achievement and thank you for contributing to <em>${JOURNAL}</em>.</p>
+    <p ${SIGN}>Yours sincerely,<br><strong>Prof. (Dr.) A. Ram Pandey</strong><br>Editor-in-Chief<br>${JOURNAL}</p>`);
+}
+
+export async function sendBothReviewersRejected(to: string, authorName: string, title: string, remarks: string) {
+  await send(to, `Manuscript Not Accepted — ${title}`, `
+    <p ${P}>Dear <strong>${authorName}</strong>,</p>
+    <p ${P}>We regret to inform you that your manuscript has been reviewed by two independent peer reviewers and both have recommended against publication at this stage.</p>
+    <div ${BOX}>
+      <p style="margin:0 0 6px;" ${LABEL}><strong>Manuscript Title:</strong></p>
+      <p style="margin:0 0 10px;font-size:14px;color:#1a202c;">${title}</p>
+      <p style="margin:0;" ${LABEL}><strong>Status:</strong> Not Accepted</p>
+      ${remarks ? `<p style="margin:8px 0 0;" ${LABEL}><strong>Reviewers' Comments:</strong> ${remarks}</p>` : ''}
+    </div>
+    <p ${P}>We encourage you to consider the reviewers' feedback and revise the manuscript for submission to another suitable journal. We appreciate the effort you have put into your research.</p>
+    <p ${P}>For any queries, please write to us at <a href="mailto:${EMAIL}" style="color:#1a2744;">${EMAIL}</a>.</p>
+    <p ${SIGN}>Yours sincerely,<br><strong>Prof. (Dr.) A. Ram Pandey</strong><br>Editor-in-Chief<br>${JOURNAL}</p>`);
+}
+
+export async function sendConflictingReviews(editorEmail: string, title: string, review1: string, review2: string) {
+  await send(editorEmail, `Editorial Decision Required — Conflicting Reviews: ${title}`, `
+    <p ${P}>Dear Editor,</p>
+    <p ${P}>The following manuscript has received conflicting recommendations from the two peer reviewers. Your editorial decision is required.</p>
+    <div ${BOX}>
+      <p style="margin:0 0 8px;" ${LABEL}><strong>Manuscript Title:</strong></p>
+      <p style="margin:0 0 12px;font-size:14px;color:#1a202c;">${title}</p>
+      <table width="100%" cellpadding="8" cellspacing="0" style="border-collapse:collapse;font-size:13px;">
+        <tr style="background:#f1f5f9;"><td style="border:1px solid #e2e8f0;padding:8px 12px;"><strong>Reviewer 1</strong></td><td style="border:1px solid #e2e8f0;padding:8px 12px;">${review1.replace(/_/g, ' ')}</td></tr>
+        <tr><td style="border:1px solid #e2e8f0;padding:8px 12px;"><strong>Reviewer 2</strong></td><td style="border:1px solid #e2e8f0;padding:8px 12px;">${review2.replace(/_/g, ' ')}</td></tr>
+      </table>
+    </div>
+    <p ${P}>Please log in to the editor dashboard to review both evaluations and make a final decision.</p>
+    <p ${P}><a href="${WEBSITE}/dashboard/editor" style="display:inline-block;background:#1a2744;color:#ffffff;padding:10px 22px;border-radius:4px;text-decoration:none;font-size:14px;">Go to Editor Dashboard</a></p>
+    <p ${SIGN}>Regards,<br><strong>Media Scholar Platform</strong></p>`);
+}
+
 export async function sendPasswordReset(to: string, name: string, resetUrl: string) {
   await send(to, "Password Reset Request — Media Scholar", `
     <p ${P}>Dear <strong>${name}</strong>,</p>
