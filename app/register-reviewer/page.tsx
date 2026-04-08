@@ -15,7 +15,7 @@ export default function ReviewerRegisterPage() {
   const router = useRouter();
   const [form, setForm] = useState({
     name: "", email: "", password: "", confirmPassword: "",
-    institution: "", designation: "", expertise: "", orcid: "", bio: ""
+    institution: "", designation: "", expertise: ""
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -32,7 +32,6 @@ export default function ReviewerRegisterPage() {
       body: JSON.stringify({
         name: form.name, email: form.email, password: form.password,
         institution: form.institution, designation: form.designation,
-        bio: form.bio, orcid: form.orcid,
       }),
     });
     const data = await res.json();
@@ -100,18 +99,7 @@ export default function ReviewerRegisterPage() {
                 {AREAS.map(a => <option key={a} value={a}>{a}</option>)}
               </select>
             </div>
-            <div>
-              <label className="text-sm font-medium text-gray-700 block mb-1">Brief Bio / Research Interests</label>
-              <textarea value={form.bio} onChange={e => setForm(p => ({ ...p, bio: e.target.value }))} rows={3}
-                placeholder="Briefly describe your research background and areas of interest…"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-700 block mb-1">ORCID ID (optional)</label>
-              <input type="text" value={form.orcid} onChange={e => setForm(p => ({ ...p, orcid: e.target.value }))}
-                placeholder="e.g. 0000-0002-1234-5678"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-            </div>
+
             <div>
               <label className="text-sm font-medium text-gray-700 block mb-1">Password <span className="text-red-500">*</span></label>
               <input type="password" value={form.password} onChange={e => setForm(p => ({ ...p, password: e.target.value }))} required
