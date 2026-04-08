@@ -169,36 +169,66 @@ export default function EditorSubmissionPage() {
           )}
         </div>
 
-        {/* ── STEP 2: ASSIGN REVIEWER (only show if plagiarism passed) ── */}
+        {/* ── STEP 2: ASSIGN REVIEWERS (only show if plagiarism passed) ── */}
         <div className={`rounded-xl border p-5 transition-opacity ${!plagPassed ? "opacity-40 pointer-events-none" : "bg-white border-gray-200"}`}>
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-lg">👤</span>
-            <h2 className="font-bold text-gray-900">Step 2 — Assign Reviewer</h2>
-            {!plagPassed && <span className="ml-2 text-xs text-gray-400 italic">(Complete plagiarism check first)</span>}
+          <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">👥</span>
+              <h2 className="font-bold text-gray-900">Step 2 — Assign Reviewers</h2>
+              {!plagPassed && <span className="ml-2 text-xs text-gray-400 italic">(Complete plagiarism check first)</span>}
+            </div>
+            <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+              assignedIds.length >= 2 ? "bg-green-100 text-green-700" : assignedIds.length === 1 ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-500"
+            }`}>{assignedIds.length}/2 Reviewers Assigned</span>
           </div>
+
+          {/* Current reviewers */}
           {sub.reviewers?.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-3">
-              {sub.reviewers.map((r: any) => (
-                <span key={r.user.id} className="text-xs bg-purple-100 text-purple-700 px-2.5 py-1 rounded-full font-medium">{r.user.name}</span>
-              ))}
+            <div className="space-y-2 mb-4">
+              {sub.reviewers.map((r: any, i: number) => {
+                const deadline = r.deadlineAt ? new Date(r.deadlineAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '15 days';
+                const retracted = r.retractedAt;
+                return (
+                  <div key={r.user.id} className={`flex items-center justify-between gap-3 px-3 py-2 rounded-lg border ${
+                    retracted ? 'border-red-200 bg-red-50' : 'border-purple-200 bg-purple-50'
+                  }`}>
+                    <div>
+                      <span className="text-sm font-semibold text-gray-800">Reviewer {i+1}: {r.user.name}</span>
+                      {r.isReplacement && <span className="ml-2 text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">Replacement</span>}
+                      {retracted && <span className="ml-2 text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full">Retracted</span>}
+                    </div>
+                    <span className="text-xs text-gray-500">Deadline: {deadline}</span>
+                  </div>
+                );
+              })}
             </div>
           )}
-          <div className="flex gap-2">
-            <select value={selectedReviewer} onChange={e => setSelectedReviewer(e.target.value)}
-              className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-              <option value="">Select reviewer…</option>
-              {reviewers.filter(r => !assignedIds.includes(r.id)).map(r => (
-                <option key={r.id} value={r.id}>{r.name} — {r.institution || r.email}</option>
+
+          {/* Assign new reviewer */}
+          {assignedIds.length < 2 && (
+            <>
+              <p className="text-xs text-gray-500 mb-2">Each reviewer gets <strong>15 days</strong> to complete the review. Reminders sent at day 15, retraction at day 21.</p>
+              <div className="flex gap-2">
+                <select value={selectedReviewer} onChange={e => setSelectedReviewer(e.target.value)}
+                  className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  <option value="">Select reviewer {assignedIds.length + 1}…</option>
+                  {reviewers.filter(r => !assignedIds.includes(r.id)).map(r => (
+                    <option key={r.id} value={r.id}>{r.name} — {r.institution || r.email}</option>
               ))}
             </select>
             <button
               disabled={!selectedReviewer}
-              onClick={() => act(`/api/submissions/${id}/assign-reviewer`, "POST", { reviewerId: selectedReviewer })}
+              onClick={() => { act(`/api/submissions/${id}/assign-reviewer`, "POST", { reviewerId: selectedReviewer }); setSelectedReviewer(""); }}
               className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-bold hover:bg-purple-700 disabled:opacity-40"
             >
               Assign
             </button>
           </div>
+            </>
+          )}
+          {assignedIds.length >= 2 && (
+            <p className="text-xs text-green-600 font-medium mt-1">✅ Both reviewers assigned. Emails sent with 15-day deadline.</p>
+          )}
         </div>
 
         {/* ── STEP 3: REVIEWS ── */}

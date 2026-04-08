@@ -100,12 +100,17 @@ model Review {
 }
 
 model SubmissionReviewer {
-  id           String     @id @default(cuid())
-  submissionId String
-  submission   Submission @relation(fields: [submissionId], references: [id])
-  userId       String
-  user         User       @relation(fields: [userId], references: [id])
-  assignedAt   DateTime   @default(now())
+  id              String     @id @default(cuid())
+  submissionId    String
+  submission      Submission @relation(fields: [submissionId], references: [id])
+  userId          String
+  user            User       @relation(fields: [userId], references: [id])
+  assignedAt      DateTime   @default(now())
+  deadlineAt      DateTime?
+  reminderSentAt  DateTime?
+  retractedAt     DateTime?
+  isReplacement   Boolean    @default(false)
+  replacedById    String?
 
   @@unique([submissionId, userId])
 }

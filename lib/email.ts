@@ -107,6 +107,51 @@ export async function sendReviewerApplicationDecision(to: string, name: string, 
     <p>Best regards,<br>Editorial Team</p>`);
 }
 
+export async function sendReviewerAssignment2(to: string, reviewerName: string, title: string, deadlineDays: number, isReplacement: boolean = false) {
+  const deadlineDate = new Date(Date.now() + deadlineDays * 24 * 60 * 60 * 1000).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+  const subject = isReplacement ? `Replacement Review Request: ${title}` : `Peer Review Assignment: ${title}`;
+  await send(to, subject, `
+    <p>Dear <strong>${reviewerName}</strong>,</p>
+    <p>${isReplacement ? 'You have been assigned as a <strong>replacement reviewer</strong> for the following manuscript:' : 'You have been invited to review the following manuscript for <em>Media Scholar — Journal of Media Studies and Humanities</em>:'}</p>
+    <div style="background:#f5f3ff;border-left:4px solid #8b5cf6;padding:16px;margin:16px 0;border-radius:4px;">
+      <strong>Paper Title:</strong> ${title}<br><br>
+      <strong>Review Deadline:</strong> <span style="color:#7c3aed;font-weight:bold;">${deadlineDate} (${deadlineDays} days)</span>
+    </div>
+    <p><strong>Instructions:</strong></p>
+    <ul style="color:#374151;font-size:14px;line-height:1.8;">
+      <li>Log in to <a href="https://mediascholar.in">mediascholar.in</a> using your registered email</li>
+      <li>Go to your <strong>Reviewer Dashboard</strong></li>
+      <li>Download and read the manuscript</li>
+      <li>Submit your scores and comments before the deadline</li>
+    </ul>
+    <p><strong>Review Criteria:</strong> Clarity, Methodology, Relevance, Originality (each scored 0–10)</p>
+    <p>Please log in at your earliest convenience. If you are unable to review, kindly inform us immediately so we can arrange an alternate reviewer.</p>
+    <p>Best regards,<br>Editorial Team<br><em>Media Scholar — Journal of Media Studies and Humanities</em></p>`);
+}
+
+export async function sendReviewReminder(to: string, reviewerName: string, title: string, daysLeft: number) {
+  await send(to, `Reminder: Review Due in ${daysLeft} Days — ${title}`, `
+    <p>Dear <strong>${reviewerName}</strong>,</p>
+    <p>This is a friendly reminder that your review is due in <strong>${daysLeft} days</strong>.</p>
+    <div style="background:#fff7ed;border-left:4px solid #f97316;padding:16px;margin:16px 0;border-radius:4px;">
+      <strong>Paper:</strong> ${title}<br>
+      <strong>Days Remaining:</strong> <span style="color:#ea580c;font-weight:bold;">${daysLeft} days</span>
+    </div>
+    <p>Please log in to <a href="https://mediascholar.in">mediascholar.in</a> and complete your review at the earliest.</p>
+    <p>Best regards,<br>Editorial Team</p>`);
+}
+
+export async function sendReviewRetraction(to: string, reviewerName: string, title: string) {
+  await send(to, `Review Assignment Withdrawn — ${title}`, `
+    <p>Dear <strong>${reviewerName}</strong>,</p>
+    <p>We regret to inform you that your review assignment for the following manuscript has been <strong>withdrawn</strong> due to non-submission of the review within the stipulated time.</p>
+    <div style="background:#fef2f2;border-left:4px solid #ef4444;padding:16px;margin:16px 0;border-radius:4px;">
+      <strong>Paper:</strong> ${title}
+    </div>
+    <p>We appreciate your willingness to review and hope you will be available for future assignments.</p>
+    <p>Best regards,<br>Editorial Team<br><em>Media Scholar — Journal of Media Studies and Humanities</em></p>`);
+}
+
 export async function sendPasswordReset(to: string, name: string, resetUrl: string) {
   await send(to, "Reset Your Password — Media Scholar", `
     <p>Dear <strong>${name}</strong>,</p>
