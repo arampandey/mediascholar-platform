@@ -7,11 +7,14 @@ export async function GET() {
   try {
     const papers = await prisma.submission.findMany({
       where: { status: "PUBLISHED" },
-      select: { id: true, publishedAt: true, updatedAt: true },
+      select: { id: true, publishedAt: true, updatedAt: true, authorId: true },
       orderBy: { publishedAt: "desc" },
     });
 
-    const urls = papers.map((p) => {
+    // Unique author IDs
+    const authorIds = [...new Set(papers.map((p) => p.authorId).filter(Boolean))];
+
+    const paperUrls = papers.map((p) => {
       const lastmod = (p.publishedAt || p.updatedAt).toISOString().split("T")[0];
       return `  <url>
     <loc>https://mediascholar.in/paper/${p.id}</loc>
@@ -19,11 +22,17 @@ export async function GET() {
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>`;
-    }).join("\n");
+    });
+
+    const authorUrls = authorIds.map((id) => `  <url>
+    <loc>https://mediascholar.in/author/${id}</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>`);
 
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls}
+${[...paperUrls, ...authorUrls].join("\n")}
 </urlset>`;
 
     return new NextResponse(xml, {
