@@ -110,24 +110,24 @@ export default function EditorialBoardPage() {
         {/* Editor-in-Chief */}
         <div className="bg-white rounded-xl border border-gray-200 p-5 mb-4">
           <span className="text-xs font-medium uppercase tracking-widest text-indigo-500 bg-indigo-50 px-2.5 py-1 rounded-full">Editor-in-Chief</span>
-          <p className="text-sm font-bold text-gray-900 mt-2 mb-0.5">{EDITOR_IN_CHIEF.name}</p>
-          <p className="text-xs text-indigo-600 font-medium">{EDITOR_IN_CHIEF.affiliation}</p>
-          <p className="text-xs text-gray-500 mt-0.5 mb-3">{EDITOR_IN_CHIEF.institution}</p>
+          <p className="text-base font-bold text-gray-900 mt-2 mb-0.5">{EDITOR_IN_CHIEF.name}</p>
+          <p className="text-sm text-indigo-600 font-medium">{EDITOR_IN_CHIEF.affiliation}</p>
+          <p className="text-sm text-gray-500 mt-0.5 mb-3">{EDITOR_IN_CHIEF.institution}</p>
           <div className="flex gap-4 flex-wrap">
-            <a href={`mailto:${EDITOR_IN_CHIEF.email}`} className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">✉ {EDITOR_IN_CHIEF.email}</a>
-            <a href={EDITOR_IN_CHIEF.profile} target="_blank" rel="noopener noreferrer" className="text-xs text-indigo-500 hover:text-indigo-700 transition-colors">🔗 Profile</a>
+            <a href={`mailto:${EDITOR_IN_CHIEF.email}`} className="text-sm text-gray-400 hover:text-indigo-600 transition-colors">✉ {EDITOR_IN_CHIEF.email}</a>
+            <a href={EDITOR_IN_CHIEF.profile} target="_blank" rel="noopener noreferrer" className="text-sm text-indigo-500 hover:text-indigo-700 transition-colors">🔗 Profile</a>
           </div>
         </div>
 
         {/* Sub-Editor */}
         <div className="bg-white rounded-xl border border-gray-200 p-5 mb-6">
           <span className="text-xs font-medium uppercase tracking-widest text-indigo-500 bg-indigo-50 px-2.5 py-1 rounded-full">Sub-Editor</span>
-          <p className="text-sm font-bold text-gray-900 mt-2 mb-0.5">{SUB_EDITOR.name}</p>
-          <p className="text-xs text-indigo-600 font-medium">{SUB_EDITOR.affiliation}</p>
-          <p className="text-xs text-gray-500 mt-0.5 mb-3">{SUB_EDITOR.institution}</p>
+          <p className="text-base font-bold text-gray-900 mt-2 mb-0.5">{SUB_EDITOR.name}</p>
+          <p className="text-sm text-indigo-600 font-medium">{SUB_EDITOR.affiliation}</p>
+          <p className="text-sm text-gray-500 mt-0.5 mb-3">{SUB_EDITOR.institution}</p>
           <div className="flex gap-4 flex-wrap">
-            <a href={`mailto:${SUB_EDITOR.email}`} className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">✉ {SUB_EDITOR.email}</a>
-            <a href={`tel:${SUB_EDITOR.phone}`} className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">{SUB_EDITOR.phone}</a>
+            <a href={`mailto:${SUB_EDITOR.email}`} className="text-sm text-gray-400 hover:text-indigo-600 transition-colors">✉ {SUB_EDITOR.email}</a>
+            <a href={`tel:${SUB_EDITOR.phone}`} className="text-sm text-gray-400 hover:text-indigo-600 transition-colors">{SUB_EDITOR.phone}</a>
           </div>
         </div>
 
@@ -136,13 +136,13 @@ export default function EditorialBoardPage() {
         <div className="grid sm:grid-cols-2 gap-4">
           {MEMBERS.map(m => (
             <div key={m.name} className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-sm transition-shadow">
-              <p className="text-sm font-bold text-gray-900 leading-snug">{m.name}</p>
-              <p className="text-xs text-indigo-600 font-medium mt-1">{m.affiliation}</p>
-              <p className="text-xs text-gray-500 mt-0.5 mb-3">{m.institution}</p>
+              <p className="text-base font-bold text-gray-900 leading-snug">{m.name}</p>
+              <p className="text-sm text-indigo-600 font-medium mt-1">{m.affiliation}</p>
+              <p className="text-sm text-gray-500 mt-0.5 mb-3">{m.institution}</p>
               <div className="flex gap-4 flex-wrap">
-                <a href={`mailto:${m.email}`} className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">✉ {m.email}</a>
+                <a href={`mailto:${m.email}`} className="text-sm text-gray-400 hover:text-indigo-600 transition-colors">✉ {m.email}</a>
                 {m.profile && (
-                  <a href={m.profile} target="_blank" rel="noopener noreferrer" className="text-xs text-indigo-500 hover:text-indigo-700 transition-colors shrink-0">🔗 Profile</a>
+                  <a href={m.profile} target="_blank" rel="noopener noreferrer" className="text-sm text-indigo-500 hover:text-indigo-700 transition-colors shrink-0">🔗 Profile</a>
                 )}
               </div>
             </div>
