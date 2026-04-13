@@ -16,6 +16,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        <meta name="google-site-verification" content="JA-gSqA7h2x3MTGNj1uhvSe7G14wZxqMbEYxrUpAHDg" />
+      </head>
       <body className={`${geist.className} bg-gray-50 min-h-screen`}>
         <SessionProvider>{children}</SessionProvider>
       </body>
