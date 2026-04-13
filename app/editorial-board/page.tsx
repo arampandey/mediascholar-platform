@@ -108,14 +108,26 @@ export default function EditorialBoardPage() {
         <p className="text-gray-500 mb-8">Media Scholar — Journal of Media Studies and Humanities</p>
 
         {/* Editor-in-Chief */}
-        <div className="bg-white rounded-xl border border-gray-200 p-5 mb-6">
+        <div className="bg-white rounded-xl border border-gray-200 p-5 mb-4">
           <span className="text-xs font-medium uppercase tracking-widest text-indigo-500 bg-indigo-50 px-2.5 py-1 rounded-full">Editor-in-Chief</span>
-          <h2 className="text-base font-semibold text-gray-900 mt-2 mb-0.5">{EDITOR_IN_CHIEF.name}</h2>
-          <p className="text-sm text-gray-600">{EDITOR_IN_CHIEF.affiliation}</p>
-          <p className="text-sm text-gray-500 mb-3">{EDITOR_IN_CHIEF.institution}</p>
-          <div className="flex gap-5 flex-wrap text-sm">
-            <a href={`mailto:${EDITOR_IN_CHIEF.email}`} className="text-gray-400 hover:text-indigo-600 transition-colors text-xs">✉ {EDITOR_IN_CHIEF.email}</a>
-            <a href={EDITOR_IN_CHIEF.profile} target="_blank" rel="noopener noreferrer" className="text-indigo-500 hover:text-indigo-700 transition-colors text-xs">🔗 Profile</a>
+          <p className="text-sm font-bold text-gray-900 mt-2 mb-0.5">{EDITOR_IN_CHIEF.name}</p>
+          <p className="text-xs text-indigo-600 font-medium">{EDITOR_IN_CHIEF.affiliation}</p>
+          <p className="text-xs text-gray-500 mt-0.5 mb-3">{EDITOR_IN_CHIEF.institution}</p>
+          <div className="flex gap-4 flex-wrap">
+            <a href={`mailto:${EDITOR_IN_CHIEF.email}`} className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">✉ {EDITOR_IN_CHIEF.email}</a>
+            <a href={EDITOR_IN_CHIEF.profile} target="_blank" rel="noopener noreferrer" className="text-xs text-indigo-500 hover:text-indigo-700 transition-colors">🔗 Profile</a>
+          </div>
+        </div>
+
+        {/* Sub-Editor */}
+        <div className="bg-white rounded-xl border border-gray-200 p-5 mb-6">
+          <span className="text-xs font-medium uppercase tracking-widest text-indigo-500 bg-indigo-50 px-2.5 py-1 rounded-full">Sub-Editor</span>
+          <p className="text-sm font-bold text-gray-900 mt-2 mb-0.5">{SUB_EDITOR.name}</p>
+          <p className="text-xs text-indigo-600 font-medium">{SUB_EDITOR.affiliation}</p>
+          <p className="text-xs text-gray-500 mt-0.5 mb-3">{SUB_EDITOR.institution}</p>
+          <div className="flex gap-4 flex-wrap">
+            <a href={`mailto:${SUB_EDITOR.email}`} className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">✉ {SUB_EDITOR.email}</a>
+            <a href={`tel:${SUB_EDITOR.phone}`} className="text-xs text-gray-400 hover:text-indigo-600 transition-colors">{SUB_EDITOR.phone}</a>
           </div>
         </div>
 
@@ -124,7 +136,7 @@ export default function EditorialBoardPage() {
         <div className="grid sm:grid-cols-2 gap-4">
           {MEMBERS.map(m => (
             <div key={m.name} className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-sm transition-shadow">
-              <p className="font-bold text-gray-900 text-sm leading-snug">{m.name}</p>
+              <p className="text-sm font-bold text-gray-900 leading-snug">{m.name}</p>
               <p className="text-xs text-indigo-600 font-medium mt-1">{m.affiliation}</p>
               <p className="text-xs text-gray-500 mt-0.5 mb-3">{m.institution}</p>
               <div className="flex gap-4 flex-wrap">
@@ -135,18 +147,6 @@ export default function EditorialBoardPage() {
               </div>
             </div>
           ))}
-        </div>
-
-        {/* Sub-Editor */}
-        <div className="bg-orange-50 border border-orange-200 rounded-2xl p-6 mt-8">
-          <span className="text-xs font-bold uppercase tracking-widest text-orange-600 bg-orange-100 px-3 py-1 rounded-full">Sub-Editor</span>
-          <h2 className="text-xl font-extrabold text-gray-900 mt-3 mb-1">{SUB_EDITOR.name}</h2>
-          <p className="text-orange-700 text-sm">{SUB_EDITOR.affiliation}</p>
-          <p className="text-gray-500 text-sm mb-3">{SUB_EDITOR.institution}</p>
-          <div className="flex gap-5 flex-wrap text-sm">
-            <a href={`mailto:${SUB_EDITOR.email}`} className="text-orange-600 hover:text-orange-800 transition-colors">✉ {SUB_EDITOR.email}</a>
-            <a href={`tel:${SUB_EDITOR.phone}`} className="text-orange-600 hover:text-orange-800 transition-colors">📞 {SUB_EDITOR.phone}</a>
-          </div>
         </div>
       </main>
 
