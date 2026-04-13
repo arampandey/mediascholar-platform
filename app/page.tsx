@@ -66,11 +66,7 @@ export default async function HomePage() {
                   <div key={paper.id} className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-sm transition-shadow">
                     <div className="flex items-start justify-between gap-4 flex-wrap">
                       <div className="flex-1 min-w-0">
-                        {paper.fileUrl ? (
-                      <a href={paper.fileUrl} target="_blank" rel="noopener noreferrer" className="text-lg font-bold text-indigo-800 hover:text-indigo-600 hover:underline transition-colors leading-snug block">{paper.title}</a>
-                    ) : (
-                      <h3 className="text-lg font-bold text-gray-900 leading-snug">{paper.title}</h3>
-                    )}
+                        <Link href={`/paper/${paper.id}`} className="text-lg font-bold text-indigo-800 hover:text-indigo-600 hover:underline transition-colors leading-snug block">{paper.title}</Link>
                         <p className="text-sm text-gray-500 mt-1">
                           {paper.author?.name}
                           {paper.author?.institution ? ` — ${paper.author.institution}` : ""}
@@ -94,12 +90,7 @@ export default async function HomePage() {
                         </div>
                       </div>
                       <div className="shrink-0 flex flex-col items-end gap-2">
-                        {paper.fileUrl && (
-                          <a href={paper.fileUrl} target="_blank" rel="noopener noreferrer"
-                            className="px-4 py-2 bg-indigo-700 text-white text-sm font-semibold rounded-lg hover:bg-indigo-800 transition-colors">
-                            📄 PDF
-                          </a>
-                        )}
+                        <Link href={`/paper/${paper.id}`} className="px-4 py-2 bg-indigo-700 text-white text-sm font-semibold rounded-lg hover:bg-indigo-800 transition-colors">Read →</Link>
                       </div>
                     </div>
                   </div>
