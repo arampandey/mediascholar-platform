@@ -34,7 +34,7 @@ export default async function ArchivePage() {
                 <div className="p-4 space-y-4">
                   {vol.issues.length === 0 ? <p className="text-sm text-gray-400 italic px-2">No published issues yet.</p> : vol.issues.map(iss => (
                     <div key={iss.id}>
-                      <h3 className="font-semibold text-gray-800 mb-2 px-2">Issue {iss.number}{iss.title ? ` — ${iss.title}` : ""}</h3>
+                      <h3 className="font-semibold text-gray-800 mb-2 px-2">{iss.title || `Issue ${iss.number}`}</h3>
                       <div className="space-y-1">
                         {iss.submissions.map(s => (
                           <div key={s.id} className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg hover:bg-gray-50">
