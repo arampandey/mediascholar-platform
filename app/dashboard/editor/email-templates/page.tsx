@@ -47,18 +47,13 @@ export default function EmailTemplatesPage() {
     });
     if (res.ok) {
       setSaved(true);
-      // Refresh list and update selected with saved values
-      const d = await fetch("/api/admin/email-templates").then((r) => r.json());
-      const updated = d.templates || [];
-      setTemplates(updated);
-      // Update selected template to reflect saved state
-      const refreshed = updated.find((t: Template) => t.key === selected.key);
-      if (refreshed) {
-        setSelected(refreshed);
-        setSubject(refreshed.subject);
-        setBody(refreshed.body);
-      }
+      // Update local state directly — no re-fetch needed
+      const updatedTemplate = { ...selected, subject, body, customised: true, updatedAt: new Date().toISOString() };
+      setSelected(updatedTemplate);
+      setTemplates((prev) => prev.map((t) => t.key === selected.key ? updatedTemplate : t));
       setTimeout(() => setSaved(false), 3000);
+    } else {
+      alert("Save failed — please try again.");
     }
     setSaving(false);
   }
