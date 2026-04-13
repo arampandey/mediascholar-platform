@@ -55,24 +55,24 @@ export default function ReviewPage() {
             <div className="grid grid-cols-2 gap-4">
               {[{ key: "clarityScore", label: "Clarity" }, { key: "methodologyScore", label: "Methodology" }, { key: "relevanceScore", label: "Relevance" }, { key: "originalityScore", label: "Originality" }].map(c => (
                 <div key={c.key}>
-                  <label className="text-sm font-medium text-gray-700 block mb-1">{c.label} (0–10)</label>
+                  <label className="text-sm font-semibold text-gray-800 block mb-1">{c.label} (0–10)</label>
                   <input type="number" min="0" max="10" step="0.5" value={(form as any)[c.key]} onChange={e => setForm(p => ({...p, [c.key]: e.target.value}))} required
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-base text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500" />
                 </div>
               ))}
             </div>
             <div>
-              <label className="text-sm font-medium text-gray-700 block mb-1">Decision</label>
+              <label className="text-sm font-semibold text-gray-800 block mb-1">Decision</label>
               <select value={form.decision} onChange={e => setForm(p => ({...p, decision: e.target.value}))} required
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-base text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 <option value="">Select decision…</option>
                 {DECISIONS.map(d => <option key={d} value={d}>{d.replace(/_/g," ")}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-sm font-medium text-gray-700 block mb-1">Remarks / Feedback</label>
+              <label className="text-sm font-semibold text-gray-800 block mb-1">Remarks / Feedback</label>
               <textarea value={form.remarks} onChange={e => setForm(p => ({...p, remarks: e.target.value}))} rows={4}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Detailed feedback for the author…" />
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-gray-400" placeholder="Detailed feedback for the author…" />
             </div>
             <button type="submit" disabled={submitting} style={{ backgroundColor: "#1a2744" }} className="w-full text-white py-2.5 rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50">
               {submitting ? "Submitting…" : "Submit Review"}
