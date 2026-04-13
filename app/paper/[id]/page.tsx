@@ -19,6 +19,29 @@ async function getPaper(id: string) {
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const paper = await getPaper(params.id);
   if (!paper) return { title: "Paper Not Found" };
+
+  const vol = paper.issue?.volume;
+  const iss = paper.issue;
+  const pubDate = paper.publishedAt
+    ? new Date(paper.publishedAt).toISOString().split("T")[0]
+    : vol?.year?.toString() || "";
+
+  // Highwire Press meta tags — required for Google Scholar indexing
+  const highwire: Record<string, string> = {
+    citation_title: paper.title,
+    citation_author: paper.author?.name || "",
+    citation_journal_title: "Media Scholar — Journal of Media Studies and Humanities",
+    citation_issn: "3048-5029",
+    citation_publication_date: pubDate,
+    ...(vol ? { citation_volume: String(vol.number) } : {}),
+    ...(iss ? { citation_issue: String(iss.number) } : {}),
+    ...(paper.doi ? { citation_doi: paper.doi } : {}),
+    ...(paper.fileUrl ? { citation_pdf_url: paper.fileUrl } : {}),
+    citation_fulltext_html_url: `https://mediascholar.in/paper/${paper.id}`,
+    citation_language: paper.language === "hi" ? "hi" : "en",
+    citation_publisher: "Media Scholar",
+  };
+
   return {
     title: `${paper.title} | Media Scholar`,
     description: paper.abstract?.slice(0, 160) || "",
@@ -29,6 +52,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
       type: "article",
       publishedTime: paper.publishedAt?.toISOString(),
     },
+    other: highwire,
   };
 }
 
