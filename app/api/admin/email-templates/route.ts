@@ -22,7 +22,9 @@ export async function GET() {
     updatedAt: dbMap[def.key]?.updatedAt ?? null,
   }));
 
-  return NextResponse.json({ templates });
+  return NextResponse.json({ templates }, {
+    headers: { "Cache-Control": "no-store, no-cache, must-revalidate" }
+  });
 }
 
 // POST — seed all defaults into DB (first-time setup)

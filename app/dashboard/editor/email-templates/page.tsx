@@ -24,15 +24,17 @@ export default function EmailTemplatesPage() {
   const [preview, setPreview] = useState(false);
 
   useEffect(() => {
-    fetch("/api/admin/email-templates")
+    fetch("/api/admin/email-templates", { cache: "no-store", credentials: "include" })
       .then((r) => r.json())
       .then((d) => setTemplates(d.templates || []));
   }, []);
 
   function selectTemplate(t: Template) {
-    setSelected(t);
-    setSubject(t.subject);
-    setBody(t.body);
+    // Always use the version from local templates state (which has latest saves)
+    const latest = templates.find((tmpl) => tmpl.key === t.key) || t;
+    setSelected(latest);
+    setSubject(latest.subject);
+    setBody(latest.body);
     setSaved(false);
     setPreview(false);
   }
