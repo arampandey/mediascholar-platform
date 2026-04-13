@@ -40,20 +40,34 @@ export default function EmailTemplatesPage() {
   async function handleSave() {
     if (!selected) return;
     setSaving(true);
-    const res = await fetch(`/api/admin/email-templates/${selected.key}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ subject, body }),
-    });
-    if (res.ok) {
-      setSaved(true);
-      // Update local state directly — no re-fetch needed
-      const updatedTemplate = { ...selected, subject, body, customised: true, updatedAt: new Date().toISOString() };
-      setSelected(updatedTemplate);
-      setTemplates((prev) => prev.map((t) => t.key === selected.key ? updatedTemplate : t));
-      setTimeout(() => setSaved(false), 3000);
-    } else {
-      alert("Save failed — please try again.");
+    try {
+      const res = await fetch(`/api/admin/email-templates/${selected.key}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ subject, body }),
+      });
+      const data = await res.json();
+      if (res.ok && data.template) {
+        // Update local state directly with confirmed saved values
+        const updatedTemplate = {
+          ...selected,
+          subject: data.template.subject,
+          body: data.template.body,
+          customised: true,
+          updatedAt: data.template.updatedAt,
+        };
+        setSelected(updatedTemplate);
+        setSubject(data.template.subject);
+        setBody(data.template.body);
+        setTemplates((prev) => prev.map((t) => t.key === selected.key ? updatedTemplate : t));
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3000);
+      } else {
+        alert(`Save failed: ${data.error || res.status}`);
+      }
+    } catch (e) {
+      alert("Network error — please try again.");
     }
     setSaving(false);
   }

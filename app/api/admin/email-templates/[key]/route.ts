@@ -21,7 +21,17 @@ export async function PATCH(req: NextRequest, { params }: { params: { key: strin
     create: { key: params.key, label: def.label, subject, body, variables: def.variables },
   });
 
-  return NextResponse.json({ template });
+  // Return full template with saved values confirmed
+  return NextResponse.json({
+    template: {
+      key: template.key,
+      label: template.label,
+      subject: template.subject,
+      body: template.body,
+      variables: template.variables,
+      updatedAt: template.updatedAt,
+    }
+  });
 }
 
 // DELETE — reset template to default
