@@ -24,6 +24,7 @@ export default function EditorDashboard() {
           <div className="flex gap-2 flex-wrap">
             <Link href="/dashboard/admin" className="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">📊 Analytics</Link>
             <Link href="/dashboard/admin/users" className="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">👥 Users</Link>
+            <Link href="/dashboard/editor/email-templates" className="px-3 py-2 text-sm border border-indigo-300 rounded-lg text-indigo-700 hover:bg-indigo-50 font-medium">✉️ Email Templates</Link>
           </div>
         </div>
 

@@ -146,6 +146,17 @@ model Volume {
   issues Issue[]
 }
 
+model EmailTemplate {
+  id        String   @id @default(cuid())
+  key       String   @unique  // e.g. "submission_confirmation"
+  label     String            // Human readable name
+  subject   String
+  body      String            // HTML body (inner content only, not full wrap)
+  variables String[]          // Available placeholder variables
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}
+
 model Issue {
   id          String    @id @default(cuid())
   number      Int
