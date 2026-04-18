@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
     ...(vol ? { citation_volume: String(vol.number) } : {}),
     ...(iss ? { citation_issue: String(iss.number) } : {}),
     ...(paper.doi ? { citation_doi: paper.doi } : {}),
-    ...(paper.fileUrl ? { citation_pdf_url: paper.fileUrl } : {}),
+    ...(paper.fileUrl ? { citation_pdf_url: paper.fileUrl.startsWith("http") ? paper.fileUrl : `https://mediascholar.in${paper.fileUrl}` } : {}),
     citation_fulltext_html_url: `https://mediascholar.in/paper/${paper.id}`,
     citation_language: paper.language === "hi" ? "hi" : "en",
     citation_publisher: "Media Scholar",

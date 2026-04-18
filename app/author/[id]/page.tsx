@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
 
 export default async function AuthorPage({ params }: { params: { id: string } }) {
   const author = await getAuthor(params.id);
-  if (!author || author.submissions.length === 0) notFound();
+  if (!author) notFound();
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -78,6 +78,12 @@ export default async function AuthorPage({ params }: { params: { id: string } })
 
         {/* Published papers */}
         <h2 className="text-lg font-bold text-gray-900 mb-4">Published Articles</h2>
+
+        {author.submissions.length === 0 ? (
+          <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
+            <p className="text-gray-500 text-sm">No published articles found for this author yet.</p>
+          </div>
+        ) : (
         <div className="space-y-4">
           {author.submissions.map((paper) => {
             const vol = paper.issue?.volume;
@@ -122,6 +128,7 @@ export default async function AuthorPage({ params }: { params: { id: string } })
             );
           })}
         </div>
+        )}
 
         <div className="mt-8 text-sm">
           <Link href="/journal" className="text-indigo-600 hover:underline">← Browse All Articles</Link>
