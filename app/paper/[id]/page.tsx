@@ -90,7 +90,7 @@ export default async function PaperPage({ params }: { params: { id: string } }) 
     },
     ...(paper.publishedAt ? { "datePublished": new Date(paper.publishedAt).toISOString().split("T")[0] } : {}),
     ...(paper.doi ? { "identifier": { "@type": "PropertyValue", "propertyID": "DOI", "value": paper.doi } } : {}),
-    ...(paper.fileUrl ? { "url": paper.fileUrl } : {}),
+    ...(paper.fileUrl ? { "url": paper.fileUrl.startsWith("http") ? paper.fileUrl : `https://mediascholar.in${paper.fileUrl}` } : {}),
     "inLanguage": paper.language === "hi" ? "hi" : "en",
     "license": "https://creativecommons.org/licenses/by/4.0/",
     "isAccessibleForFree": true,
