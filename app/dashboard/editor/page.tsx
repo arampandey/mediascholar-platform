@@ -25,6 +25,7 @@ export default function EditorDashboard() {
             <Link href="/dashboard/admin" className="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">📊 Analytics</Link>
             <Link href="/dashboard/admin/users" className="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">👥 Users</Link>
             <Link href="/dashboard/editor/email-templates" className="px-3 py-2 text-sm border border-indigo-300 rounded-lg text-indigo-700 hover:bg-indigo-50 font-medium">✉️ Email Templates</Link>
+            <Link href="/dashboard/editor/doi" className="px-3 py-2 text-sm border border-purple-300 rounded-lg text-purple-700 hover:bg-purple-50 font-medium">🔖 DOI Management</Link>
           </div>
         </div>
 

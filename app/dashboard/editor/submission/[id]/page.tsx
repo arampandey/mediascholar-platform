@@ -22,6 +22,8 @@ export default function EditorSubmissionPage() {
   const [selIssue, setSelIssue] = useState("");
   const [doi, setDoi] = useState("");
   const [msg, setMsg] = useState("");
+  const [doiLoading, setDoiLoading] = useState(false);
+  const [doiResult, setDoiResult] = useState<{ success?: boolean; doi?: string; error?: string; message?: string } | null>(null);
 
   function load() {
     fetch(`/api/submissions/${id}`).then(r => r.json()).then(d => setSub(d.submission));
@@ -307,8 +309,8 @@ export default function EditorSubmissionPage() {
                   <option key={i.id} value={i.id}>Vol. {i.volNum} ({i.volYear}) — Issue {i.number}{i.title ? `: ${i.title}` : ""}</option>
                 ))}
               </select>
-              <input type="text" value={doi} onChange={e => setDoi(e.target.value)} placeholder="DOI (optional)"
-                className="w-40 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              <input type="text" value={doi} onChange={e => setDoi(e.target.value)} placeholder="DOI (leave blank to auto-generate)"
+                className="w-52 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
               <button
                 disabled={!selIssue}
                 onClick={() => act(`/api/submissions/${id}/publish`, "POST", { issueId: selIssue, doi })}
@@ -317,6 +319,105 @@ export default function EditorSubmissionPage() {
                 Publish
               </button>
             </div>
+          </div>
+        )}
+
+        {/* ── DOI REGISTRATION (CrossRef) ── */}
+        {sub.status === "PUBLISHED" && (
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-lg">🔖</span>
+              <h2 className="font-bold text-gray-900">DOI Registration — CrossRef</h2>
+            </div>
+            <p className="text-xs text-gray-500 mb-4">
+              Register a permanent DOI for this paper with CrossRef. Requires CrossRef membership credentials in environment variables.
+            </p>
+
+            {sub.doi ? (
+              <div className="flex items-center gap-3 flex-wrap">
+                <div className="flex-1 bg-green-50 border border-green-200 rounded-lg px-4 py-3">
+                  <p className="text-xs text-green-600 font-semibold mb-0.5">DOI Registered</p>
+                  <a href={`https://doi.org/${sub.doi}`} target="_blank" rel="noopener noreferrer"
+                    className="text-sm font-mono text-green-800 hover:underline">https://doi.org/{sub.doi}</a>
+                </div>
+                <button
+                  onClick={async () => {
+                    setDoiLoading(true);
+                    const res = await fetch("/api/doi/register", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ submissionId: id }),
+                    });
+                    const data = await res.json();
+                    setDoiResult(data);
+                    setDoiLoading(false);
+                    if (data.success) load();
+                  }}
+                  disabled={doiLoading}
+                  className="px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg text-sm font-semibold hover:bg-indigo-200 disabled:opacity-40"
+                >
+                  {doiLoading ? "Re-depositing…" : "Re-deposit with CrossRef"}
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex gap-2 flex-wrap">
+                  <button
+                    onClick={async () => {
+                      setDoiLoading(true);
+                      const res = await fetch("/api/doi/register", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ submissionId: id, preview: true }),
+                      });
+                      const data = await res.json();
+                      setDoiResult(data);
+                      setDoiLoading(false);
+                    }}
+                    disabled={doiLoading}
+                    className="px-4 py-2 border border-indigo-300 text-indigo-700 rounded-lg text-sm font-semibold hover:bg-indigo-50 disabled:opacity-40"
+                  >
+                    {doiLoading ? "Generating…" : "Preview DOI"}
+                  </button>
+                  <button
+                    onClick={async () => {
+                      setDoiLoading(true);
+                      const res = await fetch("/api/doi/register", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ submissionId: id }),
+                      });
+                      const data = await res.json();
+                      setDoiResult(data);
+                      setDoiLoading(false);
+                      if (data.success) load();
+                    }}
+                    disabled={doiLoading}
+                    className="px-4 py-2 bg-indigo-700 text-white rounded-lg text-sm font-bold hover:bg-indigo-800 disabled:opacity-40"
+                  >
+                    {doiLoading ? "Registering…" : "Register DOI with CrossRef"}
+                  </button>
+                </div>
+
+                {doiResult && (
+                  <div className={`rounded-lg px-4 py-3 text-sm ${
+                    doiResult.success ? "bg-green-50 border border-green-200 text-green-800" :
+                    doiResult.doi ? "bg-blue-50 border border-blue-200 text-blue-800" :
+                    "bg-red-50 border border-red-200 text-red-800"
+                  }`}>
+                    {doiResult.success && <p className="font-semibold">✅ {doiResult.message}</p>}
+                    {doiResult.doi && !doiResult.success && (
+                      <div>
+                        <p className="font-semibold mb-1">📋 Preview — DOI will be: <span className="font-mono">{doiResult.doi}</span></p>
+                        <p className="text-xs opacity-70">Click &quot;Register DOI with CrossRef&quot; to deposit once credentials are configured.</p>
+                        {doiResult.error && <p className="mt-1 text-xs">{doiResult.error}</p>}
+                      </div>
+                    )}
+                    {!doiResult.doi && doiResult.error && <p>❌ {doiResult.error}</p>}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 
