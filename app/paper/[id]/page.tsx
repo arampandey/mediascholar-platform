@@ -1,8 +1,10 @@
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 import Navbar from "@/components/Navbar";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
 import Link from "next/link";
 import type { Metadata } from "next";
 import PaperClient from "./PaperClient";
@@ -59,6 +61,8 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
 }
 
 export default async function PaperPage({ params }: { params: { id: string } }) {
+  // Force Vercel edge to never cache individual paper pages
+  headers();
   const paper = await getPaper(params.id);
   if (!paper) notFound();
 
