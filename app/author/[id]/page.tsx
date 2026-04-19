@@ -35,8 +35,9 @@ async function getAuthor(id: string) {
   } catch { return null; }
 }
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  const author = await getAuthor(params.id);
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const author = await getAuthor(id);
   if (!author) return { title: "Author Not Found" };
   return {
     title: `${author.name} — Author Profile | Media Scholar`,
@@ -44,8 +45,9 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   };
 }
 
-export default async function AuthorPage({ params }: { params: { id: string } }) {
-  const author = await getAuthor(params.id);
+export default async function AuthorPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const author = await getAuthor(id);
   if (!author) notFound();
 
   return (

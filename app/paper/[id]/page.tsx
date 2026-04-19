@@ -21,8 +21,9 @@ async function getPaper(id: string) {
   } catch { return null; }
 }
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  const paper = await getPaper(params.id);
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const paper = await getPaper(id);
   if (!paper) return { title: "Paper Not Found" };
 
   const vol = paper.issue?.volume;
@@ -60,10 +61,11 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   };
 }
 
-export default async function PaperPage({ params }: { params: { id: string } }) {
+export default async function PaperPage({ params }: { params: Promise<{ id: string }> }) {
   // Force Vercel edge to never cache individual paper pages
   headers();
-  const paper = await getPaper(params.id);
+  const { id } = await params;
+  const paper = await getPaper(id);
   if (!paper) notFound();
 
   const vol = paper.issue?.volume;
