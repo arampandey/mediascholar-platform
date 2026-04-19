@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import Navbar from "@/components/Navbar";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
@@ -58,7 +60,7 @@ export default async function ArchivePage() {
         )}
       </main>
       <footer style={{ backgroundColor: "#1a2744" }} className="text-white text-center py-6 text-sm">
-        <p>© {new Date().getFullYear()} MediaScholar. ISSN: 3048-5029</p>
+        <p>© {new Date().getFullYear()} Media Scholar — Journal of Media Studies and Humanities. ISSN: 3048-5029</p>
       </footer>
     </div>
   );

@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import Navbar from "@/components/Navbar";
 import { prisma } from "@/lib/prisma";
 import JournalClient from "./JournalClient";
@@ -19,7 +21,7 @@ export default async function JournalPage() {
       <Navbar />
       <JournalClient articles={articles} />
       <footer style={{ backgroundColor: "#1a2744" }} className="text-white text-center py-6 text-sm">
-        <p>© {new Date().getFullYear()} MediaScholar. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} Media Scholar — Journal of Media Studies and Humanities. ISSN: 3048-5029</p>
       </footer>
     </div>
   );
