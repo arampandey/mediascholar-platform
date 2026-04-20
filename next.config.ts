@@ -7,6 +7,16 @@ const nextConfig: NextConfig = {
   ],
   images: { remotePatterns: [{ protocol: "https", hostname: "mediascholar.in" }] },
   typescript: { ignoreBuildErrors: true },
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.mediascholar.in" }],
+        destination: "https://mediascholar.in/:path*",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {
