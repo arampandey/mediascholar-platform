@@ -8,7 +8,7 @@ import { prisma } from "@/lib/prisma";
 const CROSSREF_LOGIN = process.env.CROSSREF_LOGIN || "";
 const CROSSREF_PASSWORD = process.env.CROSSREF_PASSWORD || "";
 const CROSSREF_DEPOSITOR_NAME = process.env.CROSSREF_DEPOSITOR_NAME || "Media Scholar";
-const CROSSREF_DEPOSITOR_EMAIL = process.env.CROSSREF_DEPOSITOR_EMAIL || "mediascholarjournal@gmail.com";
+const CROSSREF_DEPOSITOR_EMAIL = process.env.CROSSREF_DEPOSITOR_EMAIL || "editor@mediascholar.in";
 const CROSSREF_REGISTRANT = process.env.CROSSREF_REGISTRANT || "Media Scholar Journal";
 const DOI_PREFIX = process.env.DOI_PREFIX || "10.XXXXX"; // Replace with real prefix after CrossRef approval
 

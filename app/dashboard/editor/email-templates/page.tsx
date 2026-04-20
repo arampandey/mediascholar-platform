@@ -94,7 +94,7 @@ export default function EmailTemplatesPage() {
       .replace(/\{\{SIGN\}\}/g, 'style="margin:24px 0 0;font-size:14px;color:#2d3748;line-height:1.8;"')
       .replace(/\{\{LABEL\}\}/g, 'style="font-size:13px;color:#4a5568;"')
       .replace(/\{\{JOURNAL\}\}/g, "Media Scholar — Journal of Media Studies and Humanities")
-      .replace(/\{\{EMAIL\}\}/g, "mediascholarjournal@gmail.com")
+      .replace(/\{\{EMAIL\}\}/g, "editor@mediascholar.in")
       .replace(/\{\{WEBSITE\}\}/g, "https://mediascholar.in")
       .replace(/\{\{authorName\}\}/g, "Dr. Priya Sharma")
       .replace(/\{\{reviewerName\}\}/g, "Prof. Rajesh Kumar")
@@ -229,7 +229,7 @@ export default function EmailTemplatesPage() {
                             dangerouslySetInnerHTML={{ __html: renderPreview(body) }}
                           />
                           <div style={{ background: "#f1f5f9", padding: "14px 24px", border: "1px solid #e2e8f0", borderTop: "none", borderRadius: "0 0 6px 6px" }}>
-                            <p style={{ margin: 0, fontSize: "11px", color: "#718096" }}>Media Scholar — Journal of Media Studies and Humanities<br />Galgotias University, Greater Noida<br />mediascholarjournal@gmail.com | +91 9911893074</p>
+                            <p style={{ margin: 0, fontSize: "11px", color: "#718096" }}>Media Scholar — Journal of Media Studies and Humanities<br />Galgotias University, Greater Noida<br />editor@mediascholar.in | +91 9911893074</p>
                           </div>
                         </div>
                       </div>

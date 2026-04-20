@@ -15,7 +15,7 @@ const SUB_EDITOR = {
   affiliation: "Assistant Professor, Department of Mass Communication",
   institution: "Galgotias University, Greater Noida, Uttar Pradesh, India",
   phone: "+91 9935731781",
-  email: "mediascholarjournal@gmail.com",
+  email: "editor@mediascholar.in",
   profile: null,
 };
 

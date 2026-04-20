@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
 const JOURNAL = "Media Scholar — Journal of Media Studies and Humanities";
 const ISSN = "ISSN: 3048-5029";
 const ADDR = "Galgotias University, Greater Noida, Uttar Pradesh, India";
-const EMAIL = "mediascholarjournal@gmail.com";
+const EMAIL = "editor@mediascholar.in";
 const PHONE = "+91 9911893074";
 const WEBSITE = "https://mediascholar.in";
 
@@ -81,6 +81,7 @@ async function sendRaw(to: string, subject: string, html: string) {
   try {
     await transporter.sendMail({
       from: `"${JOURNAL}" <${process.env.GMAIL_USER}>`,
+      replyTo: `"${JOURNAL}" <editor@mediascholar.in>`,
       to,
       subject,
       html,

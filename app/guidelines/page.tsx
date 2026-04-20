@@ -173,7 +173,7 @@ export default function GuidelinesPage() {
           <ul className="space-y-3 text-sm text-gray-600">
             <li className="flex gap-3">
               <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 mt-2 shrink-0" />
-              <span><strong>Before review assignment:</strong> Withdrawal is permitted without conditions. Authors should notify the editorial office at <a href="mailto:mediascholarjournal@gmail.com" className="text-indigo-600 hover:underline">mediascholarjournal@gmail.com</a> as soon as possible.</span>
+              <span><strong>Before review assignment:</strong> Withdrawal is permitted without conditions. Authors should notify the editorial office at <a href="mailto:editor@mediascholar.in" className="text-indigo-600 hover:underline">editor@mediascholar.in</a> as soon as possible.</span>
             </li>
             <li className="flex gap-3">
               <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 mt-2 shrink-0" />
@@ -319,7 +319,7 @@ export default function GuidelinesPage() {
           <h2 className="text-lg font-extrabold text-gray-900 mb-2">Questions?</h2>
           <p className="text-sm text-gray-600 mb-5">Contact the editorial office for any queries about submission or these guidelines.</p>
           <div className="flex gap-3 justify-center flex-wrap">
-            <a href="mailto:mediascholarjournal@gmail.com"
+            <a href="mailto:editor@mediascholar.in"
               className="px-6 py-2.5 bg-indigo-700 text-white font-bold rounded-xl hover:bg-indigo-800 transition-colors text-sm">
               Email Editorial Office
             </a>
