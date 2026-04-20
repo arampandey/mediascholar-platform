@@ -90,7 +90,15 @@ export default function EditorSubmissionPage() {
             <div>Submitted: {new Date(sub.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</div>
           </div>
           <div className="mt-3 flex gap-4 flex-wrap items-center">
-            <a href={sub.fileUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-indigo-700 hover:underline font-medium">📄 Download Paper</a>
+            {sub.fileUrl ? (
+              <a
+                href={sub.fileUrl.startsWith("/") ? `https://mediascholar.in${sub.fileUrl}` : sub.fileUrl}
+                target="_blank" rel="noopener noreferrer"
+                className="text-sm text-indigo-700 hover:underline font-medium"
+              >📄 Download Paper</a>
+            ) : (
+              <span className="text-sm text-red-500 font-medium">⚠ File unavailable — ask author to resubmit</span>
+            )}
             <select value={sub.status} onChange={e => act(`/api/submissions/${id}/status`, "PATCH", { status: e.target.value })}
               className="text-xs border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500">
               {["SUBMITTED","PLAGIARISM_CHECK","UNDER_REVIEW","REVISION_REQUESTED","RESUBMITTED","ACCEPTED","REJECTED","PUBLISHED"].map(s =>

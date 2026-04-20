@@ -41,7 +41,15 @@ export default function ReviewPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h1 className="font-bold text-gray-900 text-lg mb-2">{sub.title}</h1>
           <p className="text-sm text-gray-600 mb-2">{sub.abstract?.slice(0, 400)}…</p>
-          <a href={sub.fileUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-indigo-700 hover:underline">📄 Download Full Paper</a>
+          {sub.fileUrl ? (
+            <a
+              href={sub.fileUrl.startsWith("/") ? `https://mediascholar.in${sub.fileUrl}` : sub.fileUrl}
+              target="_blank" rel="noopener noreferrer"
+              className="text-sm text-indigo-700 hover:underline"
+            >📄 Download Full Paper</a>
+          ) : (
+            <span className="text-sm text-red-500">⚠ File not available</span>
+          )}
         </div>
         {done ? (
           <div className="bg-green-50 border border-green-200 rounded-xl p-6 text-center">
