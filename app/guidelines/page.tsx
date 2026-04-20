@@ -16,7 +16,7 @@ const sections = [
   {
     id: "who",
     title: "Who Can Submit",
-    content: "Research papers, review articles, and book reviews from faculty members, research scholars, and media professionals are welcome. Authors must register on the platform before submitting. Both Indian and international scholars are invited to contribute.",
+    content: "Research papers and review articles from faculty members, research scholars, and media professionals are welcome. Authors must register on the platform before submitting. Both Indian and international scholars are invited to contribute.",
   },
   {
     id: "language",
@@ -70,22 +70,7 @@ const articleTypes = [
     sections: "Introduction, Theoretical Framework, Discussion, Implications, References",
     notes: "Must advance a new framework, model, or theoretical argument. Empirical data not required.",
   },
-  {
-    type: "Case Study",
-    words: "3,000–6,000 words",
-    abstract: "150–250 words",
-    keywords: "5–8",
-    sections: "Introduction, Context, Analysis, Discussion, Conclusions, References",
-    notes: "In-depth analysis of specific media phenomena, campaigns, organisations, or events with broader scholarly relevance.",
-  },
-  {
-    type: "Book Review",
-    words: "800–1,500 words",
-    abstract: "Not required",
-    keywords: "Not required",
-    sections: "Bibliographic details, Summary, Critical Evaluation, Conclusion",
-    notes: "Should critically evaluate books published within the last three years in media studies, journalism, or allied humanities.",
-  },
+
 ];
 
 export default function GuidelinesPage() {

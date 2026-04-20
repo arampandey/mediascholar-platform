@@ -73,8 +73,7 @@ export default function AimsAndScopePage() {
               { type: "Original Research Articles", desc: "Empirical or theoretical papers presenting new findings, 4,000–8,000 words. Must include abstract, methodology, findings, and references." },
               { type: "Review Articles", desc: "Systematic or scoping reviews of existing literature on a media studies topic, up to 5,000 words." },
               { type: "Conceptual Papers", desc: "Theoretical contributions that advance frameworks or models in media and communication, 3,000–6,000 words." },
-              { type: "Book Reviews", desc: "Critical reviews of recently published books in media studies, journalism, or allied humanities, 800–1,500 words." },
-              { type: "Case Studies", desc: "In-depth analyses of specific media phenomena, campaigns, organisations, or events with broader scholarly relevance." },
+
             ].map(c => (
               <div key={c.type} className="flex gap-4 items-start">
                 <div className="w-2 h-2 rounded-full bg-indigo-600 mt-1.5 shrink-0" />
