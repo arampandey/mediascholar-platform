@@ -8,20 +8,28 @@ export default function RegisterPage() {
   const router = useRouter();
   const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "", institution: "", designation: "" });
   const [error, setError] = useState("");
+  const [alreadyExists, setAlreadyExists] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (form.password !== form.confirmPassword) { setError("Passwords do not match"); return; }
     if (form.password.length < 8) { setError("Password must be at least 8 characters"); return; }
-    setLoading(true); setError("");
+    setLoading(true); setError(""); setAlreadyExists(false);
     const res = await fetch("/api/auth/register", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: form.name, email: form.email, password: form.password, institution: form.institution, designation: form.designation }),
     });
     const data = await res.json();
     setLoading(false);
-    if (!res.ok) { setError(data.error || "Registration failed"); return; }
+    if (!res.ok) {
+      if (data.error?.includes("already registered")) {
+        setAlreadyExists(true);
+      } else {
+        setError(data.error || "Registration failed");
+      }
+      return;
+    }
     router.push(`/verify-email?email=${encodeURIComponent(form.email)}`);
   }
 
@@ -45,6 +53,12 @@ export default function RegisterPage() {
             </Link>
           </div>
 
+          {alreadyExists && (
+            <div className="bg-amber-50 border border-amber-300 text-amber-800 text-sm px-4 py-3 rounded-lg mb-4">
+              <p className="font-semibold mb-1">This email is already registered.</p>
+              <p>Please <Link href="/login" className="underline font-bold hover:text-amber-900">sign in</Link> to your existing account, or use <Link href="/forgot-password" className="underline font-bold hover:text-amber-900">Forgot Password</Link> if you don&apos;t remember your password.</p>
+            </div>
+          )}
           {error && <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-3 py-2 rounded-lg mb-4">{error}</div>}
 
           <form onSubmit={handleSubmit} className="space-y-4">
