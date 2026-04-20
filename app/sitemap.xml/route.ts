@@ -10,6 +10,7 @@ export async function GET() {
     { loc: "https://mediascholar.in/editorial-board", priority: "0.7", changefreq: "monthly" },
     { loc: "https://mediascholar.in/aims-and-scope", priority: "0.8", changefreq: "monthly" },
     { loc: "https://mediascholar.in/guidelines", priority: "0.6", changefreq: "monthly" },
+    { loc: "https://mediascholar.in/call-for-papers", priority: "0.9", changefreq: "weekly" },
     { loc: "https://mediascholar.in/contact", priority: "0.5", changefreq: "yearly" },
   ];
 

@@ -44,6 +44,20 @@ export default async function HomePage() {
 
       <main className="flex-1 max-w-5xl mx-auto px-4 py-12 w-full space-y-12">
 
+        {/* Call for Papers Banner */}
+        <section className="bg-gradient-to-r from-indigo-700 to-indigo-500 rounded-2xl p-6 sm:p-8 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <span className="inline-block bg-yellow-400 text-yellow-900 text-xs font-extrabold uppercase tracking-widest px-3 py-1 rounded-full mb-3">Now Open</span>
+            <h2 className="text-xl sm:text-2xl font-extrabold mb-1">Call for Papers — Vol. 4, Issue 1 (2026)</h2>
+            <p className="text-indigo-200 text-sm">We invite original research in media studies, journalism, and humanities (Hindi & English)</p>
+            <p className="text-yellow-300 font-bold text-sm mt-2">🗓 Deadline: 30 April 2026</p>
+          </div>
+          <div className="flex gap-3 flex-wrap shrink-0">
+            <Link href="/call-for-papers" className="px-5 py-2.5 bg-white text-indigo-800 font-bold rounded-xl hover:bg-indigo-50 transition-colors text-sm whitespace-nowrap">View Details</Link>
+            <Link href="/register" className="px-5 py-2.5 border-2 border-white text-white font-bold rounded-xl hover:bg-white hover:text-indigo-800 transition-colors text-sm whitespace-nowrap">Submit Now</Link>
+          </div>
+        </section>
+
         {/* Latest Issue */}
         {latestIssue ? (
           <section>
