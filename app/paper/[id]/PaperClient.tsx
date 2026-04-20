@@ -129,7 +129,7 @@ export default function PaperClient({ paper }: { paper: PaperData }) {
                 <p className="text-xs text-indigo-600 mt-0.5">Open-access · Free to read and download</p>
               </div>
               <a
-                href={paper.fileUrl}
+                href={`/api/download?id=${paper.id}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-indigo-700 font-semibold rounded-lg border border-indigo-300 hover:bg-indigo-50 transition-colors text-sm"
@@ -258,7 +258,7 @@ export default function PaperClient({ paper }: { paper: PaperData }) {
           {paper.fileUrl && (
             <div className="flex justify-center pt-4">
               <a
-                href={paper.fileUrl}
+                href={`/api/download?id=${paper.id}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-8 py-3.5 bg-indigo-700 text-white font-bold rounded-xl hover:bg-indigo-800 transition-colors text-base shadow"

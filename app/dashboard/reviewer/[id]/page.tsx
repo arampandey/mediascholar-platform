@@ -43,7 +43,7 @@ export default function ReviewPage() {
           <p className="text-sm text-gray-600 mb-2">{sub.abstract?.slice(0, 400)}…</p>
           {sub.fileUrl ? (
             <a
-              href={sub.fileUrl.startsWith("/") ? `https://mediascholar.in${sub.fileUrl}` : sub.fileUrl}
+              href={`/api/download?id=${id}`}
               target="_blank" rel="noopener noreferrer"
               className="text-sm text-indigo-700 hover:underline"
             >📄 Download Full Paper</a>

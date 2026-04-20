@@ -92,7 +92,7 @@ export default function EditorSubmissionPage() {
           <div className="mt-3 flex gap-4 flex-wrap items-center">
             {sub.fileUrl ? (
               <a
-                href={sub.fileUrl.startsWith("/") ? `https://mediascholar.in${sub.fileUrl}` : sub.fileUrl}
+                href={`/api/download?id=${id}`}
                 target="_blank" rel="noopener noreferrer"
                 className="text-sm text-indigo-700 hover:underline font-medium"
               >📄 Download Paper</a>
