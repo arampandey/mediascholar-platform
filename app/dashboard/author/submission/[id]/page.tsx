@@ -25,8 +25,9 @@ export default function AuthorSubmissionPage() {
     setResubmitting(true);
     const fd = new FormData();
     fd.append("file", revFile);
-    const uploadRes = await fetch("/api/submissions", { method: "POST", body: fd });
-    const fileUrl = `/uploads/${revFile.name}`;
+    const uploadRes = await fetch("/api/upload", { method: "POST", body: fd });
+    if (!uploadRes.ok) { setResubmitting(false); alert("File upload failed. Please try again."); return; }
+    const { fileUrl } = await uploadRes.json();
     await fetch(`/api/submissions/${id}/revision`, {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ type: "resubmit", fileUrl, notes: revNotes }),
