@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
-  const { secret, action } = await req.json();
+  const body = await req.json();
+  const { secret, action } = body;
   if (secret !== "mediascholar-migrate-2026") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   try {
@@ -62,6 +63,25 @@ export async function POST(req: NextRequest) {
         }
       }
       return NextResponse.json({ success: true, message: `Fixed ${fixed} GitHub PDF URLs`, total: papers.length });
+    }
+
+    if (action === "check-user") {
+      const { email } = body;
+      const user = await prisma.user.findUnique({
+        where: { email: email.toLowerCase() },
+        select: { id: true, name: true, email: true, role: true, emailVerified: true, verifyToken: true },
+      });
+      return NextResponse.json({ success: true, user });
+    }
+
+    if (action === "verify-user") {
+      const { email } = body;
+      const user = await prisma.user.update({
+        where: { email: email.toLowerCase() },
+        data: { emailVerified: true, verifyToken: null },
+        select: { id: true, name: true, email: true, emailVerified: true },
+      });
+      return NextResponse.json({ success: true, user });
     }
 
     if (action === "fix-emails") {
