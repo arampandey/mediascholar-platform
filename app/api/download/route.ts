@@ -28,43 +28,9 @@ export async function GET(req: NextRequest) {
 
   const fileUrl = submission.fileUrl;
 
-  // For Cloudinary URLs, generate a signed URL and proxy
+  // For Cloudinary URLs, redirect directly (files are now type=upload, publicly accessible)
   if (fileUrl.includes("cloudinary.com")) {
-    try {
-      // Extract public_id from URL
-      const match = fileUrl.match(/\/upload\/(?:v\d+\/)?(.+)$/);
-      if (!match) throw new Error("Cannot parse Cloudinary URL");
-
-      const fullPublicId = match[1]; // includes extension e.g. mediascholar/papers/xxx.pdf
-      const publicIdNoExt = fullPublicId.replace(/\.[^/.]+$/, "");
-      const ext = fullPublicId.split(".").pop() || "pdf";
-
-      // Generate signed download URL (valid 1 hour)
-      const signedUrl = cloudinary.utils.private_download_url(publicIdNoExt, ext, {
-        resource_type: "raw",
-        expires_at: Math.floor(Date.now() / 1000) + 3600,
-        attachment: true,
-      });
-
-      // Fetch and proxy the file
-      const response = await fetch(signedUrl);
-      if (!response.ok) throw new Error(`Cloudinary returned ${response.status}`);
-
-      const buffer = await response.arrayBuffer();
-      const filename = `${submission.title.slice(0, 60).replace(/[^a-zA-Z0-9 ]/g, "").trim()}.${ext}`;
-      const contentType = ext === "pdf" ? "application/pdf" : "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-
-      return new NextResponse(buffer, {
-        headers: {
-          "Content-Type": contentType,
-          "Content-Disposition": `attachment; filename="${filename}"`,
-          "Cache-Control": "private, max-age=3600",
-        },
-      });
-    } catch (e: any) {
-      console.error("Download error:", e);
-      return NextResponse.json({ error: "File download failed" }, { status: 500 });
-    }
+    return NextResponse.redirect(fileUrl);
   }
 
   // For non-Cloudinary URLs (relative /uploads/ or external), redirect directly
