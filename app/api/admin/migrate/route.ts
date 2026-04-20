@@ -85,9 +85,10 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === "list-fileurls") {
+      const limit = body.limit || 100;
       const rows = await prisma.submission.findMany({
         orderBy: { createdAt: "desc" },
-        take: 10,
+        take: limit,
         select: { id: true, title: true, fileUrl: true, status: true, createdAt: true },
       });
       return NextResponse.json({ success: true, rows });
