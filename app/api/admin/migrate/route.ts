@@ -84,6 +84,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, user });
     }
 
+    if (action === "list-fileurls") {
+      const rows = await prisma.submission.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 10,
+        select: { id: true, title: true, fileUrl: true, status: true, createdAt: true },
+      });
+      return NextResponse.json({ success: true, rows });
+    }
+
     if (action === "fix-emails") {
       await prisma.$executeRaw`UPDATE "User" SET email = 'mediascholarjournal@gmail.com' WHERE email = 'editor@mediascholar.in'`;
       await prisma.$executeRaw`UPDATE "User" SET email = 'apoorvaagnihotri8@gmail.com' WHERE email = 'subeditor@mediascholar.in' OR email = 'apoorva.smcs@galgotiasuniversity.edu.in'`;
