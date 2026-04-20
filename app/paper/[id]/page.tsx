@@ -57,6 +57,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       type: "article",
       publishedTime: paper.publishedAt?.toISOString(),
     },
+    alternates: { canonical: `https://mediascholar.in/paper/${paper.id}` },
     other: highwire,
   };
 }

@@ -5,6 +5,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Submission Guidelines | Media Scholar — Journal of Media Studies and Humanities",
   description: "Comprehensive submission guidelines for Media Scholar journal — formatting requirements, peer review process, revision policy, withdrawal policy, self-archiving policy, and post-acceptance workflow. ISSN: 3048-5029.",
+  alternates: { canonical: "https://mediascholar.in/guidelines" },
 };
 
 const sections = [

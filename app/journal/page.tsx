@@ -1,7 +1,14 @@
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
+
+export const metadata: Metadata = {
+  title: "Current Issue | Media Scholar — Journal of Media Studies and Humanities",
+  description: "Browse the current issue of Media Scholar journal. Peer-reviewed research in media studies, journalism, and communication. ISSN: 3048-5029.",
+  alternates: { canonical: "https://mediascholar.in/journal" },
+};
 import { prisma } from "@/lib/prisma";
 import JournalClient from "./JournalClient";
 
