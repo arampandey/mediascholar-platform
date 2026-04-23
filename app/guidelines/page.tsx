@@ -199,10 +199,6 @@ export default function GuidelinesPage() {
           </p>
           <div className="space-y-4">
             <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-              <h3 className="font-bold text-green-800 text-sm mb-2">✓ Permitted (Pre-print)</h3>
-              <p className="text-sm text-green-700 leading-relaxed">Authors may post the <strong>pre-review (pre-print) version</strong> of their manuscript on personal websites, institutional repositories, and pre-print servers (such as SSRN, PhilPapers, or ResearchGate) at any time — before, during, or after submission.</p>
-            </div>
-            <div className="bg-green-50 border border-green-200 rounded-xl p-4">
               <h3 className="font-bold text-green-800 text-sm mb-2">✓ Permitted (Post-publication)</h3>
               <p className="text-sm text-green-700 leading-relaxed">After publication, authors may freely share the <strong>final published version</strong> (PDF) on:
               </p>
@@ -300,7 +296,7 @@ export default function GuidelinesPage() {
             ))}
           </div>
           <div className="mt-4 bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-700">
-            <strong>Expected timeline from acceptance to online publication:</strong> 2–4 weeks, depending on proof turnaround and issue schedule. Authors with time-sensitive work may contact the editorial office to discuss expedited processing.
+            <strong>Expected timeline from acceptance to online publication:</strong> 4–6 weeks, depending on proof turnaround and issue schedule. Authors with time-sensitive work may contact the editorial office to discuss expedited processing.
           </div>
         </div>
 
