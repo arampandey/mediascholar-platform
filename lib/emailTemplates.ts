@@ -23,6 +23,23 @@ export const DEFAULT_TEMPLATES: {
     variables: ["authorName", "title"],
   },
   {
+    key: "new_submission_editor",
+    label: "New Manuscript Submitted (to Editor)",
+    subject: "New Manuscript Submitted — Action Required: {{title}}",
+    body: `<p {{P}}>Dear Editor,</p>
+<p {{P}}>A new manuscript has been submitted to <em>{{JOURNAL}}</em> and requires your attention. Please initiate the plagiarism check and proceed with reviewer assignment once cleared.</p>
+<div {{BOX}}>
+  <p style="margin:0 0 6px;font-size:13px;color:#4a5568;"><strong>Manuscript Title:</strong></p>
+  <p style="margin:0 0 10px;font-size:14px;color:#1a202c;">{{title}}</p>
+  <p style="margin:0 0 4px;font-size:13px;color:#4a5568;"><strong>Author:</strong> {{authorName}}</p>
+  <p style="margin:0 0 4px;font-size:13px;color:#4a5568;"><strong>Author Email:</strong> {{authorEmail}}</p>
+  <p style="margin:0;font-size:13px;color:#4a5568;"><strong>Submitted On:</strong> {{submittedOn}}</p>
+</div>
+<p {{P}}>Please log in to the editor dashboard at <a href="{{WEBSITE}}" style="color:#1a2744;">{{WEBSITE}}</a> to review the submission and take the next steps.</p>
+<p {{SIGN}}>Regards,<br><strong>Media Scholar Platform</strong></p>`,
+    variables: ["title", "authorName", "authorEmail", "submittedOn"],
+  },
+  {
     key: "reviewer_assignment",
     label: "Reviewer Assignment (to Reviewer)",
     subject: "Peer Review Assignment — {{title}}",

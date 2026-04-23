@@ -109,6 +109,11 @@ export async function sendSubmissionConfirmation(to: string, authorName: string,
   await sendTemplate(to, "submission_confirmation", { authorName, title });
 }
 
+export async function sendNewSubmissionEditor(editorEmail: string, authorName: string, authorEmail: string, title: string) {
+  const submittedOn = new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  await sendTemplate(editorEmail, "new_submission_editor", { authorName, authorEmail, title, submittedOn });
+}
+
 export async function sendReviewerAssignment(to: string, reviewerName: string, title: string) {
   await sendTemplate(to, "reviewer_assignment", { reviewerName, title, deadlineDate: "", deadlineDays: "15" });
 }

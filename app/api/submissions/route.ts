@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { sendSubmissionConfirmation } from "@/lib/email";
+import { sendSubmissionConfirmation, sendNewSubmissionEditor } from "@/lib/email";
 import { v2 as cloudinary } from "cloudinary";
 
 cloudinary.config({
@@ -75,9 +75,19 @@ export async function POST(req: NextRequest) {
       data: { title, abstract, keywords, language, fileUrl, coAuthors, authorId: userId },
     });
 
-    // Send confirmation email
+    // Send emails: confirmation to author + alert to all editors
     const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (user) await sendSubmissionConfirmation(user.email, user.name, title);
+    if (user) {
+      await sendSubmissionConfirmation(user.email, user.name, title);
+
+      const editors = await prisma.user.findMany({
+        where: { role: { in: ["EDITOR", "SUB_EDITOR"] } },
+        select: { email: true },
+      });
+      for (const ed of editors) {
+        await sendNewSubmissionEditor(ed.email, user.name, user.email, title);
+      }
+    }
 
     return NextResponse.json({ submission });
   } catch (error: any) {
