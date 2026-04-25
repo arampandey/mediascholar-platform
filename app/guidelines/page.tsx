@@ -296,7 +296,7 @@ export default function GuidelinesPage() {
             ))}
           </div>
           <div className="mt-4 bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-700">
-            <strong>Expected timeline from acceptance to online publication:</strong> 4–6 weeks, depending on proof turnaround and issue schedule. Authors with time-sensitive work may contact the editorial office to discuss expedited processing.
+            <strong>Expected timeline from acceptance to online publication:</strong> 2–3 months, depending on proof turnaround and issue schedule. Authors with time-sensitive work may contact the editorial office to discuss expedited processing.
           </div>
         </div>
 
