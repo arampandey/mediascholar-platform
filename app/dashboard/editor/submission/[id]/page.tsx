@@ -65,7 +65,7 @@ export default function EditorSubmissionPage() {
     </div>
   );
 
-  const assignedIds = sub.reviewers?.map((r: any) => r.user.id) || [];
+  const assignedIds = sub.reviewers?.filter((r: any) => !r.retractedAt && !r.declinedAt).map((r: any) => r.user.id) || [];
   const plagPassed = sub.plagiarismScore !== null && sub.plagiarismScore <= 20;
   const plagFailed = sub.plagiarismScore !== null && sub.plagiarismScore > 20;
   const plagDone = sub.plagiarismScore !== null;
@@ -198,16 +198,19 @@ export default function EditorSubmissionPage() {
               {sub.reviewers.map((r: any, i: number) => {
                 const deadline = r.deadlineAt ? new Date(r.deadlineAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '15 days';
                 const retracted = r.retractedAt;
+                const declined = r.declinedAt;
                 return (
                   <div key={r.user.id} className={`flex items-center justify-between gap-3 px-3 py-2 rounded-lg border ${
-                    retracted ? 'border-red-200 bg-red-50' : 'border-purple-200 bg-purple-50'
+                    retracted ? 'border-red-200 bg-red-50' : declined ? 'border-orange-200 bg-orange-50' : 'border-purple-200 bg-purple-50'
                   }`}>
-                    <div>
+                    <div className="flex-1 min-w-0">
                       <span className="text-sm font-semibold text-gray-800">Reviewer {i+1}: {r.user.name}</span>
                       {r.isReplacement && <span className="ml-2 text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">Replacement</span>}
                       {retracted && <span className="ml-2 text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full">Retracted</span>}
+                      {declined && <span className="ml-2 text-xs bg-orange-100 text-orange-800 px-2 py-0.5 rounded-full font-semibold">Declined</span>}
+                      {declined && r.declineReason && <p className="text-xs text-orange-700 mt-0.5">Reason: {r.declineReason}</p>}
                     </div>
-                    <span className="text-xs text-gray-500">Deadline: {deadline}</span>
+                    {!declined && <span className="text-xs text-gray-500 shrink-0">Deadline: {deadline}</span>}
                   </div>
                 );
               })}
