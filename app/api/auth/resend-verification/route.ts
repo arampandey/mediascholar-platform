@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
   const verifyToken = crypto.randomBytes(32).toString("hex");
   await prisma.user.update({ where: { id: user.id }, data: { verifyToken } });
 
-  const verifyUrl = `${process.env.NEXTAUTH_URL}/verify-email?token=${verifyToken}`;
+  const verifyUrl = `${process.env.NEXTAUTH_URL}/api/auth/verify-email?token=${verifyToken}`;
   await sendEmailVerification(user.email, user.name, verifyUrl);
 
   return NextResponse.json({ success: true });
