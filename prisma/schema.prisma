@@ -111,6 +111,8 @@ model SubmissionReviewer {
   deadlineAt      DateTime?
   reminderSentAt  DateTime?
   retractedAt     DateTime?
+  declinedAt      DateTime?
+  declineReason   String?
   isReplacement   Boolean    @default(false)
   replacedById    String?
 

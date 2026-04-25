@@ -7,9 +7,9 @@ export async function GET() {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const userId = (session.user as any).id;
 
-  // Get all assignments (not retracted)
+  // Get all assignments (not retracted, not declined)
   const assignments = await prisma.submissionReviewer.findMany({
-    where: { userId, retractedAt: null },
+    where: { userId, retractedAt: null, declinedAt: null },
     include: {
       submission: {
         include: {

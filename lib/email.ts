@@ -184,3 +184,26 @@ export async function sendEmailVerification(to: string, name: string, verifyUrl:
 export async function sendPasswordReset(to: string, name: string, resetUrl: string) {
   await sendTemplate(to, "password_reset", { name, resetUrl });
 }
+
+export async function sendReviewerDeclined(
+  to: string,
+  reviewerName: string,
+  reviewerEmail: string,
+  title: string,
+  reason: string
+) {
+  const subject = `Reviewer Declined Assignment — ${title}`;
+  const html = `
+    <p ${P}>Dear Editor,</p>
+    <p ${P}>A reviewer has <strong>declined their assignment</strong> for the following manuscript:</p>
+    <div ${BOX}>
+      <p ${LABEL}><strong>Manuscript:</strong> ${title}</p>
+      <p ${LABEL}><strong>Reviewer:</strong> ${reviewerName} (${reviewerEmail})</p>
+      <p ${LABEL}><strong>Reason given:</strong> ${reason}</p>
+    </div>
+    <p ${P}>Please log in to the editor dashboard to assign a replacement reviewer for this manuscript.</p>
+    <p ${P}><a href="https://mediascholar.in/dashboard/editor" style="color:#1a2744;font-weight:bold;">Go to Editor Dashboard →</a></p>
+    <p ${SIGN}>Regards,<br/>Media Scholar Platform</p>
+  `;
+  await send(to, subject, html);
+}
