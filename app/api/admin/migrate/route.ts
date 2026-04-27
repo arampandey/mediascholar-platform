@@ -84,6 +84,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, user });
     }
 
+    if (action === "fix-all-verified") {
+      // Mark all non-AUTHOR users as verified (they were created before emailVerified existed)
+      const r1 = await prisma.user.updateMany({
+        where: { role: { in: ["EDITOR", "SUB_EDITOR", "REVIEWER"] } },
+        data: { emailVerified: true, verifyToken: null },
+      });
+      // Also fix any AUTHOR accounts that are legacy (no verifyToken, created before verification system)
+      const r2 = await prisma.user.updateMany({
+        where: { role: "AUTHOR", verifyToken: null, emailVerified: false },
+        data: { emailVerified: true },
+      });
+      const all = await prisma.user.findMany({
+        where: { role: { in: ["EDITOR", "SUB_EDITOR", "REVIEWER"] } },
+        select: { email: true, role: true, emailVerified: true },
+      });
+      return NextResponse.json({ success: true, fixed_staff: r1.count, fixed_null: r2.count, users: all });
+    }
+
     if (action === "list-fileurls") {
       const limit = body.limit || 100;
       const rows = await prisma.submission.findMany({
@@ -98,6 +116,29 @@ export async function POST(req: NextRequest) {
       await prisma.$executeRaw`UPDATE "User" SET email = 'mediascholarjournal@gmail.com' WHERE email = 'editor@mediascholar.in'`;
       await prisma.$executeRaw`UPDATE "User" SET email = 'apoorvaagnihotri8@gmail.com' WHERE email = 'subeditor@mediascholar.in' OR email = 'apoorva.smcs@galgotiasuniversity.edu.in'`;
       return NextResponse.json({ success: true, message: "Editor emails updated" });
+    }
+
+    if (action === "sync-schema") {
+      // Add any missing columns to keep schema in sync with Prisma models
+      await prisma.$executeRaw`ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "emailVerified" BOOLEAN NOT NULL DEFAULT true`;
+      await prisma.$executeRaw`ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "verifyToken" TEXT`;
+      await prisma.$executeRaw`UPDATE "User" SET "emailVerified" = true WHERE "emailVerified" IS NULL`;
+      await prisma.$executeRaw`ALTER TABLE "SubmissionReviewer" ADD COLUMN IF NOT EXISTS "declinedAt" TIMESTAMP`;
+      await prisma.$executeRaw`ALTER TABLE "SubmissionReviewer" ADD COLUMN IF NOT EXISTS "declineReason" TEXT`;
+      await prisma.$executeRaw`ALTER TABLE "SubmissionReviewer" ADD COLUMN IF NOT EXISTS "retractedAt" TIMESTAMP`;
+      await prisma.$executeRaw`ALTER TABLE "SubmissionReviewer" ADD COLUMN IF NOT EXISTS "reminderSentAt" TIMESTAMP`;
+      await prisma.$executeRaw`ALTER TABLE "SubmissionReviewer" ADD COLUMN IF NOT EXISTS "deadlineAt" TIMESTAMP`;
+      await prisma.$executeRaw`ALTER TABLE "SubmissionReviewer" ADD COLUMN IF NOT EXISTS "isReplacement" BOOLEAN NOT NULL DEFAULT false`;
+      await prisma.$executeRaw`ALTER TABLE "SubmissionReviewer" ADD COLUMN IF NOT EXISTS "replacedById" TEXT`;
+      await prisma.$executeRaw`ALTER TABLE "Submission" ADD COLUMN IF NOT EXISTS "doi" TEXT`;
+      await prisma.$executeRaw`ALTER TABLE "Submission" ADD COLUMN IF NOT EXISTS "publishedAt" TIMESTAMP`;
+      await prisma.$executeRaw`ALTER TABLE "Submission" ADD COLUMN IF NOT EXISTS "editorDecision" TEXT`;
+      await prisma.$executeRaw`ALTER TABLE "Submission" ADD COLUMN IF NOT EXISTS "decisionNotes" TEXT`;
+      await prisma.$executeRaw`ALTER TABLE "Submission" ADD COLUMN IF NOT EXISTS "decisionAt" TIMESTAMP`;
+      await prisma.$executeRaw`ALTER TABLE "Submission" ADD COLUMN IF NOT EXISTS "plagiarismReport" TEXT`;
+      await prisma.$executeRaw`ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "bio" TEXT`;
+      await prisma.$executeRaw`ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "orcid" TEXT`;
+      return NextResponse.json({ success: true, message: "Schema sync complete" });
     }
 
     // Default: schema migration
