@@ -136,8 +136,7 @@ export default async function HomePage() {
         <p className="font-bold text-lg mb-0.5">मीडिया स्कॉलर | Media Scholar</p>
         <p className="text-sm text-blue-200 mb-1">Journal of Media Studies and Humanities</p>
         <p className="text-sm text-blue-300">ISSN: 3048-5029</p>
-        <p className="text-sm text-blue-300 mt-2">Galgotias University, Greater Noida</p>
-        <p className="text-sm text-blue-300">editor@mediascholar.in | +91 9911893074</p>
+        <p className="text-sm text-blue-300 mt-2">editor@mediascholar.in | +91 9911893074</p>
         <p className="text-xs text-blue-400 mt-3">© {new Date().getFullYear()} Media Scholar. All rights reserved.</p>
       </footer>
     </div>
