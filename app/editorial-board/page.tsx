@@ -29,7 +29,7 @@ const SUB_EDITOR = {
 const MEMBERS = [
   {
     name: "Jatin Srivastava, Ph.D.",
-    affiliation: "Associate Professor & Director, Institute for International Journalism, E.W. Scripps School of Journalism",
+    affiliation: "Professor, Associate Director for Graduate Studies, E.W. Scripps School of Journalism",
     institution: "Ohio University, Athens, Ohio, USA",
     email: "srivastj@ohio.edu",
     profile: "https://www.ohio.edu/scripps-college/journalism/about/faculty-and-staff/srivastj",
