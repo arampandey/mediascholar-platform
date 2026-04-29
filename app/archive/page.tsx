@@ -39,12 +39,12 @@ export default async function ArchivePage() {
             {volumes.map(vol => (
               <div key={vol.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                 <div style={{ backgroundColor: "#1a2744" }} className="px-6 py-4 text-white">
-                  <h2 className="text-lg font-bold">Volume {vol.number} ({vol.year})</h2>
+                  <h2 className="text-lg font-bold">Volume {vol.number}</h2>
                 </div>
                 <div className="p-4 space-y-4">
                   {vol.issues.length === 0 ? <p className="text-sm text-gray-400 italic px-2">No published issues yet.</p> : vol.issues.map(iss => (
                     <div key={iss.id}>
-                      <h3 className="font-semibold text-gray-800 mb-2 px-2">{iss.title || `Issue ${iss.number}`}</h3>
+                      <h3 className="font-semibold text-gray-800 mb-2 px-2">Issue {iss.number}</h3>
                       <div className="space-y-1">
                         {iss.submissions.map(s => (
                           <div key={s.id} className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg hover:bg-gray-50">
