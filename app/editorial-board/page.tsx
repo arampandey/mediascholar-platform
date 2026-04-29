@@ -104,6 +104,13 @@ const MEMBERS = [
     profile: "https://www.galgotiasuniversity.edu.in/p/dr-pramod-kumar-pandey",
   },
   {
+    name: "Alessandro Martinisi, Ph.D.",
+    affiliation: "Assistant Professor of Media and Communication Studies",
+    institution: "Franklin University Switzerland, Sorengo (Lugano), Switzerland",
+    email: "a.martinisi@fus.edu",
+    profile: "https://www.fus.edu",
+  },
+  {
     name: "Mehak Pandit, Ph.D.",
     affiliation: "Assistant Professor & Research Coordinator, School of Media and Communication Studies",
     institution: "Galgotias University, Greater Noida, Uttar Pradesh",
