@@ -135,7 +135,7 @@ export default function EditorialBoardPage() {
             <p className="text-sm font-medium" style={{color:"#1a2744"}}>{EDITOR_IN_CHIEF.affiliation}</p>
             <p className="text-sm text-gray-500 mt-0.5 mb-3">{EDITOR_IN_CHIEF.institution}</p>
             <div className="flex gap-4 flex-wrap">
-              <a href={`mailto:${EDITOR_IN_CHIEF.email}`} className="text-sm text-gray-400 transition-colors" style={{}} onMouseOver={e=>(e.currentTarget.style.color="#1a2744")} onMouseOut={e=>(e.currentTarget.style.color="")}>✉ {EDITOR_IN_CHIEF.email}</a>
+              <a href={`mailto:${EDITOR_IN_CHIEF.email}`} className="text-sm text-gray-400 transition-colors">✉ {EDITOR_IN_CHIEF.email}</a>
               <a href={EDITOR_IN_CHIEF.profile} target="_blank" rel="noopener noreferrer" className="text-sm transition-colors" style={{color:"#1a2744"}}>🔗 Profile</a>
             </div>
           </div>
