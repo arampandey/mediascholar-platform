@@ -39,7 +39,7 @@ export default async function ArchivePage() {
             {volumes.map(vol => (
               <div key={vol.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                 <div style={{ backgroundColor: "#1a2744" }} className="px-6 py-4 text-white">
-                  <h2 className="text-lg font-bold">Volume {vol.number}</h2>
+                  <h2 className="text-lg font-bold">Volume {vol.number} ({vol.year})</h2>
                 </div>
                 <div className="p-4 space-y-4">
                   {vol.issues.length === 0 ? <p className="text-sm text-gray-400 italic px-2">No published issues yet.</p> : vol.issues.map(iss => (
