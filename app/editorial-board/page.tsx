@@ -12,7 +12,7 @@ const EDITOR_IN_CHIEF = {
   role: "Editor",
   affiliation: "Professor, School of Media and Communication Studies",
   institution: "Galgotias University, Plot No.2, Sector 17-A Yamuna Expressway, Greater Noida, Uttar Pradesh, India",
-  email: "aram.pandey@galgotiasuniversity.edu.in",
+  email: "editor@mediascholar.in",
   profile: "https://www.galgotiasuniversity.edu.in/p/a-ram-pandey",
 };
 
@@ -21,8 +21,7 @@ const SUB_EDITOR = {
   role: "Sub-Editor",
   affiliation: "Assistant Professor, Department of Mass Communication",
   institution: "Galgotias University, Greater Noida, Uttar Pradesh, India",
-  phone: "+91 9935731781",
-  email: "editor@mediascholar.in",
+  email: "mediascholarjournal@gmail.com",
   profile: null,
 };
 
@@ -140,7 +139,6 @@ export default function EditorialBoardPage() {
             <p className="text-sm text-gray-500 mt-0.5 mb-3">{SUB_EDITOR.institution}</p>
             <div className="flex gap-4 flex-wrap">
               <a href={`mailto:${SUB_EDITOR.email}`} className="text-sm text-gray-400 hover:text-indigo-600 transition-colors">✉ {SUB_EDITOR.email}</a>
-              <a href={`tel:${SUB_EDITOR.phone}`} className="text-sm text-gray-400 hover:text-indigo-600 transition-colors">{SUB_EDITOR.phone}</a>
             </div>
           </div>
         </div>
