@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 const EDITOR_IN_CHIEF = {
   name: "A. Ram Pandey, Ph.D.",
   role: "Editor-in-Chief",
-  affiliation: "Professor & Dean, School of Media and Communication Studies",
+  affiliation: "Professor, School of Media and Communication Studies",
   institution: "Galgotias University, Plot No.2, Sector 17-A Yamuna Expressway, Greater Noida, Uttar Pradesh, India",
   email: "aram.pandey@galgotiasuniversity.edu.in",
   profile: "https://www.galgotiasuniversity.edu.in/p/a-ram-pandey",
@@ -103,6 +103,13 @@ const MEMBERS = [
     institution: "Galgotias University, Greater Noida, Uttar Pradesh",
     email: "pramod.pandey@galgotiasuniversity.edu.in",
     profile: "https://www.galgotiasuniversity.edu.in/p/dr-pramod-kumar-pandey",
+  },
+  {
+    name: "Mehak Pandit, Ph.D.",
+    affiliation: "Assistant Professor & Research Coordinator, School of Media and Communication Studies",
+    institution: "Galgotias University, Greater Noida, Uttar Pradesh",
+    email: "mehak.pandit@galgotiasuniversity.edu.in",
+    profile: "https://www.galgotiasuniversity.edu.in/p/dr-mehak-pandit",
   },
 ];
 
