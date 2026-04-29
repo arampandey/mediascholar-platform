@@ -81,7 +81,7 @@ const MEMBERS = [
     affiliation: "Associate Professor",
     institution: "VIPS, Affiliated to Guru Gobind Singh Indraprastha University, Pitampura, New Delhi",
     email: "sunil.mishra@vips.edu",
-    profile: "https://vsjmc.vips.edu/sunil-kumar-mishra/",
+    profile: "https://www.linkedin.com/in/dr-sunil-kumar-mishra-573a9a253/",
   },
   {
     name: "Gajendra Pratap Singh, Ph.D.",
