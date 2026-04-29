@@ -67,7 +67,7 @@ const MEMBERS = [
     affiliation: "Professor, School of Media and Communication Studies",
     institution: "Galgotias University, Greater Noida, Uttar Pradesh",
     email: "tasha.singh@galgotiasuniversity.edu.in",
-    profile: "https://www.galgotiasuniversity.edu.in/p/dr-tasha-singh",
+    profile: "https://www.galgotiasuniversity.edu.in/p/prof-tasha-singh",
   },
   {
     name: "Bhawani Shankar, Ph.D.",
