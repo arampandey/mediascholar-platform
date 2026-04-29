@@ -15,7 +15,7 @@ export default function ReviewerRegisterPage() {
   const router = useRouter();
   const [form, setForm] = useState({
     name: "", email: "", password: "", confirmPassword: "",
-    institution: "", designation: "", expertise: ""
+    institution: "", designation: "", expertise: "", mobile: ""
   });
   const [error, setError] = useState("");
   const [alreadyExists, setAlreadyExists] = useState(false);
@@ -33,6 +33,7 @@ export default function ReviewerRegisterPage() {
       body: JSON.stringify({
         name: form.name, email: form.email, password: form.password,
         institution: form.institution, designation: form.designation,
+        mobile: form.mobile || undefined,
       }),
     });
     const data = await res.json();
@@ -114,6 +115,12 @@ export default function ReviewerRegisterPage() {
               </select>
             </div>
 
+            <div>
+              <label className="text-sm font-medium text-gray-700 block mb-1">Mobile Number <span className="text-gray-400 font-normal">(optional)</span></label>
+              <input type="tel" value={form.mobile} onChange={e => setForm(p => ({ ...p, mobile: e.target.value }))}
+                placeholder="e.g. +91 98765 43210"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            </div>
             <div>
               <label className="text-sm font-medium text-gray-700 block mb-1">Password <span className="text-red-500">*</span></label>
               <input type="password" value={form.password} onChange={e => setForm(p => ({ ...p, password: e.target.value }))} required

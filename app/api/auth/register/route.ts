@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { sendEmailVerification } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
-  const { name, email, password, institution, designation, role: requestedRole } = await req.json();
+  const { name, email, password, institution, designation, mobile, role: requestedRole } = await req.json();
 
   if (!name || !email || !password) {
     return NextResponse.json({ error: "Name, email and password are required" }, { status: 400 });
@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
       role,
       institution,
       designation,
+      mobile: mobile || null,
       emailVerified: false,
       verifyToken,
     },

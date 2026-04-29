@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "", institution: "", designation: "" });
+  const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "", institution: "", designation: "", mobile: "" });
   const [error, setError] = useState("");
   const [alreadyExists, setAlreadyExists] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -18,7 +18,7 @@ export default function RegisterPage() {
     setLoading(true); setError(""); setAlreadyExists(false);
     const res = await fetch("/api/auth/register", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: form.name, email: form.email, password: form.password, institution: form.institution, designation: form.designation }),
+      body: JSON.stringify({ name: form.name, email: form.email, password: form.password, institution: form.institution, designation: form.designation, mobile: form.mobile || undefined }),
     });
     const data = await res.json();
     setLoading(false);
@@ -84,6 +84,12 @@ export default function RegisterPage() {
               <label className="text-sm font-medium text-gray-700 block mb-1">Designation <span className="text-red-500">*</span></label>
               <input type="text" value={form.designation} onChange={e => setForm(p => ({ ...p, designation: e.target.value }))} required
                 placeholder="e.g. Research Scholar, Assistant Professor"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700 block mb-1">Mobile Number <span className="text-gray-400 font-normal">(optional)</span></label>
+              <input type="tel" value={form.mobile} onChange={e => setForm(p => ({ ...p, mobile: e.target.value }))}
+                placeholder="e.g. +91 98765 43210"
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
             </div>
             <div>

@@ -40,6 +40,7 @@ model User {
   role         Role     @default(AUTHOR)
   institution  String?
   designation  String?
+  mobile            String?
   bio               String?
   orcid             String?
   resetToken        String?
