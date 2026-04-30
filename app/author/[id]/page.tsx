@@ -38,10 +38,16 @@ async function getAuthor(id: string) {
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const author = await getAuthor(id);
-  if (!author) return { title: "Author Not Found" };
+  if (!author) return { title: "Author Not Found", robots: { index: false } };
   return {
     title: `${author.name} — Author Profile | Media Scholar`,
     description: `Published research by ${author.name}${author.institution ? ` from ${author.institution}` : ""} in Media Scholar — Journal of Media Studies and Humanities.`,
+    alternates: { canonical: `https://mediascholar.in/author/${id}` },
+    openGraph: {
+      title: `${author.name} — Author Profile | Media Scholar`,
+      description: `Published research by ${author.name}${author.institution ? ` from ${author.institution}` : ""} in Media Scholar.`,
+      type: "profile",
+    },
   };
 }
 

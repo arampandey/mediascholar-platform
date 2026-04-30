@@ -1,11 +1,28 @@
 User-agent: *
 Allow: /
+Disallow: /dashboard/
+Disallow: /login
+Disallow: /register
+Disallow: /register-reviewer
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /api/
 
 User-agent: Googlebot
 Allow: /
+Disallow: /dashboard/
+Disallow: /login
+Disallow: /register
+Disallow: /register-reviewer
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /api/
 
 User-agent: Googlebot-Scholar
 Allow: /
 
+Sitemap: https://mediascholar.in/sitemap-index.xml
 Sitemap: https://mediascholar.in/sitemap.xml
 Sitemap: https://mediascholar.in/sitemap-papers.xml
