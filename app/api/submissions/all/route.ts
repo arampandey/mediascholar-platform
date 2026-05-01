@@ -11,10 +11,25 @@ export async function GET() {
   try {
     const submissions = await prisma.submission.findMany({
       orderBy: { createdAt: "desc" },
-      include: {
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        createdAt: true,
+        plagiarismScore: true,
         author: { select: { name: true, email: true, institution: true } },
-        issue: { include: { volume: true } },
-        reviewers: { include: { user: { select: { name: true, email: true } } } },
+        issue: { select: { number: true, volume: { select: { number: true, year: true } } } },
+        reviewers: {
+          select: {
+            id: true,
+            assignedAt: true,
+            deadlineAt: true,
+            retractedAt: true,
+            declinedAt: true,
+            declineReason: true,
+            user: { select: { id: true, name: true, email: true } },
+          },
+        },
         _count: { select: { reviews: { where: { submittedAt: { not: null } } } } },
       },
     });

@@ -27,7 +27,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       : undefined;
 
     // Fire-and-forget — don't await so publish isn't delayed
-    fetch(`${process.env.NEXTAUTH_URL || "http://localhost:3000"}/api/social`, {
+    const baseUrl = (process.env.NEXTAUTH_URL || "http://localhost:3000").trim();
+    fetch(`${baseUrl}/api/social`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Cookie: req.headers.get("cookie") || "" },
       body: JSON.stringify({

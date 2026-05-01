@@ -17,6 +17,15 @@ export async function POST(req: NextRequest) {
     const file = formData.get("file") as File;
     if (!file) return NextResponse.json({ error: "No file provided" }, { status: 400 });
 
+    // Server-side validation
+    const allowedTypes = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+    if (!allowedTypes.includes(file.type) && !file.name.match(/\.(pdf|doc|docx)$/i)) {
+      return NextResponse.json({ error: "Only PDF and Word documents are allowed" }, { status: 400 });
+    }
+    if (file.size > 20 * 1024 * 1024) {
+      return NextResponse.json({ error: "File size must not exceed 20MB" }, { status: 400 });
+    }
+
     const timestamp = Date.now();
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
     const filename = `${timestamp}-${safeName}`;
@@ -25,7 +34,7 @@ export async function POST(req: NextRequest) {
     const fileUrl = await new Promise<string>((resolve, reject) => {
       const publicId = `mediascholar/papers/${filename.replace(/\.[^/.]+$/, "")}`;
       const uploadStream = cloudinary.uploader.upload_stream(
-        { resource_type: "raw", public_id: publicId, overwrite: true },
+        { resource_type: "raw", public_id: publicId, overwrite: true, access_mode: "public" },
         (error, result) => {
           if (error) return reject(error);
           resolve(result!.secure_url);

@@ -8,8 +8,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
   const body = await req.json();
+  const role = (session.user as any).role;
 
   if (body.type === "request") {
+    // Only editors/sub-editors can request a revision
+    if (![ "EDITOR", "SUB_EDITOR" ].includes(role)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
     await prisma.submission.update({ where: { id }, data: { status: "REVISION_REQUESTED" } });
     const sub = await prisma.submission.findUnique({ where: { id }, include: { author: true } });
     if (sub?.author) await sendRevisionRequest(sub.author.email, sub.author.name, sub.title, body.notes || "");

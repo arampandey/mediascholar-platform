@@ -31,6 +31,7 @@ async function uploadToCloudinary(filename: string, buffer: Buffer, mimeType: st
         public_id: publicId,
         overwrite: true,
         use_filename: false,
+        access_mode: "public",
         format: mimeType === "application/pdf" ? "pdf" : undefined,
       },
       (error, result) => {
@@ -58,6 +59,15 @@ export async function POST(req: NextRequest) {
 
     if (!title || !abstract || !file) {
       return NextResponse.json({ error: "Title, abstract and file are required" }, { status: 400 });
+    }
+
+    // Server-side file validation
+    const allowedTypes = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+    if (!allowedTypes.includes(file.type) && !file.name.match(/\.(pdf|doc|docx)$/i)) {
+      return NextResponse.json({ error: "Only PDF and Word documents are allowed" }, { status: 400 });
+    }
+    if (file.size > 20 * 1024 * 1024) {
+      return NextResponse.json({ error: "File size must not exceed 20MB" }, { status: 400 });
     }
 
     const keywords = keywordsRaw ? keywordsRaw.split(",").map(k => k.trim()).filter(Boolean) : [];
