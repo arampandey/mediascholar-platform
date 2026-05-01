@@ -28,51 +28,77 @@ export async function GET(req: NextRequest) {
 
   const fileUrl = submission.fileUrl;
 
-  // For Cloudinary URLs, proxy the file through our server to avoid ACL issues
+  // For Cloudinary URLs, proxy through admin API to bypass CDN delivery restrictions
   if (fileUrl.includes("cloudinary.com")) {
     try {
       // Extract public_id from URL
-      // URL format: https://res.cloudinary.com/<cloud>/raw/upload/v<version>/<public_id>
+      // Format: https://res.cloudinary.com/<cloud>/raw/upload/v<version>/<public_id>
       const urlObj = new URL(fileUrl);
       const pathParts = urlObj.pathname.split("/");
-      // Find the index after 'upload' (skip version token like v1234567890)
       const uploadIdx = pathParts.indexOf("upload");
       let publicIdParts = pathParts.slice(uploadIdx + 1);
-      // Remove version token if present (starts with 'v' followed by digits)
       if (publicIdParts[0] && /^v\d+$/.test(publicIdParts[0])) {
         publicIdParts = publicIdParts.slice(1);
       }
-      const publicId = publicIdParts.join("/");
-
-      // Generate a short-lived signed download URL (1 hour)
-      const signedUrl = cloudinary.url(publicId, {
-        resource_type: "raw",
-        type: "upload",
-        sign_url: true,
-        expires_at: Math.floor(Date.now() / 1000) + 3600,
-      });
-
-      // Proxy: fetch from Cloudinary server-side and stream to client
-      const upstream = await fetch(signedUrl);
-      if (!upstream.ok) {
-        // fallback: try direct redirect anyway
-        return NextResponse.redirect(fileUrl);
-      }
-      const contentType = upstream.headers.get("content-type") || "application/octet-stream";
+      const publicId = decodeURIComponent(publicIdParts.join("/"));
       const filename = publicId.split("/").pop() || "document.pdf";
-      const body = upstream.body;
-      return new NextResponse(body as any, {
+
+      // Use Cloudinary Admin API archive download — bypasses CDN delivery restrictions
+      const adminDownloadUrl = cloudinary.utils.download_archive_url({
+        public_ids: [publicId],
+        resource_type: "raw",
+        target_format: "zip",
+      } as any);
+
+      const zipRes = await fetch(adminDownloadUrl);
+      if (!zipRes.ok) {
+        console.error("Cloudinary admin download failed:", zipRes.status);
+        return NextResponse.json({ error: "File download failed" }, { status: 502 });
+      }
+
+      // Unzip in-memory and extract the PDF/DOCX
+      const zipBuffer = Buffer.from(await zipRes.arrayBuffer());
+
+      // Parse zip manually (central directory) — find the single file entry
+      // Simple approach: find PK\x03\x04 local file header and extract content
+      const localSig = Buffer.from([0x50, 0x4b, 0x03, 0x04]);
+      const sigIdx = zipBuffer.indexOf(localSig);
+      if (sigIdx === -1) throw new Error("Invalid zip");
+
+      // Local file header: offset 26 = filename length, offset 28 = extra length
+      const fnLen = zipBuffer.readUInt16LE(sigIdx + 26);
+      const extraLen = zipBuffer.readUInt16LE(sigIdx + 28);
+      const dataStart = sigIdx + 30 + fnLen + extraLen;
+
+      // Get compressed size from header (offset 18)
+      const compSize = zipBuffer.readUInt32LE(sigIdx + 18);
+      const compressionMethod = zipBuffer.readUInt16LE(sigIdx + 8);
+
+      let fileData: Buffer;
+      if (compressionMethod === 0) {
+        // Stored (no compression)
+        fileData = zipBuffer.slice(dataStart, dataStart + compSize);
+      } else {
+        // Deflate — use Node.js zlib
+        const { inflateRawSync } = await import("zlib");
+        fileData = inflateRawSync(zipBuffer.slice(dataStart, dataStart + compSize));
+      }
+
+      const isPdf = filename.toLowerCase().endsWith(".pdf") || fileData.slice(0, 4).toString() === "%PDF";
+      const contentType = isPdf ? "application/pdf" : "application/octet-stream";
+
+      return new NextResponse(fileData as any, {
         status: 200,
         headers: {
           "Content-Type": contentType,
-          "Content-Disposition": `attachment; filename="${filename}"`,
-          "Cache-Control": "no-store",
+          "Content-Disposition": `inline; filename="${filename}"`,
+          "Content-Length": String(fileData.length),
+          "Cache-Control": "private, max-age=3600",
         },
       });
     } catch (e) {
       console.error("Cloudinary proxy error:", e);
-      // fallback to direct redirect
-      return NextResponse.redirect(fileUrl);
+      return NextResponse.json({ error: "File could not be retrieved" }, { status: 502 });
     }
   }
 
