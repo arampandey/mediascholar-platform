@@ -1,6 +1,20 @@
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
+
+async function getLatestPapers() {
+  try {
+    return await prisma.submission.findMany({
+      where: { status: "PUBLISHED" },
+      orderBy: { publishedAt: "desc" },
+      take: 5,
+      include: { author: { select: { name: true, institution: true } } },
+    });
+  } catch { return []; }
+}
+
 export default async function HomePage() {
+  const latestPapers = await getLatestPapers();
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -22,7 +36,51 @@ export default async function HomePage() {
 
       <main className="flex-1 max-w-5xl mx-auto px-4 py-12 w-full space-y-12">
 
-
+        {/* Latest Papers */}
+        {latestPapers.length > 0 && (
+          <section>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-2xl font-extrabold text-gray-900">Recent Publications</h2>
+              <Link href="/journal" className="text-sm text-indigo-700 font-semibold hover:underline">View all →</Link>
+            </div>
+            <div className="space-y-4">
+              {latestPapers.map((paper) => (
+                <div key={paper.id} className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-sm transition-shadow">
+                  <div className="flex items-start justify-between gap-4 flex-wrap">
+                    <div className="flex-1 min-w-0">
+                      <Link href={`/paper/${paper.id}`} className="text-lg font-bold text-indigo-800 hover:text-indigo-600 hover:underline transition-colors leading-snug block">{paper.title}</Link>
+                      <p className="text-sm text-gray-500 mt-1">
+                        {paper.author?.name}
+                        {paper.author?.institution ? ` — ${paper.author.institution}` : ""}
+                      </p>
+                      {(paper.keywords as string[])?.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mt-3">
+                          {(paper.keywords as string[]).slice(0, 5).map((k) => (
+                            <span key={k} className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{k}</span>
+                          ))}
+                        </div>
+                      )}
+                      <div className="flex items-center gap-4 mt-3 text-xs text-gray-400 flex-wrap">
+                        {paper.doi && <span>DOI: <span className="font-medium text-gray-600">{paper.doi}</span></span>}
+                        {paper.publishedAt && (
+                          <span>{new Date(paper.publishedAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</span>
+                        )}
+                        <span className={`px-2 py-0.5 rounded-full font-semibold ${
+                          paper.language === "hi" ? "bg-orange-100 text-orange-700" : "bg-blue-100 text-blue-700"
+                        }`}>
+                          {paper.language === "hi" ? "हिंदी" : "English"}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="shrink-0">
+                      <Link href={`/paper/${paper.id}`} className="px-4 py-2 bg-indigo-700 text-white text-sm font-semibold rounded-lg hover:bg-indigo-800 transition-colors">Read →</Link>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* About */}
         <section>
