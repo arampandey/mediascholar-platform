@@ -6,7 +6,10 @@ async function getLatestIssue() {
   try {
     // Get the most recently published issue
     const latestIssue = await prisma.issue.findFirst({
-      where: { publishedAt: { not: null } },
+      where: {
+        publishedAt: { not: null },
+        submissions: { some: { status: "PUBLISHED" } }, // only issues that actually have published papers
+      },
       orderBy: { publishedAt: "desc" },
       include: {
         volume: true,
