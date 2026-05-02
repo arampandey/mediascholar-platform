@@ -27,7 +27,7 @@ export default function EditorSubmissionPage() {
 
   function load() {
     fetch(`/api/submissions/${id}`).then(r => r.json()).then(d => setSub(d.submission));
-    fetch("/api/reviewers").then(r => r.json()).then(d => setReviewers(d.reviewers || []));
+    fetch(`/api/reviewers?submissionId=${id}`).then(r => r.json()).then(d => setReviewers(d.reviewers || []));
     fetch("/api/volumes").then(r => r.json()).then(d => {
       const allIssues = (d.volumes || []).flatMap((v: any) =>
         v.issues.map((i: any) => ({ ...i, volNum: v.number, volYear: v.year }))
@@ -210,7 +210,20 @@ export default function EditorSubmissionPage() {
                       {declined && <span className="ml-2 text-xs bg-orange-100 text-orange-800 px-2 py-0.5 rounded-full font-semibold">Declined</span>}
                       {declined && r.declineReason && <p className="text-xs text-orange-700 mt-0.5">Reason: {r.declineReason}</p>}
                     </div>
-                    {!declined && <span className="text-xs text-gray-500 shrink-0">Deadline: {deadline}</span>}
+                    {!declined && (
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-xs text-gray-500">Deadline: {deadline}</span>
+                        <button
+                          onClick={async () => {
+                            const res = await fetch(`/api/admin/users/${r.user.id}/resend-assignment`, { method: "POST" });
+                            const data = await res.json();
+                            setMsg(res.ok ? `✅ Assignment email resent to ${data.email}` : `❌ ${data.error}`);
+                            setTimeout(() => setMsg(""), 5000);
+                          }}
+                          className="text-xs text-indigo-600 hover:underline border border-indigo-200 px-2 py-0.5 rounded-full"
+                        >📧 Resend</button>
+                      </div>
+                    )}
                   </div>
                 );
               })}
