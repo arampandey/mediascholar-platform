@@ -24,6 +24,8 @@ export default function EditorSubmissionPage() {
   const [msg, setMsg] = useState("");
   const [doiLoading, setDoiLoading] = useState(false);
   const [doiResult, setDoiResult] = useState<{ success?: boolean; doi?: string; error?: string; message?: string } | null>(null);
+  const [editingRemarkId, setEditingRemarkId] = useState<string | null>(null);
+  const [remarkDraft, setRemarkDraft] = useState("");
 
   function load() {
     fetch(`/api/submissions/${id}`).then(r => r.json()).then(d => setSub(d.submission));
@@ -259,11 +261,101 @@ export default function EditorSubmissionPage() {
 
         {/* ── STEP 3: REVIEWS ── */}
         <div className={`rounded-xl border p-5 transition-opacity ${!plagPassed ? "opacity-40 pointer-events-none" : "bg-white border-gray-200"}`}>
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-2 mb-4">
             <span className="text-lg">🔍</span>
             <h2 className="font-bold text-gray-900">Step 3 — Review Summary</h2>
           </div>
-          <ReviewSummary reviews={sub.reviews || []} />
+
+          {(!sub.reviews || sub.reviews.filter((r: any) => r.decision || r.clarityScore !== null).length === 0) ? (
+            <p className="text-sm text-gray-400 italic">No reviews submitted yet.</p>
+          ) : (
+            <div className="space-y-3">
+              {sub.reviews
+                .filter((r: any) => r.decision !== null || r.clarityScore !== null)
+                .map((r: any, i: number) => {
+                  const decColor: Record<string, string> = {
+                    ACCEPT: "border-green-300 bg-green-50",
+                    MINOR_REVISION: "border-blue-200 bg-blue-50",
+                    MAJOR_REVISION: "border-orange-200 bg-orange-50",
+                    REJECT: "border-red-300 bg-red-50",
+                  };
+                  const decLabel: Record<string, string> = {
+                    ACCEPT: "text-green-700", MINOR_REVISION: "text-blue-700",
+                    MAJOR_REVISION: "text-orange-700", REJECT: "text-red-700",
+                  };
+                  const isEditing = editingRemarkId === r.id;
+                  return (
+                    <div key={r.id} className={`rounded-lg border-2 p-4 ${r.decision ? decColor[r.decision] || "border-gray-200 bg-gray-50" : "border-gray-200 bg-gray-50"}`}>
+                      <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+                        <span className="text-sm font-bold text-gray-800">
+                          Reviewer {i + 1}: {r.reviewer?.name || "Unknown"}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          {r.decision && (
+                            <span className={`text-xs font-bold px-2.5 py-1 rounded-full bg-white border ${r.decision ? decLabel[r.decision] : "text-gray-600"}`}>
+                              {r.decision.replace(/_/g, " ")}
+                            </span>
+                          )}
+                          <button
+                            onClick={() => {
+                              setEditingRemarkId(isEditing ? null : r.id);
+                              setRemarkDraft(r.remarks || "");
+                            }}
+                            className="text-xs text-indigo-600 hover:underline border border-indigo-200 px-2 py-0.5 rounded-full"
+                          >
+                            {isEditing ? "Cancel" : r.remarks ? "✏️ Edit Remarks" : "+ Add Remarks"}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Remarks display or edit */}
+                      {isEditing ? (
+                        <div className="mt-2 space-y-2">
+                          <textarea
+                            value={remarkDraft}
+                            onChange={e => setRemarkDraft(e.target.value)}
+                            rows={3}
+                            placeholder="Enter reviewer's comments / remarks…"
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+                          />
+                          <button
+                            onClick={async () => {
+                              const res = await fetch(`/api/reviews/${id}/remarks`, {
+                                method: "PATCH",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ reviewId: r.id, remarks: remarkDraft }),
+                              });
+                              if (res.ok) { setMsg("✅ Remarks saved"); setEditingRemarkId(null); load(); }
+                              else setMsg("❌ Failed to save remarks");
+                              setTimeout(() => setMsg(""), 4000);
+                            }}
+                            className="px-4 py-1.5 bg-indigo-700 text-white text-sm font-semibold rounded-lg hover:bg-indigo-800"
+                          >
+                            Save Remarks
+                          </button>
+                        </div>
+                      ) : (
+                        r.remarks
+                          ? <p className="text-sm text-gray-700 mt-1 leading-relaxed italic">&ldquo;{r.remarks}&rdquo;</p>
+                          : <p className="text-xs text-gray-400 mt-1 italic">No remarks recorded. Click &ldquo;+ Add Remarks&rdquo; to enter the reviewer&apos;s comments.</p>
+                      )}
+
+                      {/* Scores if available */}
+                      {(r.clarityScore !== null && r.clarityScore !== undefined) && (
+                        <div className="mt-3 grid grid-cols-4 gap-2">
+                          {[["Clarity", r.clarityScore],["Methodology", r.methodologyScore],["Relevance", r.relevanceScore],["Originality", r.originalityScore]].map(([label, val]) => (
+                            <div key={label as string} className="text-center bg-white rounded-lg py-1.5 px-2 border border-gray-100">
+                              <div className="text-sm font-bold text-gray-700">{val ?? "—"}</div>
+                              <div className="text-xs text-gray-400">{label}</div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+              })}
+            </div>
+          )}
         </div>
 
         {/* ── STEP 4: REQUEST REVISION ── */}
