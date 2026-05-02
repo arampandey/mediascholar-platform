@@ -6,6 +6,30 @@ import Link from "next/link";
 
 type Tab = "review" | "all";
 
+function groupByIssue(submissions: any[]) {
+  const groups: Record<string, { label: string; issueId: string | null; items: any[] }> = {};
+  for (const s of submissions) {
+    const key = s.issue
+      ? `vol${s.issue.volume.number}-issue${s.issue.number}`
+      : "unassigned";
+    if (!groups[key]) {
+      groups[key] = {
+        label: s.issue
+          ? `Vol. ${s.issue.volume.number} (${s.issue.volume.year}) — Issue ${s.issue.number}`
+          : "📥 Unassigned (No Issue)",
+        issueId: s.issue ? s.issueId : null,
+        items: [],
+      };
+    }
+    groups[key].items.push(s);
+  }
+  return Object.values(groups).sort((a, b) => {
+    if (a.issueId === null) return 1;
+    if (b.issueId === null) return -1;
+    return a.label < b.label ? 1 : -1;
+  });
+}
+
 const DECISION_COLORS: Record<string, string> = {
   ACCEPT: "bg-green-100 text-green-700",
   MINOR_REVISION: "bg-blue-100 text-blue-700",
@@ -25,6 +49,7 @@ export default function SubEditorDashboard() {
   const [reviewSubmissions, setReviewSubmissions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>("review");
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
 
   // Per-card decision state
   const [decidingId, setDecidingId] = useState<string | null>(null);
@@ -38,8 +63,16 @@ export default function SubEditorDashboard() {
       fetch("/api/submissions/all").then(r => r.json()),
       fetch("/api/submissions/sub-editor-review").then(r => r.json()),
     ]).then(([allData, reviewData]) => {
-      setAllSubmissions(allData.submissions || []);
+      const subs = allData.submissions || [];
+      setAllSubmissions(subs);
       setReviewSubmissions(reviewData.submissions || []);
+      // Auto-collapse all issue groups except the most recent (running) one
+      const groups = groupByIssue(subs);
+      if (groups.length > 1) {
+        setCollapsedGroups(new Set(groups.slice(1).map(g => g.label)));
+      } else {
+        setCollapsedGroups(new Set());
+      }
     }).finally(() => setLoading(false));
   }
 
@@ -279,36 +312,58 @@ export default function SubEditorDashboard() {
 
             {/* ── ALL SUBMISSIONS TAB ── */}
             {tab === "all" && (
-              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="bg-gray-50 border-b border-gray-200">
-                      <th className="text-left px-4 py-3 font-semibold text-gray-600">Title</th>
-                      <th className="text-left px-4 py-3 font-semibold text-gray-600">Author</th>
-                      <th className="text-left px-4 py-3 font-semibold text-gray-600">Issue</th>
-                      <th className="text-left px-4 py-3 font-semibold text-gray-600">Status</th>
-                      <th className="px-4 py-3"></th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {allSubmissions.length === 0 && (
-                      <tr><td colSpan={5} className="text-center py-10 text-gray-400">No submissions found.</td></tr>
-                    )}
-                    {allSubmissions.map((s: any) => (
-                      <tr key={s.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 font-medium text-gray-900 max-w-[240px] truncate">{s.title}</td>
-                        <td className="px-4 py-3 text-xs text-gray-500">{s.author?.name}</td>
-                        <td className="px-4 py-3 text-xs text-gray-500">
-                          {s.issue ? `Vol. ${s.issue.volume.number} I${s.issue.number}` : "—"}
-                        </td>
-                        <td className="px-4 py-3"><StatusBadge status={s.status} /></td>
-                        <td className="px-4 py-3">
-                          <Link href={`/dashboard/editor/submission/${s.id}`} className="text-indigo-700 text-xs hover:underline">View →</Link>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="space-y-4">
+                {allSubmissions.length === 0 ? (
+                  <div className="text-center py-20 text-gray-400">No submissions found.</div>
+                ) : (
+                  groupByIssue(allSubmissions).map((group) => {
+                    const collapsed = collapsedGroups.has(group.label);
+                    return (
+                      <div key={group.label} className="rounded-xl border border-gray-200 overflow-hidden">
+                        <button
+                          onClick={() => setCollapsedGroups(prev => {
+                            const next = new Set(prev);
+                            if (next.has(group.label)) next.delete(group.label); else next.add(group.label);
+                            return next;
+                          })}
+                          className="w-full flex items-center justify-between px-5 py-3 bg-gray-50 hover:bg-gray-100 transition-colors"
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="text-sm font-bold text-gray-800">{group.label}</span>
+                            <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-semibold">
+                              {group.items.length} paper{group.items.length !== 1 ? "s" : ""}
+                            </span>
+                          </div>
+                          <span className="text-gray-400 text-sm">{collapsed ? "▶" : "▼"}</span>
+                        </button>
+                        {!collapsed && (
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="border-b border-gray-100">
+                                <th className="text-left px-4 py-2 font-semibold text-gray-500 text-xs">Title</th>
+                                <th className="text-left px-4 py-2 font-semibold text-gray-500 text-xs">Author</th>
+                                <th className="text-left px-4 py-2 font-semibold text-gray-500 text-xs">Status</th>
+                                <th className="px-4 py-2"></th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-50">
+                              {group.items.map((s: any) => (
+                                <tr key={s.id} className="hover:bg-gray-50">
+                                  <td className="px-4 py-2.5 font-medium text-gray-900 max-w-[260px] truncate">{s.title}</td>
+                                  <td className="px-4 py-2.5 text-xs text-gray-500">{s.author?.name}</td>
+                                  <td className="px-4 py-2.5"><StatusBadge status={s.status} /></td>
+                                  <td className="px-4 py-2.5">
+                                    <Link href={`/dashboard/editor/submission/${s.id}`} className="text-indigo-700 text-xs hover:underline">View →</Link>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
               </div>
             )}
           </>

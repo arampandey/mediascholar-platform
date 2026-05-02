@@ -63,10 +63,22 @@ export default function EditorDashboard() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"submissions"|"applications"|"volumes">("submissions");
   const [viewMode, setViewMode] = useState<ViewMode>("issue");
-  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+  // Start with everything collapsed; open only the running issue after load
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set(["__all__"]));
 
   useEffect(() => {
-    fetch("/api/submissions/all").then(r => r.json()).then(d => setSubmissions(d.submissions || [])).finally(() => setLoading(false));
+    fetch("/api/submissions/all").then(r => r.json()).then(d => {
+      const subs = d.submissions || [];
+      setSubmissions(subs);
+      // Auto-collapse all groups except the most recent one (running issue)
+      const groups = groupByIssue(subs);
+      if (groups.length > 1) {
+        const runningKey = groups[0].label; // newest first
+        setCollapsedGroups(new Set(groups.slice(1).map(g => g.label)));
+      } else {
+        setCollapsedGroups(new Set());
+      }
+    }).finally(() => setLoading(false));
   }, []);
 
   const counts: Record<string, number> = submissions.reduce((acc: any, s: any) => { acc[s.status] = (acc[s.status]||0)+1; return acc; }, {});
