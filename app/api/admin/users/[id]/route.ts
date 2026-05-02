@@ -7,7 +7,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (!session || (session.user as any).role !== "EDITOR") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   const { id } = await params;
   const { role, institution, designation, email, name } = await req.json();
-  const updateData: any = { role, institution, designation };
+  const updateData: any = {};
+  if (role !== undefined) updateData.role = role;
+  if (institution !== undefined) updateData.institution = institution;
+  if (designation !== undefined) updateData.designation = designation;
   if (email !== undefined) updateData.email = email;
   if (name !== undefined) updateData.name = name;
   const user = await prisma.user.update({ where: { id }, data: updateData });

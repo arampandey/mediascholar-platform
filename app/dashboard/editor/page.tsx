@@ -73,7 +73,6 @@ export default function EditorDashboard() {
       // Auto-collapse all groups except the most recent one (running issue)
       const groups = groupByIssue(subs);
       if (groups.length > 1) {
-        const runningKey = groups[0].label; // newest first
         setCollapsedGroups(new Set(groups.slice(1).map(g => g.label)));
       } else {
         setCollapsedGroups(new Set());
