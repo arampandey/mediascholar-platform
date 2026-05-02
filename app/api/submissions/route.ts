@@ -80,9 +80,55 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(await file.arrayBuffer());
     const fileUrl = await uploadToCloudinary(filename, buffer, file.type);
 
+    // Auto-assign to the correct issue based on submission date and journal policy:
+    // Jan 1 – May 3  → Issue 1 of the current year's volume
+    // May 4 – Oct 31 → Issue 2 of the current year's volume
+    // Nov 1 – Dec 31 → Issue 1 of the NEXT year's volume
+    async function resolveIssue(): Promise<string | null> {
+      const now = new Date();
+      const month = now.getMonth() + 1; // 1-12
+      const day = now.getDate();
+      const year = now.getFullYear();
+
+      let targetYear = year;
+      let targetIssue = 1;
+
+      if (month > 10 || (month === 10 && day > 31)) {
+        // Nov 1 – Dec 31: next year Issue 1
+        targetYear = year + 1;
+        targetIssue = 1;
+      } else if (month > 5 || (month === 5 && day >= 4)) {
+        // May 4 – Oct 31: current year Issue 2
+        targetIssue = 2;
+      } else {
+        // Jan 1 – May 3: current year Issue 1
+        targetIssue = 1;
+      }
+
+      // Find the volume for the target year
+      const volume = await prisma.volume.findFirst({ where: { year: targetYear } });
+      if (!volume) return null;
+
+      // Find (or create) the issue
+      let issue = await prisma.issue.findUnique({
+        where: { volumeId_number: { volumeId: volume.id, number: targetIssue } },
+      });
+      if (!issue) {
+        const label = targetIssue === 1
+          ? `Issue 1 (Jan–May ${targetYear})`
+          : `Issue 2 (May–Oct ${targetYear})`;
+        issue = await prisma.issue.create({
+          data: { number: targetIssue, title: label, volumeId: volume.id },
+        });
+      }
+      return issue.id;
+    }
+
+    const autoIssueId = await resolveIssue();
+
     // Save submission to DB
     const submission = await prisma.submission.create({
-      data: { title, abstract, keywords, language, fileUrl, coAuthors, authorId: userId },
+      data: { title, abstract, keywords, language, fileUrl, coAuthors, authorId: userId, issueId: autoIssueId },
     });
 
     // Send confirmation email to author
