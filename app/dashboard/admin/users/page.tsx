@@ -56,7 +56,7 @@ export default function AdminUsersPage() {
     return (filterRole==="ALL"||u.role===filterRole) && (!q || u.name?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q) || u.institution?.toLowerCase().includes(q));
   });
 
-  const badEmailCount = users.filter(u => u.role==="REVIEWER" && u.email?.includes("@mediascholar.in")).length;
+  const badEmailCount = users.filter(u => u.email?.includes("@mediascholar.in") && u.email !== "archive@mediascholar.in").length;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -68,7 +68,7 @@ export default function AdminUsersPage() {
             <p className="text-sm text-gray-500">{users.length} total users</p>
             {badEmailCount > 0 && (
               <div className="mt-1 flex items-center gap-2 text-xs font-semibold text-orange-700 bg-orange-50 border border-orange-200 px-3 py-1.5 rounded-lg">
-                ⚠️ {badEmailCount} reviewer{badEmailCount>1?"s have":" has"} placeholder @mediascholar.in email — update before they can receive assignment emails.
+                ⚠️ {badEmailCount} user{badEmailCount>1?"s have":" has"} placeholder @mediascholar.in email — click ✏️ on any highlighted row to fix.
               </div>
             )}
           </div>
@@ -120,8 +120,8 @@ export default function AdminUsersPage() {
                         </div>
                       ) : (
                         <div className="flex items-center gap-1">
-                          <span className={u.email?.includes("@mediascholar.in") && u.role==="REVIEWER" ? "text-orange-600 font-semibold" : "text-gray-500"}>{u.email}</span>
-                          {u.email?.includes("@mediascholar.in") && u.role==="REVIEWER" && <span className="text-orange-500" title="Placeholder email — click pencil to fix">⚠️</span>}
+                          <span className={u.email?.includes("@mediascholar.in") && u.email !== "archive@mediascholar.in" ? "text-orange-600 font-semibold" : "text-gray-500"}>{u.email}</span>
+                          {u.email?.includes("@mediascholar.in") && u.email !== "archive@mediascholar.in" && <span className="text-orange-500" title="Placeholder email — click pencil to fix">⚠️</span>}
                           <button onClick={() => { setEditingEmail(u.id); setEmailDraft(u.email); }} className="ml-1 text-gray-300 hover:text-indigo-500" title="Edit email">✏️</button>
                         </div>
                       )}
