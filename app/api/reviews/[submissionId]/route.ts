@@ -36,11 +36,15 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ sub
   const reviewerId = (session.user as any).id;
   const body = await req.json();
 
+  // Destructure only valid Review fields — never pass reviewId or other non-schema keys to Prisma
+  const { reviewId, clarityScore, methodologyScore, relevanceScore, originalityScore, remarks, decision } = body;
+  const reviewData = { clarityScore, methodologyScore, relevanceScore, originalityScore, remarks, decision };
+
   // Save the review
   const review = await prisma.review.upsert({
-    where: { id: body.reviewId || "nonexistent" },
-    update: { ...body, submittedAt: new Date() },
-    create: { submissionId, reviewerId, ...body, submittedAt: new Date() },
+    where: { id: reviewId || "nonexistent" },
+    update: { ...reviewData, submittedAt: new Date() },
+    create: { submissionId, reviewerId, ...reviewData, submittedAt: new Date() },
   });
 
   const submission = await prisma.submission.findUnique({

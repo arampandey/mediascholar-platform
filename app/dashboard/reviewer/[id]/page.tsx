@@ -14,6 +14,7 @@ export default function ReviewPage() {
   const [form, setForm] = useState({ clarityScore: "", methodologyScore: "", relevanceScore: "", originalityScore: "", remarks: "", decision: "" });
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [showDecline, setShowDecline] = useState(false);
   const [declineReason, setDeclineReason] = useState("");
   const [declining, setDeclining] = useState(false);
@@ -31,9 +32,31 @@ export default function ReviewPage() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
-    await fetch(`/api/reviews/${id}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...form, clarityScore: +form.clarityScore, methodologyScore: +form.methodologyScore, relevanceScore: +form.relevanceScore, originalityScore: +form.originalityScore, reviewId: review?.id }) });
-    setSubmitting(false);
-    setDone(true);
+    setSubmitError("");
+    try {
+      const res = await fetch(`/api/reviews/${id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...form,
+          clarityScore: +form.clarityScore,
+          methodologyScore: +form.methodologyScore,
+          relevanceScore: +form.relevanceScore,
+          originalityScore: +form.originalityScore,
+          reviewId: review?.id,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        setSubmitError(err.error || "Submission failed. Please try again.");
+      } else {
+        setDone(true);
+      }
+    } catch {
+      setSubmitError("Network error. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   async function handleDecline() {
@@ -140,6 +163,11 @@ export default function ReviewPage() {
               <textarea value={form.remarks} onChange={e => setForm(p => ({...p, remarks: e.target.value}))} rows={4}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-gray-400" placeholder="Detailed feedback for the author…" />
             </div>
+            {submitError && (
+              <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                ❌ {submitError}
+              </div>
+            )}
             <button type="submit" disabled={submitting} style={{ backgroundColor: "#1a2744" }} className="w-full text-white py-2.5 rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50">
               {submitting ? "Submitting…" : "Submit Review"}
             </button>
