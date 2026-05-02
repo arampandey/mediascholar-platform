@@ -7,6 +7,7 @@ import {
   sendBothReviewersAccepted,
   sendBothReviewersRejected,
   sendConflictingReviews,
+  sendSubEditorReviewAlert,
 } from "@/lib/email";
 
 // Decisions considered as POSITIVE (accept/minor revision)
@@ -56,6 +57,23 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ sub
     // Notify editor a review was submitted
     for (const ed of editors) {
       await sendReviewSubmitted(ed.email, reviewer.name, submission.title, body.decision || "N/A");
+    }
+
+    // If reviewer REJECTED — notify all sub-editors immediately
+    if (body.decision === "REJECT") {
+      const subEditors = await prisma.user.findMany({
+        where: { role: "SUB_EDITOR" },
+        select: { name: true, email: true },
+      });
+      for (const se of subEditors) {
+        await sendSubEditorReviewAlert(
+          se.email,
+          se.name,
+          reviewer.name,
+          submission.title,
+          body.remarks || ""
+        );
+      }
     }
 
     // Check if both reviewers have now submitted

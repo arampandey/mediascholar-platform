@@ -185,6 +185,30 @@ export async function sendPasswordReset(to: string, name: string, resetUrl: stri
   await sendTemplate(to, "password_reset", { name, resetUrl });
 }
 
+export async function sendSubEditorReviewAlert(
+  to: string,
+  subEditorName: string,
+  reviewerName: string,
+  title: string,
+  remarks: string
+) {
+  const subject = `Paper Flagged for Review — Reviewer Rejected: ${title}`;
+  const html = `
+    <p ${P}>Dear ${subEditorName},</p>
+    <p ${P}>A reviewer has submitted a <strong>Rejection</strong> decision for the following manuscript. The paper has been forwarded to you for further review and final decision.</p>
+    <div ${BOX}>
+      <p ${LABEL}><strong>Manuscript:</strong> ${title}</p>
+      <p ${LABEL}><strong>Reviewer:</strong> ${reviewerName}</p>
+      <p ${LABEL}><strong>Decision:</strong> <span style="color:#c53030;font-weight:bold;">Rejected</span></p>
+      ${remarks ? `<p ${LABEL}><strong>Remarks:</strong> ${remarks}</p>` : ""}
+    </div>
+    <p ${P}>Please log in to your dashboard to review the submission and take appropriate action.</p>
+    <p ${P}><a href="https://mediascholar.in/dashboard/sub-editor" style="color:#1a2744;font-weight:bold;">Go to Sub-Editor Dashboard →</a></p>
+    <p ${SIGN}>Regards,<br/>Media Scholar Platform</p>
+  `;
+  await send(to, subject, html);
+}
+
 export async function sendReviewerDeclined(
   to: string,
   reviewerName: string,
