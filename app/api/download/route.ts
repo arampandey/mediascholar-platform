@@ -1,12 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { v2 as cloudinary } from "cloudinary";
 import { prisma } from "@/lib/prisma";
-
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -26,16 +19,41 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "File not found" }, { status: 404 });
   }
 
-  const fileUrl = submission.fileUrl;
+  let fileUrl = submission.fileUrl;
 
-  // For Cloudinary URLs, redirect directly
-  if (fileUrl.includes("cloudinary.com")) {
-    return NextResponse.redirect(fileUrl);
-  }
-
-  // For non-Cloudinary URLs (relative /uploads/ or external), redirect directly
+  // Build absolute URL for relative paths
   if (fileUrl.startsWith("/")) {
-    return NextResponse.redirect(`https://mediascholar.in${fileUrl}`);
+    fileUrl = `https://mediascholar.in${fileUrl}`;
   }
-  return NextResponse.redirect(fileUrl);
+
+  // Proxy the file so the browser always gets correct Content-Type headers
+  // (plain redirects to Cloudinary/GitHub can fail in PDF viewers due to missing
+  // Content-Type or CORS issues)
+  try {
+    const upstream = await fetch(fileUrl);
+    if (!upstream.ok) {
+      return NextResponse.json(
+        { error: `Upstream fetch failed: ${upstream.status}` },
+        { status: 502 }
+      );
+    }
+
+    const body = await upstream.arrayBuffer();
+
+    // Derive a safe filename from the URL
+    const rawName = fileUrl.split("/").pop()?.split("?")[0] ?? "paper.pdf";
+    const filename = decodeURIComponent(rawName);
+
+    return new NextResponse(body, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `inline; filename="${filename}"`,
+        "Cache-Control": "private, max-age=3600",
+      },
+    });
+  } catch (err) {
+    console.error("[download] fetch error:", err);
+    return NextResponse.json({ error: "Failed to fetch file" }, { status: 502 });
+  }
 }
