@@ -16,6 +16,7 @@ type PaperData = {
   iss: { number: number; title: string | null } | null;
   citations: { apa: string; mla: string; chicago: string };
   pageUrl: string;
+  zenodoUrl: string | null;
 };
 
 export default function PaperClient({ paper }: { paper: PaperData }) {
@@ -182,6 +183,24 @@ export default function PaperClient({ paper }: { paper: PaperData }) {
             <section className="mb-7">
               <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">DOI</h2>
               <p className="text-sm text-gray-700 font-mono">{paper.doi}</p>
+            </section>
+          )}
+
+          {/* Zenodo Archive Badge */}
+          {paper.zenodoUrl && (
+            <section className="mb-7">
+              <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Digital Archive</h2>
+              <a
+                href={paper.zenodoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-blue-200 bg-blue-50 hover:bg-blue-100 transition-colors"
+              >
+                <svg className="w-4 h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                </svg>
+                <span className="text-xs font-semibold text-blue-700">Archived in Zenodo</span>
+              </a>
             </section>
           )}
 

@@ -17,6 +17,7 @@ async function getPaper(id: string) {
         author: { select: { id: true, name: true, institution: true, email: true } },
         issue: { include: { volume: true } },
       },
+      // zenodoUrl is a scalar field — included automatically
     });
   } catch { return null; }
 }
@@ -133,6 +134,7 @@ export default async function PaperPage({ params }: { params: Promise<{ id: stri
     iss: iss ? { number: iss.number, title: iss.title } : null,
     citations,
     pageUrl,
+    zenodoUrl: paper.zenodoUrl || null,
   };
 
   return (

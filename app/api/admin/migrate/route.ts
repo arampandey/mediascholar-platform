@@ -138,6 +138,8 @@ export async function POST(req: NextRequest) {
       await prisma.$executeRaw`ALTER TABLE "Submission" ADD COLUMN IF NOT EXISTS "plagiarismReport" TEXT`;
       await prisma.$executeRaw`ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "bio" TEXT`;
       await prisma.$executeRaw`ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "orcid" TEXT`;
+      await prisma.$executeRaw`ALTER TABLE "Submission" ADD COLUMN IF NOT EXISTS "zenodoRecordId" TEXT`;
+      await prisma.$executeRaw`ALTER TABLE "Submission" ADD COLUMN IF NOT EXISTS "zenodoUrl" TEXT`;
       return NextResponse.json({ success: true, message: "Schema sync complete" });
     }
 

@@ -69,6 +69,8 @@ model Submission {
   plagiarismReport String?
   doi             String?
   publishedAt     DateTime?
+  zenodoRecordId  String?
+  zenodoUrl       String?
   editorDecision  String?
   decisionNotes   String?
   decisionAt      DateTime?

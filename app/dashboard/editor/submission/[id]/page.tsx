@@ -26,6 +26,8 @@ export default function EditorSubmissionPage() {
   const [doiResult, setDoiResult] = useState<{ success?: boolean; doi?: string; error?: string; message?: string } | null>(null);
   const [editingRemarkId, setEditingRemarkId] = useState<string | null>(null);
   const [remarkDraft, setRemarkDraft] = useState("");
+  const [zenodoLoading, setZenodoLoading] = useState(false);
+  const [zenodoResult, setZenodoResult] = useState<{ success?: boolean; url?: string; doi?: string; error?: string } | null>(null);
 
   function load() {
     fetch(`/api/submissions/${id}`).then(r => r.json()).then(d => setSub(d.submission));
@@ -435,6 +437,56 @@ export default function EditorSubmissionPage() {
                 Publish
               </button>
             </div>
+          </div>
+        )}
+
+        {/* ── ZENODO ARCHIVE ── */}
+        {sub.status === "PUBLISHED" && (
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-lg">🗄️</span>
+              <h2 className="font-bold text-gray-900">Digital Archive — Zenodo</h2>
+            </div>
+            <p className="text-xs text-gray-500 mb-4">
+              Archive this paper permanently on Zenodo (CERN). Free, recognised by Google Scholar and DOAJ.
+            </p>
+
+            {sub.zenodoUrl ? (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
+                <p className="text-xs text-blue-600 font-semibold mb-0.5">✅ Archived in Zenodo</p>
+                <a href={sub.zenodoUrl} target="_blank" rel="noopener noreferrer"
+                  className="text-sm text-blue-800 hover:underline break-all">{sub.zenodoUrl}</a>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <button
+                  onClick={async () => {
+                    setZenodoLoading(true);
+                    setZenodoResult(null);
+                    const res = await fetch(`/api/submissions/${id}/zenodo`, { method: "POST" });
+                    const data = await res.json();
+                    setZenodoResult(data);
+                    setZenodoLoading(false);
+                    if (data.success) load();
+                  }}
+                  disabled={zenodoLoading}
+                  className="px-4 py-2 bg-blue-700 text-white rounded-lg text-sm font-bold hover:bg-blue-800 disabled:opacity-40"
+                >
+                  {zenodoLoading ? "Archiving…" : "Archive on Zenodo"}
+                </button>
+                {zenodoResult && (
+                  <div className={`rounded-lg px-4 py-3 text-sm ${
+                    zenodoResult.success
+                      ? "bg-green-50 border border-green-200 text-green-800"
+                      : "bg-red-50 border border-red-200 text-red-800"
+                  }`}>
+                    {zenodoResult.success
+                      ? <p>✅ Archived! <a href={zenodoResult.url} target="_blank" rel="noopener noreferrer" className="underline">{zenodoResult.url}</a></p>
+                      : <p>❌ {zenodoResult.error}</p>}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 

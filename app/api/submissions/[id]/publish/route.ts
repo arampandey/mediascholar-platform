@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { depositToZenodo } from "@/lib/zenodo";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
@@ -20,6 +21,24 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     },
   });
 
+  // 🗄️ Auto Zenodo archive (fires in background — won't block publish)
+  const baseUrl = (process.env.NEXTAUTH_URL || "https://mediascholar.in").trim();
+  void (async () => {
+    try {
+      if (!submission.zenodoRecordId) {
+        const zenodoResult = await depositToZenodo(submission);
+        if (zenodoResult) {
+          await prisma.submission.update({
+            where: { id: submission.id },
+            data: { zenodoRecordId: zenodoResult.recordId, zenodoUrl: zenodoResult.url },
+          });
+        }
+      }
+    } catch (e) {
+      console.error("[zenodo] background deposit error:", e);
+    }
+  })();
+
   // 🔁 Auto social media post (fires in background — won't block publish)
   try {
     const issueLabel = submission.issue
@@ -27,7 +46,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       : undefined;
 
     // Fire-and-forget — don't await so publish isn't delayed
-    const baseUrl = (process.env.NEXTAUTH_URL || "http://localhost:3000").trim();
     fetch(`${baseUrl}/api/social`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Cookie: req.headers.get("cookie") || "" },
