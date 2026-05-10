@@ -15,6 +15,8 @@ export default function AdminUsersPage() {
   const [editingEmail, setEditingEmail] = useState<string|null>(null);
   const [emailDraft, setEmailDraft] = useState("");
   const [msg, setMsg] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState<{id:string;name:string}|null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   function load() { fetch("/api/admin/users").then(r => r.json()).then(d => setUsers(d.users||[])).finally(() => setLoading(false)); }
   useEffect(() => { load(); }, []);
@@ -45,10 +47,16 @@ export default function AdminUsersPage() {
     setTimeout(() => setMsg(""), 5000);
   }
 
-  async function deleteUser(id: string, name: string) {
-    if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
-    await fetch(`/api/admin/users/${id}`, { method:"DELETE" });
-    load();
+  async function deleteUser() {
+    if (!confirmDelete) return;
+    setDeleting(true);
+    const res = await fetch(`/api/admin/users/${confirmDelete.id}`, { method:"DELETE" });
+    const data = await res.json();
+    setDeleting(false);
+    setConfirmDelete(null);
+    if (res.ok) { setMsg(`✅ Deleted "${confirmDelete.name}" successfully`); load(); }
+    else setMsg(`❌ ${data.error || "Delete failed"}`);
+    setTimeout(() => setMsg(""), 5000);
   }
 
   const filtered = users.filter(u => {
@@ -143,7 +151,7 @@ export default function AdminUsersPage() {
                             className="text-xs text-indigo-500 hover:text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full disabled:opacity-40"
                           >📧 Resend</button>
                         )}
-                        <button onClick={() => deleteUser(u.id, u.name)} className="text-xs text-red-400 hover:text-red-600">Delete</button>
+                        <button onClick={() => setConfirmDelete({id: u.id, name: u.name})} className="text-xs text-red-400 hover:text-red-600 border border-red-200 px-2 py-0.5 rounded-full">Delete</button>
                       </div>
                     </td>
                   </tr>
@@ -154,6 +162,30 @@ export default function AdminUsersPage() {
           </div>
         )}
       </main>
+
+      {/* Inline delete confirmation — no window.confirm() */}
+      {confirmDelete && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full">
+            <h3 className="font-bold text-gray-900 text-lg mb-2">Delete User?</h3>
+            <p className="text-sm text-gray-600 mb-1">You are about to permanently delete:</p>
+            <p className="font-semibold text-gray-900 mb-1">{confirmDelete.name}</p>
+            <p className="text-xs text-gray-400 mb-5">This will also remove all their review assignments and reviews. This cannot be undone.</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmDelete(null)}
+                disabled={deleting}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-50 disabled:opacity-40"
+              >Cancel</button>
+              <button
+                onClick={deleteUser}
+                disabled={deleting}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-bold hover:bg-red-700 disabled:opacity-40"
+              >{deleting ? "Deleting…" : "Yes, Delete"}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -22,6 +22,14 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   if (!session || (session.user as any).role !== "EDITOR") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   const { id } = await params;
   if (id === (session.user as any).id) return NextResponse.json({ error: "Cannot delete yourself" }, { status: 400 });
-  await prisma.user.delete({ where: { id } });
-  return NextResponse.json({ success: true });
+  try {
+    // Cascade: remove dependent records before deleting user
+    await prisma.submissionReviewer.deleteMany({ where: { userId: id } });
+    await prisma.review.deleteMany({ where: { reviewerId: id } });
+    await prisma.reviewerApplication.deleteMany({ where: { userId: id } });
+    await prisma.user.delete({ where: { id } });
+    return NextResponse.json({ success: true });
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message || "Delete failed" }, { status: 500 });
+  }
 }
