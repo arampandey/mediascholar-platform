@@ -23,10 +23,24 @@ export default function PaperClient({ paper }: { paper: PaperData }) {
   const [copied, setCopied] = useState(false);
   const [citePanelOpen, setCitePanelOpen] = useState(false);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(paper.citations[citationFormat].replace(/\*/g, ""));
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(paper.citations[citationFormat].replace(/\*/g, ""));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      // Fallback for browsers that deny clipboard permission
+      const el = document.createElement("textarea");
+      el.value = paper.citations[citationFormat].replace(/\*/g, "");
+      el.style.position = "fixed";
+      el.style.opacity = "0";
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand("copy");
+      document.body.removeChild(el);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    }
   };
 
   const shareUrl = encodeURIComponent(paper.pageUrl);
