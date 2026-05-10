@@ -9,17 +9,33 @@ const STATUS_LABELS: Record<string, string> = { SUBMITTED:"Submitted", PLAGIARIS
 export default function AdminAnalytics() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [citations, setCitations] = useState<any>(null);
+  const [citLoading, setCitLoading] = useState(false);
+  const [citFetched, setCitFetched] = useState(false);
 
-  useEffect(() => { fetch("/api/analytics").then(r => r.json()).then(setData).finally(() => setLoading(false)); }, []);
+  useEffect(() => {
+    fetch("/api/analytics").then(r => r.json()).then(setData).finally(() => setLoading(false));
+  }, []);
+
+  function fetchCitations() {
+    setCitLoading(true);
+    fetch("/api/analytics/citations")
+      .then(r => r.json())
+      .then(setCitations)
+      .finally(() => { setCitLoading(false); setCitFetched(true); });
+  }
 
   if (loading) return <div className="min-h-screen flex flex-col"><Navbar /><div className="flex-1 flex items-center justify-center text-gray-400">Loading…</div></div>;
 
   const maxMonth = Math.max(...(data?.submissionsPerMonth?.map((m: any) => m.count) || [1]), 1);
+  const maxDownloads = Math.max(...(data?.topDownloaded?.map((p: any) => p.downloadCount) || [1]), 1);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
       <main className="flex-1 max-w-7xl mx-auto px-4 py-10 w-full space-y-6">
+
+        {/* Header */}
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div><h1 className="text-2xl font-bold text-gray-900">Analytics</h1><p className="text-sm text-gray-500 mt-1">Journal statistics overview</p></div>
           <div className="flex gap-2">
@@ -28,48 +44,149 @@ export default function AdminAnalytics() {
           </div>
         </div>
 
+        {/* Top stat cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {[{ label:"Total Submissions", value:data.totalSubmissions, icon:"📄", color:"bg-blue-50 border-blue-200 text-blue-700" }, { label:"Total Users", value:data.totalUsers, icon:"👥", color:"bg-indigo-50 border-indigo-200 text-indigo-700" }, { label:"Reviews Completed", value:data.totalReviews, icon:"🔍", color:"bg-purple-50 border-purple-200 text-purple-700" }, { label:"Published", value:data.submissionsByStatus?.find((s: any) => s.status==="PUBLISHED")?._count?.id||0, icon:"🌐", color:"bg-emerald-50 border-emerald-200 text-emerald-700" }].map(s => (
-            <div key={s.label} className={`rounded-xl border p-5 ${s.color}`}><div className="text-3xl mb-1">{s.icon}</div><div className="text-3xl font-extrabold">{s.value}</div><div className="text-xs font-semibold mt-1 opacity-80">{s.label}</div></div>
+          {[
+            { label:"Total Submissions", value: data.totalSubmissions, icon:"📄", color:"bg-blue-50 border-blue-200 text-blue-700" },
+            { label:"Published Papers", value: data.submissionsByStatus?.find((s: any) => s.status==="PUBLISHED")?._count?.id||0, icon:"🌐", color:"bg-emerald-50 border-emerald-200 text-emerald-700" },
+            { label:"Total Downloads", value: data.totalDownloads ?? 0, icon:"📥", color:"bg-orange-50 border-orange-200 text-orange-700" },
+            { label:"Total Page Views", value: data.totalViews ?? 0, icon:"👁️", color:"bg-purple-50 border-purple-200 text-purple-700" },
+          ].map(s => (
+            <div key={s.label} className={`rounded-xl border p-5 ${s.color}`}>
+              <div className="text-3xl mb-1">{s.icon}</div>
+              <div className="text-3xl font-extrabold">{s.value?.toLocaleString()}</div>
+              <div className="text-xs font-semibold mt-1 opacity-80">{s.label}</div>
+            </div>
           ))}
         </div>
 
+        {/* Downloads & Views — Top Papers */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+          {/* Top Downloaded Papers */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <h2 className="font-bold text-gray-900 mb-1">📥 Top Papers by Downloads</h2>
+            <p className="text-xs text-gray-400 mb-4">Tracked since last update — resets on new deploy</p>
+            {data.topDownloaded?.length > 0 ? (
+              <div className="space-y-3">
+                {data.topDownloaded.map((p: any, i: number) => {
+                  const pct = maxDownloads > 0 ? (p.downloadCount / maxDownloads) * 100 : 0;
+                  return (
+                    <div key={p.id}>
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <Link href={`/paper/${p.id}`} className="text-xs text-gray-700 hover:text-indigo-600 hover:underline line-clamp-1 flex-1">
+                          <span className="text-gray-400 mr-1">#{i + 1}</span>{p.title}
+                        </Link>
+                        <span className="text-xs font-bold text-orange-700 shrink-0">{p.downloadCount} ↓</span>
+                      </div>
+                      <div className="w-full bg-gray-100 rounded-full h-1.5">
+                        <div className="bg-orange-400 h-1.5 rounded-full" style={{ width: `${pct}%` }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-400 text-center py-4">No downloads tracked yet — tracking started now</p>
+            )}
+          </div>
+
+          {/* Citation counts via Semantic Scholar */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <h2 className="font-bold text-gray-900 mb-1">📚 Citation Counts</h2>
+            <p className="text-xs text-gray-400 mb-4">Live data from Semantic Scholar — takes ~30 seconds to load</p>
+            {!citFetched ? (
+              <div className="flex flex-col items-center justify-center py-6 gap-3">
+                <p className="text-sm text-gray-500">Click to fetch live citation counts for all published papers</p>
+                <button
+                  onClick={fetchCitations}
+                  disabled={citLoading}
+                  className="px-5 py-2 bg-indigo-700 text-white text-sm font-semibold rounded-lg hover:bg-indigo-800 disabled:opacity-50"
+                >
+                  {citLoading ? "Fetching from Semantic Scholar…" : "Load Citation Counts"}
+                </button>
+              </div>
+            ) : citLoading ? (
+              <div className="flex items-center justify-center py-8 text-gray-400 text-sm">Querying Semantic Scholar for {data.submissionsByStatus?.find((s: any) => s.status === "PUBLISHED")?._count?.id || 0} papers…</div>
+            ) : citations?.topCited?.length > 0 ? (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100">
+                  <span className="text-xs text-gray-500">Total citations found</span>
+                  <span className="text-lg font-extrabold text-indigo-700">{citations.totalCitations}</span>
+                </div>
+                {citations.topCited.map((p: any, i: number) => (
+                  <div key={p.id} className="flex items-start justify-between gap-2">
+                    <Link href={`/paper/${p.id}`} className="text-xs text-gray-700 hover:text-indigo-600 hover:underline line-clamp-2 flex-1">
+                      <span className="text-gray-400 mr-1">#{i + 1}</span>{p.title}
+                    </Link>
+                    <span className={`text-xs font-bold shrink-0 px-2 py-0.5 rounded-full ${p.citationCount > 0 ? "bg-indigo-100 text-indigo-700" : "bg-gray-100 text-gray-400"}`}>
+                      {p.citationCount} cited
+                    </span>
+                  </div>
+                ))}
+                <button onClick={fetchCitations} className="text-xs text-indigo-600 hover:underline mt-2">Refresh</button>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-400 text-center py-4">No citations found yet — papers may not be indexed by Semantic Scholar yet</p>
+            )}
+          </div>
+        </div>
+
+        {/* Submission stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <h2 className="font-bold text-gray-900 mb-4">Submissions by Status</h2>
             <div className="space-y-3">
-              {data.submissionsByStatus?.map((s: any) => { const pct = data.totalSubmissions > 0 ? (s._count.id/data.totalSubmissions)*100 : 0; return (
-                <div key={s.status}><div className="flex justify-between text-xs text-gray-600 mb-1"><span>{STATUS_LABELS[s.status]||s.status}</span><span className="font-bold">{s._count.id}</span></div>
-                <div className="w-full bg-gray-100 rounded-full h-2"><div className={`${STATUS_COLORS[s.status]||"bg-gray-400"} h-2 rounded-full`} style={{width:`${pct}%`}} /></div></div>
-              ); })}
+              {data.submissionsByStatus?.map((s: any) => {
+                const pct = data.totalSubmissions > 0 ? (s._count.id/data.totalSubmissions)*100 : 0;
+                return (
+                  <div key={s.status}>
+                    <div className="flex justify-between text-xs text-gray-600 mb-1"><span>{STATUS_LABELS[s.status]||s.status}</span><span className="font-bold">{s._count.id}</span></div>
+                    <div className="w-full bg-gray-100 rounded-full h-2"><div className={`${STATUS_COLORS[s.status]||"bg-gray-400"} h-2 rounded-full`} style={{width:`${pct}%`}} /></div>
+                  </div>
+                );
+              })}
             </div>
           </div>
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <h2 className="font-bold text-gray-900 mb-4">Users by Role</h2>
             <div className="space-y-3">
-              {data.usersByRole?.map((r: any) => { const pct = data.totalUsers > 0 ? (r._count.id/data.totalUsers)*100 : 0; const colors: Record<string,string> = { AUTHOR:"bg-blue-500", REVIEWER:"bg-purple-500", SUB_EDITOR:"bg-orange-500", EDITOR:"bg-green-500" }; return (
-                <div key={r.role}><div className="flex justify-between text-xs text-gray-600 mb-1"><span>{r.role.replace("_"," ")}</span><span className="font-bold">{r._count.id}</span></div>
-                <div className="w-full bg-gray-100 rounded-full h-2"><div className={`${colors[r.role]||"bg-gray-400"} h-2 rounded-full`} style={{width:`${pct}%`}} /></div></div>
-              ); })}
+              {data.usersByRole?.map((r: any) => {
+                const pct = data.totalUsers > 0 ? (r._count.id/data.totalUsers)*100 : 0;
+                const colors: Record<string,string> = { AUTHOR:"bg-blue-500", REVIEWER:"bg-purple-500", SUB_EDITOR:"bg-orange-500", EDITOR:"bg-green-500" };
+                return (
+                  <div key={r.role}>
+                    <div className="flex justify-between text-xs text-gray-600 mb-1"><span>{r.role.replace("_"," ")}</span><span className="font-bold">{r._count.id}</span></div>
+                    <div className="w-full bg-gray-100 rounded-full h-2"><div className={`${colors[r.role]||"bg-gray-400"} h-2 rounded-full`} style={{width:`${pct}%`}} /></div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
 
+        {/* Submissions chart */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h2 className="font-bold text-gray-900 mb-6">Submissions — Last 6 Months</h2>
           <div className="flex items-end gap-3 h-36">
-            {data.submissionsPerMonth?.map((m: any) => { const h = maxMonth > 0 ? (m.count/maxMonth)*100 : 0; const [y,mo] = m.month.split("-"); const label = new Date(+y,+mo-1).toLocaleDateString("en-IN",{month:"short"}); return (
-              <div key={m.month} className="flex-1 flex flex-col items-center gap-1">
-                <span className="text-xs font-bold text-gray-700">{m.count||""}</span>
-                <div className="w-full flex items-end" style={{height:"100px"}}>
-                  <div className="w-full bg-indigo-500 rounded-t-md hover:bg-indigo-600 transition-colors" style={{height:`${Math.max(h, m.count>0?8:0)}%`}} />
+            {data.submissionsPerMonth?.map((m: any) => {
+              const h = maxMonth > 0 ? (m.count/maxMonth)*100 : 0;
+              const [y,mo] = m.month.split("-");
+              const label = new Date(+y,+mo-1).toLocaleDateString("en-IN",{month:"short"});
+              return (
+                <div key={m.month} className="flex-1 flex flex-col items-center gap-1">
+                  <span className="text-xs font-bold text-gray-700">{m.count||""}</span>
+                  <div className="w-full flex items-end" style={{height:"100px"}}>
+                    <div className="w-full bg-indigo-500 rounded-t-md hover:bg-indigo-600 transition-colors" style={{height:`${Math.max(h, m.count>0?8:0)}%`}} />
+                  </div>
+                  <span className="text-xs text-gray-500">{label}</span>
                 </div>
-                <span className="text-xs text-gray-500">{label}</span>
-              </div>
-            ); })}
+              );
+            })}
           </div>
         </div>
 
+        {/* Recent submissions */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h2 className="font-bold text-gray-900 mb-4">Recent Submissions</h2>
           <div className="space-y-2">
@@ -81,6 +198,7 @@ export default function AdminAnalytics() {
             ))}
           </div>
         </div>
+
       </main>
     </div>
   );

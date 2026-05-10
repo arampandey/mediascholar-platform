@@ -70,6 +70,9 @@ export default async function PaperPage({ params }: { params: Promise<{ id: stri
   const paper = await getPaper(id);
   if (!paper) notFound();
 
+  // Fire-and-forget view count increment
+  void prisma.submission.update({ where: { id }, data: { viewCount: { increment: 1 } } }).catch(() => {});
+
   const vol = paper.issue?.volume;
   const iss = paper.issue;
 

@@ -71,6 +71,8 @@ model Submission {
   publishedAt     DateTime?
   zenodoRecordId  String?
   zenodoUrl       String?
+  downloadCount   Int      @default(0)
+  viewCount       Int      @default(0)
   editorDecision  String?
   decisionNotes   String?
   decisionAt      DateTime?

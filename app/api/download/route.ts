@@ -21,6 +21,9 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "File not found" }, { status: 404 });
   }
 
+  // Fire-and-forget download count increment
+  void prisma.submission.update({ where: { id: submissionId }, data: { downloadCount: { increment: 1 } } }).catch(() => {});
+
   let fileUrl = submission.fileUrl;
   if (fileUrl.startsWith("/")) {
     fileUrl = `https://mediascholar.in${fileUrl}`;

@@ -30,6 +30,9 @@ export async function GET(
     return new NextResponse("PDF not found", { status: 404 });
   }
 
+  // Fire-and-forget download count increment
+  void prisma.submission.update({ where: { id: paperId }, data: { downloadCount: { increment: 1 } } }).catch(() => {});
+
   let fileUrl = paper.fileUrl;
   if (fileUrl.startsWith("/")) {
     fileUrl = `https://mediascholar.in${fileUrl}`;
