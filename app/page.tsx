@@ -5,19 +5,31 @@ import Navbar from "@/components/Navbar";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 
-async function getLatestPapers() {
+async function getLatestIssueWithPapers() {
   try {
-    return await prisma.submission.findMany({
-      where: { status: "PUBLISHED" },
-      orderBy: { publishedAt: "desc" },
-      take: 5,
-      include: { author: { select: { name: true, institution: true } } },
+    // Find the most recently published issue that has at least one published paper
+    const issue = await prisma.issue.findFirst({
+      where: {
+        publishedAt: { not: null },
+        submissions: { some: { status: "PUBLISHED" } },
+      },
+      orderBy: [{ volume: { number: "desc" } }, { number: "desc" }],
+      include: {
+        volume: true,
+        submissions: {
+          where: { status: "PUBLISHED" },
+          orderBy: { publishedAt: "asc" },
+          include: { author: { select: { name: true, institution: true } } },
+        },
+      },
     });
-  } catch { return []; }
+    return issue;
+  } catch { return null; }
 }
 
 export default async function HomePage() {
-  const latestPapers = await getLatestPapers();
+  const latestIssue = await getLatestIssueWithPapers();
+  const latestPapers = latestIssue?.submissions ?? [];
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -39,11 +51,19 @@ export default async function HomePage() {
 
       <main className="flex-1 max-w-5xl mx-auto px-4 py-12 w-full space-y-12">
 
-        {/* Latest Papers */}
+        {/* Latest Issue Papers */}
         {latestPapers.length > 0 && (
           <section>
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-2xl font-extrabold text-gray-900">Recent Publications</h2>
+              <div>
+                <h2 className="text-2xl font-extrabold text-gray-900">Latest Issue</h2>
+                {latestIssue && (
+                  <p className="text-sm text-indigo-600 font-medium mt-0.5">
+                    Vol. {latestIssue.volume.number} ({latestIssue.volume.year}) — Issue {latestIssue.number}
+                    {latestIssue.title ? ` · ${latestIssue.title}` : ""}
+                  </p>
+                )}
+              </div>
               <Link href="/journal" className="text-sm text-indigo-700 font-semibold hover:underline">View all →</Link>
             </div>
             <div className="space-y-4">
