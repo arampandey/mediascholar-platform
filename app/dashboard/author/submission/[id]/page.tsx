@@ -55,7 +55,7 @@ export default function AuthorSubmissionPage() {
           <div className="text-xs text-gray-400 space-y-1">
             <div>Submitted: {new Date(sub.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</div>
             <div>Language: {sub.language === "hi" ? "Hindi" : "English"}</div>
-            {sub.plagiarismScore !== null && <div>Plagiarism Score: {sub.plagiarismScore}%</div>}
+            {sub.plagiarismScore !== null && <div>Turnitin Similarity Score: {sub.plagiarismScore}%</div>}
             {sub.editorDecision && <div className="mt-2 font-medium">Editor Decision: {sub.editorDecision.replace("_"," ")} {sub.decisionNotes ? `— ${sub.decisionNotes}` : ""}</div>}
           </div>
           <div className="mt-4 flex gap-3">

@@ -27,7 +27,7 @@ const sections = [
   {
     id: "originality",
     title: "Originality & Ethics",
-    content: "Submitted work must be original and not under simultaneous review elsewhere. Papers with more than 20% plagiarism (as detected by plagiarism screening software) will be rejected without review. Media Scholar adheres to COPE (Committee on Publication Ethics) guidelines. Any form of fabrication, falsification, or plagiarism will result in immediate rejection and notification to the author's institution.",
+    content: "Submitted work must be original and not under simultaneous review elsewhere. Papers with more than 20% plagiarism (as detected by Turnitin) will be rejected without review. Media Scholar adheres to COPE (Committee on Publication Ethics) guidelines. Any form of fabrication, falsification, or plagiarism will result in immediate rejection and notification to the author's institution.",
   },
   {
     id: "formatting",

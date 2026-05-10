@@ -97,7 +97,7 @@ export default function AimsAndScopePage() {
             </div>
             <div>
               <h3 className="font-bold text-gray-900 mb-2">Publication Ethics</h3>
-              <p className="leading-relaxed">Media Scholar adheres to COPE (Committee on Publication Ethics) guidelines. Submitted manuscripts must be original, not under simultaneous review elsewhere, and must not exceed 20% similarity as determined by plagiarism screening.</p>
+              <p className="leading-relaxed">Media Scholar adheres to COPE (Committee on Publication Ethics) guidelines. Submitted manuscripts must be original, not under simultaneous review elsewhere, and must not exceed 20% similarity as determined by Turnitin plagiarism screening.</p>
             </div>
             <div>
               <h3 className="font-bold text-gray-900 mb-2">Open Access Policy</h3>
