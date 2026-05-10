@@ -28,6 +28,9 @@ export default function EditorSubmissionPage() {
   const [remarkDraft, setRemarkDraft] = useState("");
   const [zenodoLoading, setZenodoLoading] = useState(false);
   const [zenodoResult, setZenodoResult] = useState<{ success?: boolean; url?: string; doi?: string; error?: string } | null>(null);
+  const [editingAuthorEmail, setEditingAuthorEmail] = useState(false);
+  const [authorEmailDraft, setAuthorEmailDraft] = useState("");
+  const [authorEmailSaving, setAuthorEmailSaving] = useState(false);
 
   function load() {
     fetch(`/api/submissions/${id}`).then(r => r.json()).then(d => setSub(d.submission));
@@ -90,6 +93,52 @@ export default function EditorSubmissionPage() {
           <p className="text-sm text-gray-600 mb-3 leading-relaxed">{sub.abstract}</p>
           <div className="text-xs text-gray-400 space-y-1">
             <div>Author: <span className="text-gray-600 font-medium">{sub.author?.name}</span> {sub.author?.institution ? `— ${sub.author.institution}` : ""}</div>
+            {/* Author email — shown with warning if placeholder */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <span>Email:</span>
+              {editingAuthorEmail ? (
+                <span className="flex items-center gap-1">
+                  <input
+                    type="email"
+                    value={authorEmailDraft}
+                    onChange={e => setAuthorEmailDraft(e.target.value)}
+                    className="border border-gray-300 rounded px-2 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 w-52"
+                    placeholder="real@email.com"
+                    autoFocus
+                  />
+                  <button
+                    disabled={authorEmailSaving}
+                    onClick={async () => {
+                      if (!authorEmailDraft.includes("@")) return;
+                      setAuthorEmailSaving(true);
+                      const res = await fetch(`/api/admin/users/${sub.author.id}`, {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ email: authorEmailDraft.toLowerCase().trim() }),
+                      });
+                      setAuthorEmailSaving(false);
+                      if (res.ok) { setEditingAuthorEmail(false); load(); setMsg("✅ Author email updated"); setTimeout(() => setMsg(""), 4000); }
+                      else setMsg("❌ Failed to update email");
+                    }}
+                    className="text-xs px-2 py-0.5 bg-indigo-700 text-white rounded hover:bg-indigo-800 disabled:opacity-40"
+                  >{authorEmailSaving ? "Saving…" : "Save"}</button>
+                  <button onClick={() => setEditingAuthorEmail(false)} className="text-xs text-gray-400 hover:text-gray-600">Cancel</button>
+                </span>
+              ) : (
+                <span className="flex items-center gap-1">
+                  {sub.author?.email?.includes("@mediascholar.in") ? (
+                    <span className="text-orange-600 font-semibold text-xs">{sub.author.email} ⚠️ placeholder</span>
+                  ) : (
+                    <span className="text-gray-600 text-xs">{sub.author?.email}</span>
+                  )}
+                  <button
+                    onClick={() => { setAuthorEmailDraft(sub.author?.email || ""); setEditingAuthorEmail(true); }}
+                    className="text-xs text-indigo-500 hover:text-indigo-700 ml-1"
+                    title="Edit author email"
+                  >✏️</button>
+                </span>
+              )}
+            </div>
             <div>Language: {sub.language === "hi" ? "Hindi (हिंदी)" : "English"}</div>
             <div>Submitted: {new Date(sub.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</div>
           </div>
