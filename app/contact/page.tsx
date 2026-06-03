@@ -15,7 +15,7 @@ export default function ContactPage() {
         <h1 className="text-3xl font-extrabold text-gray-900 mb-2">Contact Us</h1>
         <p className="text-gray-500 mb-8">Get in touch with the Media Scholar editorial team.</p>
         <div className="grid sm:grid-cols-2 gap-5 mb-8">
-          {[{ icon: "📧", label: "Email", value: "editor@mediascholar.in", href: "mailto:editor@mediascholar.in" }, { icon: "📞", label: "Phone", value: "+91 9911893074", href: "tel:+919911893074" }, { icon: "📍", label: "Address", value: "Galgotias University, Greater Noida, Uttar Pradesh, India", href: null }, { icon: "📰", label: "ISSN", value: "3048-5029", href: null }].map(c => (
+          {[{ icon: "📧", label: "Email", value: "editor@mediascholar.in", href: "mailto:editor@mediascholar.in" }, { icon: "📞", label: "Phone", value: "+91 9911893074", href: "tel:+919911893074" }, { icon: "📍", label: "Address", value: "Guru Jambheshwar University of Science and Technology, Hisar, Haryana", href: null }, { icon: "📰", label: "ISSN", value: "3048-5029", href: null }].map(c => (
             <div key={c.label} className="bg-white rounded-xl border border-gray-200 p-5">
               <div className="text-2xl mb-2">{c.icon}</div>
               <div className="text-sm font-semibold text-gray-500 mb-1">{c.label}</div>
@@ -25,8 +25,9 @@ export default function ContactPage() {
         </div>
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h2 className="font-bold text-gray-900 mb-4">Editor-in-Chief</h2>
-          <p className="font-semibold text-gray-900">A. Ram Pandey, Ph.D.</p>
-          <p className="text-sm text-gray-600">Galgotias University, Greater Noida</p>
+          <p className="font-semibold text-gray-900">Dr. A Ram Pandey</p>
+          <p className="text-sm text-gray-600">Chairperson, Department of Mass Communication</p>
+          <p className="text-sm text-gray-600">Guru Jambheshwar University of Science and Technology, Hisar, Haryana</p>
           <p className="text-sm text-gray-500 mt-1">For editorial queries: <a href="mailto:editor@mediascholar.in" className="text-indigo-700 hover:underline">editor@mediascholar.in</a></p>
         </div>
       </main>

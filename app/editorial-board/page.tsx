@@ -8,10 +8,10 @@ export const metadata: Metadata = {
 };
 
 const EDITOR_IN_CHIEF = {
-  name: "A. Ram Pandey, Ph.D.",
+  name: "Dr. A Ram Pandey",
   role: "Editor",
-  affiliation: "Professor, School of Media and Communication Studies",
-  institution: "Galgotias University, Plot No.2, Sector 17-A Yamuna Expressway, Greater Noida, Uttar Pradesh, India",
+  affiliation: "Chairperson, Department of Mass Communication",
+  institution: "Guru Jambheshwar University of Science and Technology, Hisar, Haryana",
   email: "editor@mediascholar.in",
   profile: "https://www.galgotiasuniversity.edu.in/p/a-ram-pandey",
 };
