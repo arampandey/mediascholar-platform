@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Call for Papers — Vol. 4, Issue 2 (2026) | Media Scholar",
-  description: "Media Scholar invites original research papers for Vol. 4, Issue 2 (2026). Submission deadline: 30 September 2026. Open access, peer-reviewed, bilingual journal. ISSN: 3048-5029.",
+  description: "Media Scholar invites original research papers for Vol. 4, Issue 2 (2026). Submission deadline: 31 October 2026. Open access, peer-reviewed, bilingual journal. ISSN: 3048-5029.",
   alternates: { canonical: "https://mediascholar.in/call-for-papers" },
 };
 
@@ -22,7 +22,7 @@ export default function CallForPapersPage() {
         </p>
         <p className="text-blue-300 text-sm mt-2">Media Scholar — Journal of Media Studies and Humanities | ISSN: 3048-5029</p>
         <div className="mt-6 inline-flex items-center gap-2 bg-red-500 text-white font-bold px-5 py-2.5 rounded-xl text-sm">
-          🗓 Submission Deadline: <span className="underline">30 September 2026</span>
+          🗓 Submission Deadline: <span className="underline">31 October 2026</span>
         </div>
       </div>
 
@@ -42,8 +42,9 @@ export default function CallForPapersPage() {
         {/* Key Details */}
         <div className="grid sm:grid-cols-2 gap-4">
           {[
-            { icon: "📅", label: "Submission Deadline", value: "30 September 2026" },
-            { icon: "📖", label: "Issue", value: "Volume 4, Issue 2 (2026)" },
+            { icon: "📅", label: "Submission Deadline", value: "31 October 2026" },
+            { icon: "📖", label: "Issue", value: "Volume 4, Issue 2 — May–Oct 2026" },
+            { icon: "📆", label: "Submission Window", value: "4 May 2026 – 31 October 2026" },
             { icon: "🌐", label: "Access", value: "Open Access — Free for readers & authors" },
             { icon: "🔍", label: "Review Process", value: "Double-Blind Peer Review" },
             { icon: "🗣", label: "Languages", value: "Hindi & English" },
@@ -140,7 +141,7 @@ export default function CallForPapersPage() {
 
         {/* Important Note */}
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 text-sm text-amber-800">
-          <strong>Important:</strong> The submission deadline is <strong>30 September 2026</strong>. Papers submitted after this date will be considered for the next issue. For queries, contact <a href="mailto:editor@mediascholar.in" className="underline font-semibold">editor@mediascholar.in</a>.
+          <strong>Important:</strong> The submission deadline is <strong>31 October 2026</strong>. Papers submitted after this date (i.e., from 1 November 2026) will be automatically assigned to Vol. 5, Issue 1 (2027). For queries, contact <a href="mailto:editor@mediascholar.in" className="underline font-semibold">editor@mediascholar.in</a>.
         </div>
 
       </main>
