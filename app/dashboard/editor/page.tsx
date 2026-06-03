@@ -65,6 +65,29 @@ export default function EditorDashboard() {
   const [viewMode, setViewMode] = useState<ViewMode>("issue");
   // Start with everything collapsed; open only the running issue after load
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set(["__all__"]));
+  const [applications, setApplications] = useState<any[]>([]);
+  const [appsLoading, setAppsLoading] = useState(false);
+  const [appsLoaded, setAppsLoaded] = useState(false);
+
+  useEffect(() => {
+    // Load pending application count for badge
+    fetch("/api/reviewer-applications").then(r => r.json()).then(d => {
+      setApplications(d.applications || []);
+      setAppsLoaded(true);
+    }).catch(() => setAppsLoaded(true));
+  }, []);
+
+  function loadApplications() {
+    setAppsLoading(true);
+    fetch("/api/reviewer-applications").then(r => r.json()).then(d => {
+      setApplications(d.applications || []);
+    }).finally(() => setAppsLoading(false));
+  }
+
+  async function decideApplication(id: string, status: string) {
+    await fetch(`/api/reviewer-applications/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }) });
+    loadApplications();
+  }
 
   useEffect(() => {
     fetch("/api/submissions/all").then(r => r.json()).then(d => {
@@ -81,6 +104,7 @@ export default function EditorDashboard() {
   }, []);
 
   const counts: Record<string, number> = submissions.reduce((acc: any, s: any) => { acc[s.status] = (acc[s.status]||0)+1; return acc; }, {});
+  const pendingAppsCount = applications.filter(a => a.status === "PENDING").length;
   const issueGroups = groupByIssue(submissions);
 
   function toggleGroup(key: string) {
@@ -117,11 +141,20 @@ export default function EditorDashboard() {
 
         {/* Tabs */}
         <div className="flex gap-2 mb-5 flex-wrap">
-          {(["submissions", "applications", "volumes"] as const).map(t => (
-            <button key={t} onClick={() => setTab(t)} className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${tab === t ? "bg-indigo-700 text-white" : "border border-gray-300 text-gray-600 hover:bg-gray-50"}`}>
-              {t.charAt(0).toUpperCase() + t.slice(1)}
-            </button>
-          ))}
+          <button onClick={() => setTab("submissions")} className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${tab === "submissions" ? "bg-indigo-700 text-white" : "border border-gray-300 text-gray-600 hover:bg-gray-50"}`}>
+            Submissions
+          </button>
+          <button onClick={() => setTab("applications")} className={`relative px-4 py-2 text-sm font-medium rounded-lg transition-colors ${tab === "applications" ? "bg-indigo-700 text-white" : "border border-gray-300 text-gray-600 hover:bg-gray-50"}`}>
+            Reviewer Applications
+            {appsLoaded && pendingAppsCount > 0 && (
+              <span className={`ml-2 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold rounded-full ${tab === "applications" ? "bg-white text-indigo-700" : "bg-red-500 text-white"}`}>
+                {pendingAppsCount}
+              </span>
+            )}
+          </button>
+          <button onClick={() => setTab("volumes")} className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${tab === "volumes" ? "bg-indigo-700 text-white" : "border border-gray-300 text-gray-600 hover:bg-gray-50"}`}>
+            Volumes
+          </button>
         </div>
 
         {tab === "submissions" && (
@@ -187,8 +220,39 @@ export default function EditorDashboard() {
           )
         )}
         {tab === "applications" && (
-          <div className="text-center py-10">
-            <Link href="/dashboard/editor/reviewer-applications" className="px-5 py-2.5 bg-indigo-700 text-white rounded-lg font-semibold hover:bg-indigo-800">Manage Reviewer Applications →</Link>
+          <div>
+            {appsLoading ? (
+              <div className="text-center py-20 text-gray-400">Loading…</div>
+            ) : applications.length === 0 ? (
+              <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
+                <p className="font-semibold text-gray-500">No reviewer applications yet</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {applications.map(a => (
+                  <div key={a.id} className="bg-white rounded-xl border border-gray-200 p-5">
+                    <div className="flex items-start justify-between gap-3 flex-wrap">
+                      <div>
+                        <p className="font-bold text-gray-900">{a.user.name}</p>
+                        <p className="text-sm text-gray-500">{a.user.email} · {a.user.institution || "—"} · {a.user.designation || "—"}</p>
+                        {a.note && <p className="text-sm text-indigo-700 mt-1 font-medium">{a.note}</p>}
+                        <p className="text-xs text-gray-400 mt-1">Applied {new Date(a.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        {a.status === "PENDING" ? (
+                          <div className="flex gap-2">
+                            <button onClick={() => decideApplication(a.id, "APPROVED")} className="px-3 py-1.5 bg-green-600 text-white text-sm rounded-lg font-semibold hover:bg-green-700">✓ Approve</button>
+                            <button onClick={() => decideApplication(a.id, "REJECTED")} className="px-3 py-1.5 bg-red-500 text-white text-sm rounded-lg font-semibold hover:bg-red-600">✗ Reject</button>
+                          </div>
+                        ) : (
+                          <span className={`text-sm font-bold px-3 py-1 rounded-full ${a.status === "APPROVED" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>{a.status}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
         {tab === "volumes" && (
