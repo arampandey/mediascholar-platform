@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
-import { sendEmailVerification } from "@/lib/email";
+import { sendEmailVerification, sendReviewerApplicationAck } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
-  const { name, email, password, institution, designation, mobile, role: requestedRole } = await req.json();
+  const { name, email, password, institution, designation, mobile, role: requestedRole, expertise, isReviewerApplication } = await req.json();
 
   if (!name || !email || !password) {
     return NextResponse.json({ error: "Name, email and password are required" }, { status: 400 });
@@ -38,6 +38,16 @@ export async function POST(req: NextRequest) {
       verifyToken,
     },
   });
+
+  // If registering as a reviewer applicant, create the application immediately
+  if (isReviewerApplication) {
+    const note = expertise ? `Area of Expertise: ${expertise}` : undefined;
+    await prisma.reviewerApplication.create({
+      data: { userId: user.id, note: note || null },
+    });
+    // Send acknowledgement email to the applicant
+    await sendReviewerApplicationAck(email.toLowerCase(), name);
+  }
 
   // Send verification email
   const verifyUrl = `${process.env.NEXTAUTH_URL}/api/auth/verify-email?token=${verifyToken}`;

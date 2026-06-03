@@ -34,6 +34,8 @@ export default function ReviewerRegisterPage() {
         name: form.name, email: form.email, password: form.password,
         institution: form.institution, designation: form.designation,
         mobile: form.mobile || undefined,
+        expertise: form.expertise || undefined,
+        isReviewerApplication: true,
       }),
     });
     const data = await res.json();
@@ -46,9 +48,7 @@ export default function ReviewerRegisterPage() {
       setLoading(false); return;
     }
 
-    // Step 2: Auto-submit reviewer application
-    // (Will be processed after email verification and login)
-    router.push(`/verify-email?email=${encodeURIComponent(form.email)}&reviewer=true`);
+    router.push(`/verify-email?email=${encodeURIComponent(form.email)}`);
   }
 
   return (
