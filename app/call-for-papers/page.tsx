@@ -48,7 +48,7 @@ export default function CallForPapersPage() {
           <div className="space-y-2 mb-5">
             {[
               "Register as an author at mediascholar.in/register",
-              "Log in and click "Submit New Paper"",
+              "Log in and click \u2018Submit New Paper\u2019",
               "Fill in details and upload your manuscript (PDF or Word)",
               "You'll receive a confirmation email on submission",
             ].map((step, i) => (
