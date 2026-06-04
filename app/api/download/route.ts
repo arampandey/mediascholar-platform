@@ -3,6 +3,13 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { v2 as cloudinary } from "cloudinary";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -30,9 +37,24 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const upstream = await fetch(fileUrl, {
-      headers: { Accept: "application/pdf, application/octet-stream, */*" },
-    });
+    // For Cloudinary raw files the free plan blocks unauthenticated CDN delivery.
+    // Use Basic-auth with the API key/secret so the request is always authorised.
+    const fetchHeaders: Record<string, string> = {
+      Accept: "application/pdf, application/octet-stream, */*",
+    };
+
+    if (
+      fileUrl.includes("cloudinary.com") &&
+      process.env.CLOUDINARY_API_KEY &&
+      process.env.CLOUDINARY_API_SECRET
+    ) {
+      const creds = Buffer.from(
+        `${process.env.CLOUDINARY_API_KEY}:${process.env.CLOUDINARY_API_SECRET}`
+      ).toString("base64");
+      fetchHeaders["Authorization"] = `Basic ${creds}`;
+    }
+
+    const upstream = await fetch(fileUrl, { headers: fetchHeaders });
 
     if (!upstream.ok) {
       console.error(`[download] upstream ${upstream.status} for ${fileUrl}`);
