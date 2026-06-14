@@ -13,16 +13,23 @@ export async function GET(req: NextRequest) {
   if (!publicId) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
   try {
-    // Generate a signed delivery URL using the SDK — signed URLs bypass CDN
-    // delivery restrictions on free plans (no Basic auth hack needed).
-    const signedUrl = cloudinary.url(publicId, {
-      resource_type: "raw",
-      type: "upload",
-      sign_url: true,
-      secure: true,
-    });
+    // Use Cloudinary Admin API download endpoint with SHA1 signature —
+    // bypasses CDN delivery restrictions on free plans.
+    const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+    const apiKey    = process.env.CLOUDINARY_API_KEY;
+    const apiSecret = process.env.CLOUDINARY_API_SECRET;
+    let downloadUrl: string;
+    if (cloudName && apiKey && apiSecret) {
+      const timestamp = String(Math.floor(Date.now() / 1000));
+      const paramsToSign: Record<string, string> = { public_id: publicId, timestamp, type: "upload" };
+      const signature = cloudinary.utils.api_sign_request(paramsToSign, apiSecret);
+      const qs = new URLSearchParams({ public_id: publicId, type: "upload", timestamp, api_key: apiKey, signature });
+      downloadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/raw/download?${qs}`;
+    } else {
+      downloadUrl = cloudinary.url(publicId, { resource_type: "raw", secure: true });
+    }
 
-    const response = await fetch(signedUrl);
+    const response = await fetch(downloadUrl, { redirect: "follow" });
 
     if (!response.ok) {
       return NextResponse.json({ error: "File not found" }, { status: 404 });

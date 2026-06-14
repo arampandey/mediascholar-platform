@@ -46,17 +46,20 @@ export async function GET(
   }
 
   try {
-    // For Cloudinary raw files, generate a signed URL to bypass free-plan CDN restrictions.
+    // For Cloudinary raw files, use Admin API download endpoint (SHA1 signature)
+    // to bypass free-plan CDN delivery restrictions.
     if (fileUrl.includes("cloudinary.com")) {
+      const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+      const apiKey    = process.env.CLOUDINARY_API_KEY;
+      const apiSecret = process.env.CLOUDINARY_API_SECRET;
       const publicIdMatch = fileUrl.match(/\/raw\/upload\/(?:v\d+\/)?(.+)$/);
       const publicId = publicIdMatch?.[1];
-      if (publicId) {
-        fileUrl = cloudinary.url(publicId, {
-          resource_type: "raw",
-          type: "upload",
-          sign_url: true,
-          secure: true,
-        });
+      if (publicId && cloudName && apiKey && apiSecret) {
+        const timestamp = String(Math.floor(Date.now() / 1000));
+        const paramsToSign: Record<string, string> = { public_id: publicId, timestamp, type: "upload" };
+        const signature = cloudinary.utils.api_sign_request(paramsToSign, apiSecret);
+        const qs = new URLSearchParams({ public_id: publicId, type: "upload", timestamp, api_key: apiKey, signature });
+        fileUrl = `https://api.cloudinary.com/v1_1/${cloudName}/raw/download?${qs}`;
       }
     }
 
