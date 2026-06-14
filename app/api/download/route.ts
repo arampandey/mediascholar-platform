@@ -38,23 +38,26 @@ export async function GET(req: NextRequest) {
 
   try {
     // For Cloudinary raw files the free plan blocks unauthenticated CDN delivery.
-    // Use Basic-auth with the API key/secret so the request is always authorised.
-    const fetchHeaders: Record<string, string> = {
-      Accept: "application/pdf, application/octet-stream, */*",
-    };
-
-    if (
-      fileUrl.includes("cloudinary.com") &&
-      process.env.CLOUDINARY_API_KEY &&
-      process.env.CLOUDINARY_API_SECRET
-    ) {
-      const creds = Buffer.from(
-        `${process.env.CLOUDINARY_API_KEY}:${process.env.CLOUDINARY_API_SECRET}`
-      ).toString("base64");
-      fetchHeaders["Authorization"] = `Basic ${creds}`;
+    // Use the Cloudinary SDK to generate a signed URL — signed URLs bypass CDN
+    // delivery restrictions regardless of plan, because they carry a cryptographic
+    // signature verified by Cloudinary's origin servers.
+    if (fileUrl.includes("cloudinary.com")) {
+      // Extract public_id from URL: …/raw/upload/(v\d+/)?{public_id}
+      const publicIdMatch = fileUrl.match(/\/raw\/upload\/(?:v\d+\/)?(.+)$/);
+      const publicId = publicIdMatch?.[1];
+      if (publicId) {
+        fileUrl = cloudinary.url(publicId, {
+          resource_type: "raw",
+          type: "upload",
+          sign_url: true,
+          secure: true,
+        });
+      }
     }
 
-    const upstream = await fetch(fileUrl, { headers: fetchHeaders });
+    const upstream = await fetch(fileUrl, {
+      headers: { Accept: "application/pdf, application/octet-stream, */*" },
+    });
 
     if (!upstream.ok) {
       console.error(`[download] upstream ${upstream.status} for ${fileUrl}`);

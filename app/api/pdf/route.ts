@@ -13,21 +13,16 @@ export async function GET(req: NextRequest) {
   if (!publicId) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
   try {
-    // Generate authenticated URL using admin API
-    const result = await (cloudinary as any).api.resource(publicId, {
+    // Generate a signed delivery URL using the SDK — signed URLs bypass CDN
+    // delivery restrictions on free plans (no Basic auth hack needed).
+    const signedUrl = cloudinary.url(publicId, {
       resource_type: "raw",
       type: "upload",
+      sign_url: true,
+      secure: true,
     });
 
-    // Fetch the file from Cloudinary with API auth and stream it
-    const authHeader = Buffer.from(
-      `${process.env.CLOUDINARY_API_KEY}:${process.env.CLOUDINARY_API_SECRET}`
-    ).toString("base64");
-
-    const fetchUrl = result.secure_url;
-    const response = await fetch(fetchUrl, {
-      headers: { Authorization: `Basic ${authHeader}` },
-    });
+    const response = await fetch(signedUrl);
 
     if (!response.ok) {
       return NextResponse.json({ error: "File not found" }, { status: 404 });

@@ -11,6 +11,13 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { v2 as cloudinary } from "cloudinary";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export async function GET(
   _req: NextRequest,
@@ -39,6 +46,20 @@ export async function GET(
   }
 
   try {
+    // For Cloudinary raw files, generate a signed URL to bypass free-plan CDN restrictions.
+    if (fileUrl.includes("cloudinary.com")) {
+      const publicIdMatch = fileUrl.match(/\/raw\/upload\/(?:v\d+\/)?(.+)$/);
+      const publicId = publicIdMatch?.[1];
+      if (publicId) {
+        fileUrl = cloudinary.url(publicId, {
+          resource_type: "raw",
+          type: "upload",
+          sign_url: true,
+          secure: true,
+        });
+      }
+    }
+
     const upstream = await fetch(fileUrl, {
       headers: { Accept: "application/pdf, application/octet-stream, */*" },
     });
