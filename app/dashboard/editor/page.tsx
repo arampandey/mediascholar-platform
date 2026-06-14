@@ -6,6 +6,24 @@ import Link from "next/link";
 
 type ViewMode = "flat" | "issue";
 
+const STATUS_LABELS: Record<string, string> = {
+  SUBMITTED: "Submitted",
+  PLAGIARISM_CHECK: "Plagiarism Check",
+  UNDER_REVIEW: "Under Review",
+  REVISION_REQUESTED: "Revision Requested",
+  RESUBMITTED: "Resubmitted",
+  ACCEPTED: "Accepted",
+  REJECTED: "Rejected",
+  PUBLISHED: "Published",
+};
+
+const DECISION_LABELS: Record<string, string> = {
+  ACCEPT: "Accept",
+  MINOR_REVISION: "Minor Revision",
+  MAJOR_REVISION: "Major Revision",
+  REJECT: "Reject",
+};
+
 function groupByIssue(submissions: any[]) {
   const groups: Record<string, { label: string; issueId: string | null; items: any[] }> = {};
   for (const s of submissions) {
@@ -61,7 +79,12 @@ function SubmissionsTable({ items }: { items: any[] }) {
 export default function EditorDashboard() {
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"submissions"|"applications"|"volumes">("submissions");
+  const [tab, setTab] = useState<"submissions"|"applications"|"volumes"|"report">("submissions");
+  // Report tab state
+  const [volumes, setVolumes] = useState<any[]>([]);
+  const [selectedIssueId, setSelectedIssueId] = useState("");
+  const [report, setReport] = useState<any[]>([]);
+  const [reportLoading, setReportLoading] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("issue");
   // Start with everything collapsed; open only the running issue after load
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set(["__all__"]));
@@ -88,6 +111,21 @@ export default function EditorDashboard() {
     await fetch(`/api/reviewer-applications/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }) });
     loadApplications();
   }
+
+  // Load volumes for the report issue selector
+  useEffect(() => {
+    fetch("/api/volumes").then(r => r.json()).then(d => setVolumes(d.volumes || []));
+  }, []);
+
+  // Fetch report when an issue is selected
+  useEffect(() => {
+    if (!selectedIssueId) { setReport([]); return; }
+    setReportLoading(true);
+    fetch(`/api/report/issue?issueId=${selectedIssueId}`)
+      .then(r => r.json())
+      .then(d => setReport(d.report || []))
+      .finally(() => setReportLoading(false));
+  }, [selectedIssueId]);
 
   useEffect(() => {
     fetch("/api/submissions/all").then(r => r.json()).then(d => {
@@ -154,6 +192,9 @@ export default function EditorDashboard() {
           </button>
           <button onClick={() => setTab("volumes")} className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${tab === "volumes" ? "bg-indigo-700 text-white" : "border border-gray-300 text-gray-600 hover:bg-gray-50"}`}>
             Volumes
+          </button>
+          <button onClick={() => setTab("report")} className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${tab === "report" ? "bg-indigo-700 text-white" : "border border-gray-300 text-gray-600 hover:bg-gray-50"}`}>
+            📋 Report
           </button>
         </div>
 
@@ -258,6 +299,114 @@ export default function EditorDashboard() {
         {tab === "volumes" && (
           <div className="text-center py-10">
             <Link href="/dashboard/editor/volumes" className="px-5 py-2.5 bg-indigo-700 text-white rounded-lg font-semibold hover:bg-indigo-800">Manage Volumes & Issues →</Link>
+          </div>
+        )}
+
+        {tab === "report" && (
+          <div className="space-y-5">
+            {/* Issue selector */}
+            <div className="bg-white rounded-xl border border-gray-200 p-5">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Select Issue</label>
+              <select
+                value={selectedIssueId}
+                onChange={e => setSelectedIssueId(e.target.value)}
+                className="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 min-w-[280px]"
+              >
+                <option value="">— Choose an issue —</option>
+                {volumes.flatMap(v =>
+                  (v.issues || []).map((iss: any) => (
+                    <option key={iss.id} value={iss.id}>
+                      Vol. {v.number} ({v.year}) — Issue {iss.number}{iss.title ? `: ${iss.title}` : ""}
+                    </option>
+                  ))
+                )}
+              </select>
+            </div>
+
+            {/* Report table */}
+            {!selectedIssueId && (
+              <div className="text-center py-16 text-gray-400 text-sm">Select an issue above to generate the report.</div>
+            )}
+
+            {selectedIssueId && reportLoading && (
+              <div className="text-center py-16 text-gray-400">Loading report…</div>
+            )}
+
+            {selectedIssueId && !reportLoading && report.length === 0 && (
+              <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
+                <p className="font-semibold text-gray-500">No papers found for this issue.</p>
+              </div>
+            )}
+
+            {selectedIssueId && !reportLoading && report.length > 0 && (
+              <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
+                <table className="w-full text-sm min-w-[720px]">
+                  <thead>
+                    <tr className="bg-gray-50 border-b border-gray-200 text-left">
+                      <th className="px-4 py-3 font-semibold text-gray-600 w-8">#</th>
+                      <th className="px-4 py-3 font-semibold text-gray-600">Paper Title</th>
+                      <th className="px-4 py-3 font-semibold text-gray-600">Author(s)</th>
+                      <th className="px-4 py-3 font-semibold text-gray-600">Paper Status</th>
+                      <th className="px-4 py-3 font-semibold text-gray-600">Assigned Reviewers</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {report.map((paper: any, idx: number) => {
+                      const allAuthors = [
+                        paper.author?.name,
+                        ...(paper.coAuthors || []),
+                      ].filter(Boolean).join(", ");
+                      return (
+                        <tr key={paper.id} className="hover:bg-gray-50 align-top">
+                          <td className="px-4 py-3 text-gray-400 text-xs">{idx + 1}</td>
+                          <td className="px-4 py-3 font-medium text-gray-900 max-w-[240px]">
+                            <Link href={`/dashboard/editor/submission/${paper.id}`} className="hover:text-indigo-700 hover:underline">
+                              {paper.title}
+                            </Link>
+                          </td>
+                          <td className="px-4 py-3 text-gray-600 text-xs max-w-[160px]">{allAuthors}</td>
+                          <td className="px-4 py-3">
+                            <StatusBadge status={paper.status} />
+                          </td>
+                          <td className="px-4 py-3">
+                            {paper.reviewers.length === 0 ? (
+                              <span className="text-xs text-gray-400 italic">Not assigned</span>
+                            ) : (
+                              <div className="space-y-1.5">
+                                {paper.reviewers.map((r: any, ri: number) => {
+                                  let badge = "";
+                                  let badgeClass = "";
+                                  if (r.declinedAt) {
+                                    badge = "❌ Declined";
+                                    badgeClass = "bg-red-50 text-red-600 border-red-200";
+                                  } else if (r.reviewSubmittedAt) {
+                                    const dec = r.reviewDecision ? ` · ${DECISION_LABELS[r.reviewDecision] || r.reviewDecision}` : "";
+                                    badge = `✅ Submitted${dec}`;
+                                    badgeClass = "bg-green-50 text-green-700 border-green-200";
+                                  } else {
+                                    badge = "⏳ Pending";
+                                    badgeClass = "bg-yellow-50 text-yellow-700 border-yellow-200";
+                                  }
+                                  return (
+                                    <div key={ri} className="flex items-center gap-2">
+                                      <span className="text-xs text-gray-700 font-medium min-w-0">{r.name}</span>
+                                      <span className={`text-xs px-2 py-0.5 rounded-full border font-medium whitespace-nowrap ${badgeClass}`}>{badge}</span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+                <div className="px-4 py-3 border-t border-gray-100 text-xs text-gray-400">
+                  {report.length} paper{report.length !== 1 ? "s" : ""} in this issue
+                </div>
+              </div>
+            )}
           </div>
         )}
       </main>
