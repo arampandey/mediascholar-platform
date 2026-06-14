@@ -369,7 +369,9 @@ export default function EditorDashboard() {
                             <StatusBadge status={paper.status} />
                           </td>
                           <td className="px-4 py-3">
-                            {paper.reviewers.length === 0 ? (
+                            {paper.status === "PUBLISHED" ? (
+                              <span className="text-xs px-2 py-0.5 rounded-full border font-medium bg-emerald-50 text-emerald-700 border-emerald-200">✅ Reviewed</span>
+                            ) : paper.reviewers.length === 0 ? (
                               <span className="text-xs text-gray-400 italic">Not assigned</span>
                             ) : (
                               <div className="space-y-1.5">
