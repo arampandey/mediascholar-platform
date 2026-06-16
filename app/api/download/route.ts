@@ -72,30 +72,28 @@ export async function GET(req: NextRequest) {
 
     const body = await upstream.arrayBuffer();
 
-    // Detect file type from URL extension or upstream Content-Type
+    // Detect file type by inspecting the actual file magic bytes — URL extension alone is
+    // unreliable because many files are stored without extension on Cloudinary.
+    const magic = new Uint8Array(body.slice(0, 4));
+    const isPDF  = magic[0] === 0x25 && magic[1] === 0x50 && magic[2] === 0x44 && magic[3] === 0x46; // %PDF
+    const isDOCX = magic[0] === 0x50 && magic[1] === 0x4B; // PK… (ZIP-based Office format)
+
     const urlLower = submission.fileUrl.toLowerCase();
-    let contentType = "application/octet-stream";
-    let fileExt = "pdf";
-    if (urlLower.endsWith(".docx")) {
+    let contentType: string;
+    let fileExt: string;
+    if (isDOCX || urlLower.endsWith(".docx")) {
       contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
       fileExt = "docx";
     } else if (urlLower.endsWith(".doc")) {
       contentType = "application/msword";
       fileExt = "doc";
+    } else if (isPDF || urlLower.endsWith(".pdf") || !urlLower.split("/").pop()?.includes(".")) {
+      // Default to PDF: explicit .pdf extension OR no extension (old uploads are all PDFs)
+      contentType = "application/pdf";
+      fileExt = "pdf";
     } else {
-      // Default to PDF (most common) or use upstream content-type
-      const upstreamType = upstream.headers.get("content-type");
-      if (upstreamType && upstreamType.includes("pdf")) {
-        contentType = "application/pdf";
-        fileExt = "pdf";
-      } else if (upstreamType && upstreamType.includes("wordprocessingml")) {
-        contentType = upstreamType;
-        fileExt = "docx";
-      } else {
-        // Fall back to PDF for files without extension (most are PDFs)
-        contentType = "application/pdf";
-        fileExt = "pdf";
-      }
+      contentType = "application/octet-stream";
+      fileExt = "bin";
     }
 
     // Safe filename derived from title or URL
@@ -104,7 +102,7 @@ export async function GET(req: NextRequest) {
       .replace(/[^a-z0-9]+/g, "-")
       .slice(0, 80);
 
-    // Use 'attachment' for non-PDF files so the browser downloads rather than trying to display
+    // Force download (attachment) for non-PDF files — browsers can't display DOCX inline
     const disposition = fileExt === "pdf" ? "inline" : "attachment";
 
     return new NextResponse(body, {
