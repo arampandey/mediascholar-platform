@@ -72,17 +72,46 @@ export async function GET(req: NextRequest) {
 
     const body = await upstream.arrayBuffer();
 
+    // Detect file type from URL extension or upstream Content-Type
+    const urlLower = submission.fileUrl.toLowerCase();
+    let contentType = "application/octet-stream";
+    let fileExt = "pdf";
+    if (urlLower.endsWith(".docx")) {
+      contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+      fileExt = "docx";
+    } else if (urlLower.endsWith(".doc")) {
+      contentType = "application/msword";
+      fileExt = "doc";
+    } else {
+      // Default to PDF (most common) or use upstream content-type
+      const upstreamType = upstream.headers.get("content-type");
+      if (upstreamType && upstreamType.includes("pdf")) {
+        contentType = "application/pdf";
+        fileExt = "pdf";
+      } else if (upstreamType && upstreamType.includes("wordprocessingml")) {
+        contentType = upstreamType;
+        fileExt = "docx";
+      } else {
+        // Fall back to PDF for files without extension (most are PDFs)
+        contentType = "application/pdf";
+        fileExt = "pdf";
+      }
+    }
+
     // Safe filename derived from title or URL
     const slug = (submission.title || submissionId)
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .slice(0, 80);
 
+    // Use 'attachment' for non-PDF files so the browser downloads rather than trying to display
+    const disposition = fileExt === "pdf" ? "inline" : "attachment";
+
     return new NextResponse(body, {
       status: 200,
       headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `inline; filename="${slug}.pdf"`,
+        "Content-Type": contentType,
+        "Content-Disposition": `${disposition}; filename="${slug}.${fileExt}"`,
         // public so Google Scholar / Googlebot can access and cache
         "Cache-Control": "public, max-age=86400, stale-while-revalidate=3600",
         "X-Robots-Tag": "index",
