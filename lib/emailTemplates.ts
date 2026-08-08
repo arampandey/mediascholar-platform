@@ -16,11 +16,13 @@ export const DEFAULT_TEMPLATES: {
 <p {{P}}>Thank you for submitting your manuscript to <em>{{JOURNAL}}</em>. We confirm receipt of your submission and will notify you as the editorial process progresses.</p>
 <div {{BOX}}>
   <p style="margin:0 0 6px;font-size:13px;color:#4a5568;"><strong>Manuscript Title:</strong></p>
-  <p style="margin:0;font-size:14px;color:#1a202c;">{{title}}</p>
+  <p style="margin:0 0 10px;font-size:14px;color:#1a202c;">{{title}}</p>
+  {{#if issueLabel}}<p style="margin:0;font-size:13px;color:#4a5568;"><strong>Tentatively Scheduled For:</strong> {{issueLabel}}</p>{{/if}}
 </div>
+{{#if issueLabel}}<p {{P}}>Note: your manuscript has been provisionally slotted into the issue above based on your submission date. This may change depending on the outcome of peer review and the editorial timeline.</p>{{/if}}
 <p {{P}}>If you have any queries, please write to us at <a href="mailto:{{EMAIL}}" style="color:#1a2744;">{{EMAIL}}</a>.</p>
 <p {{SIGN}}>Yours sincerely,<br><strong>Editorial Team</strong><br>{{JOURNAL}}</p>`,
-    variables: ["authorName", "title"],
+    variables: ["authorName", "title", "issueLabel"],
   },
   {
     key: "new_submission_editor",
@@ -240,6 +242,24 @@ export const DEFAULT_TEMPLATES: {
 <p {{P}}>For any queries, please write to us at <a href="mailto:{{EMAIL}}" style="color:#1a2744;">{{EMAIL}}</a>.</p>
 <p {{SIGN}}>Yours sincerely,<br><strong>Prof. (Dr.) A. Ram Pandey</strong><br>Editor-in-Chief<br>{{JOURNAL}}</p>`,
     variables: ["authorName", "title", "decisionText", "notes"],
+  },
+  {
+    key: "paper_published",
+    label: "Manuscript Published (to Author)",
+    subject: "Your Paper Is Now Published — {{title}}",
+    body: `<p {{P}}>Dear <strong>{{authorName}}</strong>,</p>
+<p {{P}}>Congratulations! Your manuscript has been published in <em>{{JOURNAL}}</em>.</p>
+<div {{BOX}}>
+  <p style="margin:0 0 6px;font-size:13px;color:#4a5568;"><strong>Manuscript Title:</strong></p>
+  <p style="margin:0 0 10px;font-size:14px;color:#1a202c;">{{title}}</p>
+  <p style="margin:0 0 6px;font-size:13px;color:#4a5568;"><strong>Published In:</strong> {{issueLabel}}</p>
+  {{#if doi}}<p style="margin:8px 0 0;font-size:13px;color:#4a5568;"><strong>DOI:</strong> <span style="font-family:monospace;">{{doi}}</span></p>{{/if}}
+</div>
+<p {{P}}>You can view and share your published paper here:</p>
+<p {{P}}><a href="{{paperUrl}}" style="color:#1a2744;font-weight:bold;">{{paperUrl}}</a></p>
+<p {{P}}>Thank you for choosing {{JOURNAL}} for your research. We look forward to your future contributions.</p>
+<p {{SIGN}}>Yours sincerely,<br><strong>Prof. (Dr.) A. Ram Pandey</strong><br>Editor-in-Chief<br>{{JOURNAL}}</p>`,
+    variables: ["authorName", "title", "issueLabel", "doi", "paperUrl"],
   },
   {
     key: "revision_request",

@@ -107,8 +107,12 @@ async function sendTemplate(to: string, key: string, vars: Record<string, string
   await sendRaw(to, subject, wrap(body));
 }
 
-export async function sendSubmissionConfirmation(to: string, authorName: string, title: string) {
-  await sendTemplate(to, "submission_confirmation", { authorName, title });
+export async function sendSubmissionConfirmation(to: string, authorName: string, title: string, issueLabel?: string) {
+  await sendTemplate(to, "submission_confirmation", { authorName, title, issueLabel: issueLabel || "" });
+}
+
+export async function sendPaperPublished(to: string, authorName: string, title: string, issueLabel: string, doi: string | null, paperUrl: string) {
+  await sendTemplate(to, "paper_published", { authorName, title, issueLabel, doi: doi || "", paperUrl });
 }
 
 export async function sendNewSubmissionEditor(editorEmail: string, authorName: string, authorEmail: string, title: string) {

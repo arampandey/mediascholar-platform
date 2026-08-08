@@ -129,12 +129,17 @@ export async function POST(req: NextRequest) {
     // Save submission to DB
     const submission = await prisma.submission.create({
       data: { title, abstract, keywords, language, fileUrl, coAuthors, authorId: userId, issueId: autoIssueId },
+      include: { issue: { include: { volume: true } } },
     });
 
-    // Send confirmation email to author
+    // Send confirmation email to author — include the auto-assigned Volume/Issue so
+    // authors submitting close to a deadline see immediately which issue they landed in
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (user) {
-      await sendSubmissionConfirmation(user.email, user.name, title);
+      const issueLabel = submission.issue
+        ? `Vol. ${submission.issue.volume.number} (${submission.issue.volume.year}), ${submission.issue.title || `Issue ${submission.issue.number}`}`
+        : undefined;
+      await sendSubmissionConfirmation(user.email, user.name, title, issueLabel);
     }
 
     return NextResponse.json({ submission });

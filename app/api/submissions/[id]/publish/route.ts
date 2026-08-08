@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { depositToZenodo } from "@/lib/zenodo";
+import { sendPaperPublished } from "@/lib/email";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
@@ -16,10 +17,19 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     where: { id },
     data: { status: "PUBLISHED", publishedAt: new Date(), issueId, doi },
     include: {
-      author: { select: { name: true } },
+      author: { select: { name: true, email: true } },
       issue: { include: { volume: true } },
     },
   });
+
+  // 📧 Notify the author their paper is now live, with the correct Volume/Issue/DOI
+  if (submission.author?.email && submission.issue) {
+    const issueLabel = `Vol. ${submission.issue.volume.number} (${submission.issue.volume.year}), ${submission.issue.title || `Issue ${submission.issue.number}`}`;
+    const paperUrl = `https://mediascholar.in/paper/${submission.id}`;
+    void sendPaperPublished(submission.author.email, submission.author.name, submission.title, issueLabel, doi || null, paperUrl).catch((e) =>
+      console.error("[email] paper_published send failed:", e)
+    );
+  }
 
   // 🗄️ Auto Zenodo archive (fires in background — won't block publish)
   const baseUrl = (process.env.NEXTAUTH_URL || "https://mediascholar.in").trim();
