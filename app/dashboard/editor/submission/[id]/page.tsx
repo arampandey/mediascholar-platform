@@ -442,6 +442,35 @@ export default function EditorSubmissionPage() {
           )}
         </div>
 
+        {/* ── REVISION HISTORY (author resubmissions) ── */}
+        {sub.revisions && sub.revisions.length > 0 && (
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-lg">📜</span>
+              <h2 className="font-bold text-gray-900">Revision History</h2>
+              <span className="text-xs text-gray-400">({sub.revisions.length} resubmission{sub.revisions.length > 1 ? "s" : ""})</span>
+            </div>
+            <div className="space-y-3">
+              {sub.revisions.map((rev: any, idx: number) => (
+                <div key={rev.id} className="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                  <div className="flex items-center justify-between gap-2 mb-1.5 flex-wrap">
+                    <span className="text-xs font-semibold text-gray-700">
+                      Round {sub.revisions.length - idx} — Resubmitted {new Date(rev.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                    <a href={rev.fileUrl} target="_blank" rel="noopener noreferrer"
+                      className="text-xs text-indigo-700 hover:underline font-medium">📄 View this version</a>
+                  </div>
+                  {rev.notes ? (
+                    <p className="text-sm text-gray-700 whitespace-pre-wrap">{rev.notes}</p>
+                  ) : (
+                    <p className="text-xs text-gray-400 italic">No notes provided by author for this resubmission.</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* ── STEP 4: REQUEST REVISION ── */}
         <div className={`rounded-xl border p-5 transition-opacity ${!plagPassed ? "opacity-40 pointer-events-none" : "bg-white border-gray-200"}`}>
           <div className="flex items-center gap-2 mb-3">
