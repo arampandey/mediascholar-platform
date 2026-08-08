@@ -17,6 +17,7 @@ async function getPaper(id: string) {
         author: { select: { id: true, name: true, institution: true, email: true } },
         issue: { include: { volume: true } },
       },
+      // coAuthors is a scalar field — included automatically
       // zenodoUrl is a scalar field — included automatically
     });
   } catch { return null; }
@@ -138,6 +139,12 @@ export default async function PaperPage({ params }: { params: Promise<{ id: stri
     citations,
     pageUrl,
     zenodoUrl: paper.zenodoUrl || null,
+    zenodoDoi: paper.zenodoDoi || null,
+    // Best-effort file type from URL extension (actual detection happens in /pdfs/ route)
+    fileType: (paper.fileUrl || "").toLowerCase().endsWith(".docx") ? "docx"
+            : (paper.fileUrl || "").toLowerCase().endsWith(".doc")  ? "doc"
+            : "pdf",
+    coAuthors: (paper.coAuthors as string[]) || [],
   };
 
   return (

@@ -122,6 +122,16 @@ export default function ReviewerDashboard() {
                   </div>
                   <div className="flex items-center gap-2 shrink-0 flex-wrap">
                     <StatusBadge status={a.submission.status} />
+                    {a.submission.fileUrl && (
+                      <a
+                        href={`/api/download?id=${a.submissionId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-1.5 border border-indigo-200 text-indigo-700 text-xs font-semibold rounded-lg hover:bg-indigo-50"
+                      >
+                        📄 Download
+                      </a>
+                    )}
                     <Link
                       href={`/dashboard/reviewer/${a.submissionId}`}
                       className="px-3 py-1.5 bg-indigo-700 text-white text-xs font-semibold rounded-lg hover:bg-indigo-800"

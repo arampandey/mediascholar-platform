@@ -74,6 +74,34 @@ export async function GET(
 
     const body = await upstream.arrayBuffer();
 
+    // Detect actual file type from magic bytes — fileUrl extension is unreliable
+    const magic = new Uint8Array(body.slice(0, 4));
+    const isPDF  = magic[0] === 0x25 && magic[1] === 0x50 && magic[2] === 0x44 && magic[3] === 0x46; // %PDF
+    const isDOCX = magic[0] === 0x50 && magic[1] === 0x4B; // PK (ZIP-based Office format)
+
+    const urlLower = (paper.fileUrl || "").toLowerCase();
+    let contentType: string;
+    let fileExt: string;
+    let disposition: string;
+
+    if (isDOCX || urlLower.endsWith(".docx")) {
+      contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+      fileExt = "docx";
+      disposition = "attachment"; // browsers can't render DOCX inline
+    } else if (urlLower.endsWith(".doc")) {
+      contentType = "application/msword";
+      fileExt = "doc";
+      disposition = "attachment";
+    } else if (isPDF || urlLower.endsWith(".pdf") || !urlLower.split("/").pop()?.includes(".")) {
+      contentType = "application/pdf";
+      fileExt = "pdf";
+      disposition = "inline";
+    } else {
+      contentType = "application/octet-stream";
+      fileExt = "bin";
+      disposition = "attachment";
+    }
+
     const slug_clean = (paper.title || paperId)
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
@@ -82,8 +110,8 @@ export async function GET(
     return new NextResponse(body, {
       status: 200,
       headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `inline; filename="${slug_clean}.pdf"`,
+        "Content-Type": contentType,
+        "Content-Disposition": `${disposition}; filename="${slug_clean}.${fileExt}"`,
         // Public caching — Google Scholar and Googlebot must be able to access this
         "Cache-Control": "public, max-age=86400, stale-while-revalidate=3600",
         "X-Robots-Tag": "index",

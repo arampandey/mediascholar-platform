@@ -47,14 +47,18 @@ export async function POST(
 
   if (!result) {
     return NextResponse.json(
-      { error: "Zenodo deposit failed — check server logs or ZENODO_TOKEN env var" },
+      { error: "Zenodo deposit failed — check server logs or ZENODO_TOKEN env var", debug: { hasToken: !!process.env.ZENODO_TOKEN, hasFile: !!submission.fileUrl, submissionId: id } },
       { status: 500 }
     );
   }
 
   await prisma.submission.update({
     where: { id },
-    data: { zenodoRecordId: result.recordId, zenodoUrl: result.url },
+    data: {
+      zenodoRecordId: result.recordId,
+      zenodoUrl: result.url,
+      zenodoDoi: result.doi || null,
+    },
   });
 
   return NextResponse.json({ success: true, ...result });

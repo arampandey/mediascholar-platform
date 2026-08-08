@@ -72,6 +72,8 @@ async function getTemplate(key: string): Promise<{ subject: string; body: string
 function interpolate(str: string, vars: Record<string, string>): string {
   // Replace style placeholders
   str = str.replace(/\{\{P\}\}/g, P).replace(/\{\{BOX\}\}/g, BOX).replace(/\{\{SIGN\}\}/g, SIGN).replace(/\{\{LABEL\}\}/g, LABEL);
+  // Simple {{#if var}}...{{/if}} conditional blocks — show content only when var is truthy
+  str = str.replace(/\{\{#if (\w+)\}\}([\s\S]*?)\{\{\/if\}\}/g, (_, k, inner) => (vars[k] ? inner : ""));
   // Replace content variables
   return str.replace(/\{\{(\w+)\}\}/g, (_, k) => vars[k] ?? `{{${k}}}`);
 }
@@ -163,6 +165,25 @@ export async function sendPlagiarismFailed(to: string, authorName: string, title
 
 export async function sendPlagiarismPassed(editorEmail: string, authorName: string, title: string, score: number) {
   await sendTemplate(editorEmail, "plagiarism_passed", { authorName, title, score: String(score) });
+}
+
+export async function sendBothMinorRevision(to: string, authorName: string, title: string, remarks: string) {
+  const remarksHtml = remarks
+    ? remarks
+    : "Please refer to reviewer comments in your dashboard.";
+  const deadline = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+    .toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
+  await sendTemplate(to, "both_minor_revision", { authorName, title, remarks: remarksHtml, deadline });
+}
+
+export async function sendRevisionSubmittedToEditors(
+  to: string,
+  editorName: string,
+  authorName: string,
+  title: string,
+  notes: string
+) {
+  await sendTemplate(to, "revision_submitted_editors", { editorName, authorName, title, notes: notes || "" });
 }
 
 export async function sendBothReviewersAccepted(to: string, authorName: string, title: string) {

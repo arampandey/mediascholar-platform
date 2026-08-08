@@ -64,10 +64,10 @@ export default function SubmitPage() {
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Dr. Jane Smith, XYZ University" />
           </div>
           <div>
-            <label className="text-sm font-semibold text-gray-700 block mb-1">Paper File (PDF/Word) *</label>
-            <input type="file" accept=".pdf,.doc,.docx" onChange={e => setFile(e.target.files?.[0] || null)} required
+            <label className="text-sm font-semibold text-gray-700 block mb-1">Paper File *</label>
+            <input type="file" accept=".pdf,.doc,.docx,.odt,.rtf,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.oasis.opendocument.text,application/rtf,text/rtf" onChange={e => setFile(e.target.files?.[0] || null)} required
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-            <p className="text-xs text-gray-400 mt-1">Max file size: 20MB. Accepted: PDF, DOC, DOCX</p>
+            <p className="text-xs text-gray-400 mt-1">Max file size: 20MB · Accepted formats: PDF, Word (.doc/.docx), ODT, RTF. Word files are automatically converted to PDF.</p>
           </div>
           <button type="submit" disabled={loading} style={{ backgroundColor: "#1a2744" }}
             className="w-full text-white py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity disabled:opacity-50">

@@ -17,6 +17,9 @@ type PaperData = {
   citations: { apa: string; mla: string; chicago: string };
   pageUrl: string;
   zenodoUrl: string | null;
+  zenodoDoi: string | null;
+  coAuthors: string[];
+  fileType: "pdf" | "docx" | "doc";
 };
 
 export default function PaperClient({ paper }: { paper: PaperData }) {
@@ -127,6 +130,18 @@ export default function PaperClient({ paper }: { paper: PaperData }) {
             )}
             {paper.author?.institution && <span className="text-blue-200">· {paper.author.institution}</span>}
           </div>
+          {paper.coAuthors && paper.coAuthors.length > 0 && (
+            <div className="mt-2 space-y-1">
+              {paper.coAuthors.map((co, i) => (
+                <div key={i} className="flex items-start gap-2 text-blue-100 text-sm">
+                  <svg className="w-4 h-4 shrink-0 mt-0.5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  <span className="text-white/90">{co}</span>
+                </div>
+              ))}
+            </div>
+          )}
           {paper.publishedAt && (
             <p className="text-xs text-blue-200 mt-2">
               Published {new Date(paper.publishedAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}
@@ -136,7 +151,7 @@ export default function PaperClient({ paper }: { paper: PaperData }) {
 
         <div className="px-8 py-8">
 
-          {/* Top CTA — View PDF */}
+          {/* Top CTA — View / Download */}
           {paper.fileUrl && (
             <div className="mb-8 p-5 bg-indigo-50 border border-indigo-100 rounded-xl flex items-center justify-between gap-4 flex-wrap">
               <div>
@@ -153,7 +168,7 @@ export default function PaperClient({ paper }: { paper: PaperData }) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
-                View PDF
+                {paper.fileType === "pdf" ? "View PDF" : `Download ${paper.fileType.toUpperCase()}`}
               </a>
             </div>
           )}
@@ -178,29 +193,62 @@ export default function PaperClient({ paper }: { paper: PaperData }) {
             </section>
           )}
 
-          {/* DOI */}
+          {/* DOI — CrossRef */}
           {paper.doi && (
             <section className="mb-7">
               <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">DOI</h2>
-              <p className="text-sm text-gray-700 font-mono">{paper.doi}</p>
+              <a
+                href={`https://doi.org/${paper.doi}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-indigo-700 font-mono hover:underline break-all"
+              >
+                https://doi.org/{paper.doi}
+              </a>
             </section>
           )}
 
-          {/* Zenodo Archive Badge */}
+          {/* Zenodo Archive */}
           {paper.zenodoUrl && (
             <section className="mb-7">
-              <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Digital Archive</h2>
-              <a
-                href={paper.zenodoUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-blue-200 bg-blue-50 hover:bg-blue-100 transition-colors"
-              >
-                <svg className="w-4 h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-                </svg>
-                <span className="text-xs font-semibold text-blue-700">Archived in Zenodo</span>
-              </a>
+              <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Digital Archive</h2>
+              <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 shrink-0 w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                    </svg>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-blue-900">Archived on Zenodo</p>
+                    <p className="text-xs text-blue-600 mt-0.5">Permanently preserved by CERN · Indexed by Google Scholar &amp; DOAJ</p>
+                    {paper.zenodoDoi && (
+                      <p className="text-xs text-blue-800 font-mono mt-1.5">
+                        DOI:{" "}
+                        <a
+                          href={`https://doi.org/${paper.zenodoDoi}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="hover:underline"
+                        >
+                          {paper.zenodoDoi}
+                        </a>
+                      </p>
+                    )}
+                    <a
+                      href={paper.zenodoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 mt-2 text-xs font-semibold text-blue-700 hover:text-blue-900 hover:underline"
+                    >
+                      View on Zenodo
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+              </div>
             </section>
           )}
 
@@ -299,7 +347,7 @@ export default function PaperClient({ paper }: { paper: PaperData }) {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                Download Full PDF
+                {paper.fileType === "pdf" ? "Download Full PDF" : `Download Full ${paper.fileType.toUpperCase()}`}
               </a>
             </div>
           )}

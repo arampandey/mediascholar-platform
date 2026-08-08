@@ -6,6 +6,7 @@ import {
   sendReviewThankYou,
   sendBothReviewersAccepted,
   sendBothReviewersRejected,
+  sendBothMinorRevision,
   sendConflictingReviews,
   sendSubEditorReviewAlert,
 } from "@/lib/email";
@@ -97,8 +98,28 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ sub
         const d1 = decisions[0];
         const d2 = decisions[1];
 
-        // Case 1: Both positive (Accept or Minor Revision) → email author
-        if (isPositive(d1) && isPositive(d2)) {
+        // Case 1a: Both MINOR_REVISION → request revised manuscript from author
+        if (d1 === "MINOR_REVISION" && d2 === "MINOR_REVISION") {
+          const remarks = allReviews
+            .map(r => r.remarks)
+            .filter(Boolean)
+            .join(" | ");
+          if (submission.author) {
+            await sendBothMinorRevision(
+              submission.author.email,
+              submission.author.name,
+              submission.title,
+              remarks
+            );
+          }
+          await prisma.submission.update({
+            where: { id: submissionId },
+            data: { status: "REVISION_REQUESTED" },
+          });
+        }
+
+        // Case 1b: Both positive (at least one ACCEPT, or mixed ACCEPT+MINOR) → accepted
+        else if (isPositive(d1) && isPositive(d2)) {
           if (submission.author) {
             await sendBothReviewersAccepted(
               submission.author.email,

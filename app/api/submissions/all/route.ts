@@ -20,6 +20,7 @@ export async function GET() {
         author: { select: { name: true, email: true, institution: true } },
         issue: { select: { number: true, volume: { select: { number: true, year: true } } } },
         reviewers: {
+          where: { retractedAt: null },
           select: {
             id: true,
             assignedAt: true,
@@ -29,6 +30,10 @@ export async function GET() {
             declineReason: true,
             user: { select: { id: true, name: true, email: true } },
           },
+        },
+        reviews: {
+          where: { submittedAt: { not: null } },
+          select: { reviewerId: true, decision: true },
         },
         _count: { select: { reviews: { where: { submittedAt: { not: null } } } } },
       },

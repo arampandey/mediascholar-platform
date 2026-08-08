@@ -36,9 +36,10 @@ export async function depositToZenodo(
 ): Promise<ZenodoResult | null> {
   const token = process.env.ZENODO_TOKEN;
   if (!token) {
-    console.log("[zenodo] ZENODO_TOKEN not set — skipping deposit");
+    console.error("[zenodo] ZENODO_TOKEN not set — skipping deposit");
     return null;
   }
+  console.log("[zenodo] starting deposit for submission", submission.id);
 
   try {
     // ── 1. Build metadata ──────────────────────────────────────────────────
@@ -99,9 +100,10 @@ export async function depositToZenodo(
     const bucketUrl: string | undefined = deposition.links?.bucket;
 
     if (!depositionId) {
-      console.error("[zenodo] no deposition id returned");
+      console.error("[zenodo] no deposition id returned", deposition);
       return null;
     }
+    console.log("[zenodo] deposition created:", depositionId, "bucket:", bucketUrl);
 
     // ── 3. Upload PDF ─────────────────────────────────────────────────────
     if (bucketUrl && submission.fileUrl) {
@@ -115,21 +117,24 @@ export async function depositToZenodo(
 
         if (fileRes.ok) {
           const fileBuffer = await fileRes.arrayBuffer();
+          console.log("[zenodo] PDF fetched, size:", fileBuffer.byteLength, "bytes");
           const filename = `mediascholar-${submission.id}.pdf`;
 
           const uploadRes = await fetch(`${bucketUrl}/${filename}`, {
             method: "PUT",
             headers: {
               Authorization: `Bearer ${token}`,
-              "Content-Type": "application/pdf",
+              // Zenodo bucket API requires application/octet-stream (rejects application/pdf)
+              "Content-Type": "application/octet-stream",
             },
             body: fileBuffer,
           });
 
           if (!uploadRes.ok) {
+            const uploadErr = await uploadRes.text();
             console.error(
               "[zenodo] file upload failed:",
-              await uploadRes.text()
+              uploadErr
             );
             // Clean up draft and bail — Zenodo requires at least one file to publish
             await fetch(`${ZENODO_API}/deposit/depositions/${depositionId}`, {
@@ -139,7 +144,8 @@ export async function depositToZenodo(
             return null;
           }
         } else {
-          console.error("[zenodo] could not fetch PDF, status:", fileRes.status);
+          const fetchErr = await fileRes.text().catch(() => "");
+          console.error("[zenodo] could not fetch PDF, status:", fileRes.status, "body:", fetchErr);
           // Clean up and bail
           await fetch(`${ZENODO_API}/deposit/depositions/${depositionId}`, {
             method: "DELETE",

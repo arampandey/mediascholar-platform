@@ -27,10 +27,13 @@ export default function EditorSubmissionPage() {
   const [editingRemarkId, setEditingRemarkId] = useState<string | null>(null);
   const [remarkDraft, setRemarkDraft] = useState("");
   const [zenodoLoading, setZenodoLoading] = useState(false);
-  const [zenodoResult, setZenodoResult] = useState<{ success?: boolean; url?: string; doi?: string; error?: string } | null>(null);
+  const [zenodoResult, setZenodoResult] = useState<{ success?: boolean; url?: string; doi?: string; error?: string; debug?: any } | null>(null);
   const [editingAuthorEmail, setEditingAuthorEmail] = useState(false);
   const [authorEmailDraft, setAuthorEmailDraft] = useState("");
   const [authorEmailSaving, setAuthorEmailSaving] = useState(false);
+  const [reuploadFile, setReuploadFile] = useState<File | null>(null);
+  const [reuploadLoading, setReuploadLoading] = useState(false);
+  const [reuploadMsg, setReuploadMsg] = useState("");
 
   function load() {
     fetch(`/api/submissions/${id}`).then(r => r.json()).then(d => setSub(d.submission));
@@ -152,6 +155,36 @@ export default function EditorSubmissionPage() {
             ) : (
               <span className="text-sm text-red-500 font-medium">⚠ File unavailable — ask author to resubmit</span>
             )}
+            {/* Re-upload as PDF (fixes DOCX submissions) */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <label className="text-xs text-gray-400">🔄 Replace file (PDF):</label>
+              <input type="file" accept=".pdf,application/pdf"
+                onChange={e => setReuploadFile(e.target.files?.[0] || null)}
+                className="text-xs" />
+              {reuploadFile && (
+                <button
+                  disabled={reuploadLoading}
+                  onClick={async () => {
+                    setReuploadLoading(true); setReuploadMsg("");
+                    const fd = new FormData(); fd.append("file", reuploadFile);
+                    const upRes = await fetch("/api/upload", { method: "POST", body: fd });
+                    const upData = await upRes.json();
+                    if (!upData.fileUrl) { setReuploadMsg("❌ " + (upData.error || "Upload failed")); setReuploadLoading(false); return; }
+                    const patchRes = await fetch(`/api/submissions/${id}`, {
+                      method: "PATCH",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ fileUrl: upData.fileUrl }),
+                    });
+                    setReuploadLoading(false);
+                    if (patchRes.ok) { setReuploadMsg("✅ File replaced"); setReuploadFile(null); load(); }
+                    else setReuploadMsg("❌ Failed to update");
+                    setTimeout(() => setReuploadMsg(""), 5000);
+                  }}
+                  className="text-xs px-3 py-1 bg-indigo-700 text-white rounded-lg hover:bg-indigo-800 disabled:opacity-40"
+                >{reuploadLoading ? "Uploading…" : "Upload"}</button>
+              )}
+              {reuploadMsg && <span className="text-xs font-semibold">{reuploadMsg}</span>}
+            </div>
             <select value={sub.status} onChange={e => act(`/api/submissions/${id}/status`, "PATCH", { status: e.target.value })}
               className="text-xs border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500">
               {["SUBMITTED","PLAGIARISM_CHECK","UNDER_REVIEW","REVISION_REQUESTED","RESUBMITTED","ACCEPTED","REJECTED","PUBLISHED"].map(s =>
@@ -497,32 +530,39 @@ export default function EditorSubmissionPage() {
               <h2 className="font-bold text-gray-900">Digital Archive — Zenodo</h2>
             </div>
             <p className="text-xs text-gray-500 mb-4">
-              Archive this paper permanently on Zenodo (CERN). Free, recognised by Google Scholar and DOAJ.
+              Archive this paper permanently on Zenodo (CERN). Free, open-access repository recognised by Google Scholar and DOAJ. Works independently — no CrossRef account needed.
             </p>
 
             {sub.zenodoUrl ? (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
-                <p className="text-xs text-blue-600 font-semibold mb-0.5">✅ Archived in Zenodo</p>
-                <a href={sub.zenodoUrl} target="_blank" rel="noopener noreferrer"
-                  className="text-sm text-blue-800 hover:underline break-all">{sub.zenodoUrl}</a>
+              <div className="flex items-center gap-3 flex-wrap">
+                <div className="flex-1 bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
+                  <p className="text-xs text-blue-600 font-semibold mb-0.5">✅ Archived in Zenodo</p>
+                  <a href={sub.zenodoUrl} target="_blank" rel="noopener noreferrer"
+                    className="text-sm text-blue-800 hover:underline break-all">{sub.zenodoUrl}</a>
+                  {sub.zenodoDoi && (
+                    <p className="text-xs text-blue-700 font-mono mt-1">DOI: {sub.zenodoDoi}</p>
+                  )}
+                </div>
               </div>
             ) : (
               <div className="space-y-3">
-                <button
-                  onClick={async () => {
-                    setZenodoLoading(true);
-                    setZenodoResult(null);
-                    const res = await fetch(`/api/submissions/${id}/zenodo`, { method: "POST" });
-                    const data = await res.json();
-                    setZenodoResult(data);
-                    setZenodoLoading(false);
-                    if (data.success) load();
-                  }}
-                  disabled={zenodoLoading}
-                  className="px-4 py-2 bg-blue-700 text-white rounded-lg text-sm font-bold hover:bg-blue-800 disabled:opacity-40"
-                >
-                  {zenodoLoading ? "Archiving…" : "Archive on Zenodo"}
-                </button>
+                <div className="flex gap-2 flex-wrap">
+                  <button
+                    onClick={async () => {
+                      setZenodoLoading(true);
+                      setZenodoResult(null);
+                      const res = await fetch(`/api/submissions/${id}/zenodo`, { method: "POST" });
+                      const data = await res.json();
+                      setZenodoResult(data);
+                      setZenodoLoading(false);
+                      if (data.success) load();
+                    }}
+                    disabled={zenodoLoading}
+                    className="px-4 py-2 bg-blue-700 text-white rounded-lg text-sm font-bold hover:bg-blue-800 disabled:opacity-40"
+                  >
+                    {zenodoLoading ? "Archiving…" : "Archive on Zenodo"}
+                  </button>
+                </div>
                 {zenodoResult && (
                   <div className={`rounded-lg px-4 py-3 text-sm ${
                     zenodoResult.success
@@ -530,8 +570,8 @@ export default function EditorSubmissionPage() {
                       : "bg-red-50 border border-red-200 text-red-800"
                   }`}>
                     {zenodoResult.success
-                      ? <p>✅ Archived! <a href={zenodoResult.url} target="_blank" rel="noopener noreferrer" className="underline">{zenodoResult.url}</a></p>
-                      : <p>❌ {zenodoResult.error}</p>}
+                      ? <p>✅ Archived! DOI: <span className="font-mono">{zenodoResult.doi}</span> · <a href={zenodoResult.url} target="_blank" rel="noopener noreferrer" className="underline">View on Zenodo</a></p>
+                      : <><p>❌ {zenodoResult.error}</p>{zenodoResult.debug && <pre className="text-xs mt-1 opacity-70">{JSON.stringify(zenodoResult.debug, null, 2)}</pre>}</>}
                   </div>
                 )}
               </div>

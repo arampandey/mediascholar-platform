@@ -158,6 +158,42 @@ export const DEFAULT_TEMPLATES: {
     variables: ["authorName", "title"],
   },
   {
+    key: "both_minor_revision",
+    label: "Both Reviewers — Minor Corrections (to Author)",
+    subject: "Minor Corrections Required — {{title}}",
+    body: `<p {{P}}>Dear <strong>{{authorName}}</strong>,</p>
+<p {{P}}>Your manuscript has been reviewed by two independent peer reviewers. Both reviewers have found the work promising and recommend it for publication subject to <strong>minor corrections</strong>.</p>
+<div {{BOX}}>
+  <p style="margin:0 0 6px;font-size:13px;color:#4a5568;"><strong>Manuscript Title:</strong></p>
+  <p style="margin:0 0 10px;font-size:14px;color:#1a202c;">{{title}}</p>
+  <p style="margin:0 0 6px;font-size:13px;color:#4a5568;"><strong>Decision:</strong> Minor Corrections Required</p>
+  <p style="margin:8px 0 0;font-size:13px;color:#4a5568;"><strong>Deadline for Revised Submission:</strong> <strong style="color:#c53030;">{{deadline}}</strong> (1 week from today)</p>
+  {{#if remarks}}<p style="margin:8px 0 0;font-size:13px;color:#4a5568;"><strong>Reviewer Remarks:</strong> {{remarks}}</p>{{/if}}
+</div>
+<p {{P}}>Please log in to your author dashboard at <a href="{{WEBSITE}}" style="color:#1a2744;">{{WEBSITE}}</a> to upload your revised manuscript. Kindly address all reviewer comments carefully before resubmission.</p>
+<p {{P}}>Once you submit the revised version, it will be forwarded to the editorial team for final review and publication.</p>
+<p {{SIGN}}>Yours sincerely,<br><strong>Prof. (Dr.) A. Ram Pandey</strong><br>Editor-in-Chief<br>{{JOURNAL}}</p>`,
+    variables: ["authorName", "title", "remarks", "deadline"],
+  },
+  {
+    key: "revision_submitted_editors",
+    label: "Revised Manuscript Submitted (to Editors)",
+    subject: "Revised Manuscript Submitted — {{title}}",
+    body: `<p {{P}}>Dear <strong>{{editorName}}</strong>,</p>
+<p {{P}}>The author has submitted a revised version of their manuscript following minor correction feedback from peer reviewers. The revised manuscript is now ready for your editorial review and publication decision.</p>
+<div {{BOX}}>
+  <p style="margin:0 0 6px;font-size:13px;color:#4a5568;"><strong>Manuscript Title:</strong></p>
+  <p style="margin:0 0 10px;font-size:14px;color:#1a202c;">{{title}}</p>
+  <p style="margin:0 0 6px;font-size:13px;color:#4a5568;"><strong>Author:</strong> {{authorName}}</p>
+  <p style="margin:0 0 6px;font-size:13px;color:#4a5568;"><strong>Status:</strong> Awaiting Final Editorial Decision</p>
+  {{#if notes}}<p style="margin:8px 0 0;font-size:13px;color:#4a5568;"><strong>Author's Revision Notes:</strong> {{notes}}</p>{{/if}}
+</div>
+<p {{P}}>Please log in to the dashboard to review the revised manuscript and take a final decision.</p>
+<p {{P}}><a href="https://mediascholar.in/dashboard/editor" style="color:#1a2744;font-weight:bold;">Go to Editor Dashboard →</a></p>
+<p {{SIGN}}>Regards,<br><strong>Media Scholar Platform</strong></p>`,
+    variables: ["editorName", "authorName", "title", "notes"],
+  },
+  {
     key: "both_reviewers_rejected",
     label: "Both Reviewers Rejected (to Author)",
     subject: "Manuscript Not Accepted — {{title}}",

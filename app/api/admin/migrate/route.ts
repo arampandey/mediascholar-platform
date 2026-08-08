@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import bcrypt from "bcryptjs";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -143,6 +144,55 @@ export async function POST(req: NextRequest) {
       await prisma.$executeRaw`ALTER TABLE "Submission" ADD COLUMN IF NOT EXISTS "downloadCount" INTEGER NOT NULL DEFAULT 0`;
       await prisma.$executeRaw`ALTER TABLE "Submission" ADD COLUMN IF NOT EXISTS "viewCount" INTEGER NOT NULL DEFAULT 0`;
       return NextResponse.json({ success: true, message: "Schema sync complete" });
+    }
+
+    if (action === "seed-editorial-board") {
+      const BOARD = [
+        { name: "Jatin Srivastava", email: "srivastj@ohio.edu", institution: "Ohio University, Athens, Ohio, USA", designation: "Professor, Associate Director for Graduate Studies" },
+        { name: "Rajesh Kumar", email: "rkdoon@gmail.com", institution: "Doon University, Dehradun, Uttarakhand", designation: "Professor" },
+        { name: "Raghavendra Mishra", email: "rmishra@igntu.ac.in", institution: "Indira Gandhi National Tribal University, Amarkantak, MP", designation: "Professor" },
+        { name: "Amitabh Srivastava", email: "amitabh.srivastava@curaj.ac.in", institution: "Central University of Rajasthan, Ajmer, Rajasthan", designation: "Professor & Head" },
+        { name: "Harish Kumar", email: "harish.kumar@sxuk.edu.in", institution: "St. Xavier's University, Newtown, Kolkata, West Bengal", designation: "Professor & Head" },
+        { name: "Tasha Singh Parihar", email: "tasha.singh@galgotiasuniversity.edu.in", institution: "Galgotias University, Greater Noida, Uttar Pradesh", designation: "Professor, School of Media and Communication Studies" },
+        { name: "Alessandro Martinisi", email: "a.martinisi@fus.edu", institution: "Franklin University Switzerland, Sorengo (Lugano), Switzerland", designation: "Assistant Professor of Media and Communication Studies" },
+        { name: "Bhawani Shankar", email: "bhawani.shankar@galgotiasuniversity.edu.in", institution: "Galgotias University, Greater Noida, Uttar Pradesh", designation: "Assistant Professor, School of Media and Communication Studies" },
+        { name: "Sunil Mishra", email: "sunil.mishra@vips.edu", institution: "VIPS, Guru Gobind Singh Indraprastha University, New Delhi", designation: "Associate Professor" },
+        { name: "Gajendra Pratap Singh", email: "gajendra.pratap@galgotiasuniversity.edu.in", institution: "Galgotias University, Greater Noida, Uttar Pradesh", designation: "Assistant Professor, School of Media and Communication Studies" },
+        { name: "Kumari Pallavi", email: "kumari.pallavi@galgotiasuniversity.edu.in", institution: "Galgotias University, Greater Noida, Uttar Pradesh", designation: "Assistant Professor, School of Media and Communication Studies" },
+        { name: "Pramod Kumar Pandey", email: "pramod.pandey@galgotiasuniversity.edu.in", institution: "Galgotias University, Greater Noida, Uttar Pradesh", designation: "Assistant Professor, School of Media and Communication Studies" },
+        { name: "Mehak Pandit", email: "mehak.pandit@galgotiasuniversity.edu.in", institution: "Galgotias University, Greater Noida, Uttar Pradesh", designation: "Assistant Professor & Research Coordinator, School of Media and Communication Studies" },
+      ];
+
+      const defaultPassword = body.password || "Reviewer@2026";
+      const hashed = await bcrypt.hash(defaultPassword, 12);
+
+      const results: { email: string; status: string }[] = [];
+      for (const member of BOARD) {
+        const existing = await prisma.user.findUnique({ where: { email: member.email.toLowerCase() } });
+        if (existing) {
+          // Already exists — upgrade role to REVIEWER if they're AUTHOR, otherwise leave
+          if (existing.role === "AUTHOR") {
+            await prisma.user.update({ where: { email: member.email.toLowerCase() }, data: { role: "REVIEWER", emailVerified: true } });
+            results.push({ email: member.email, status: "upgraded to REVIEWER" });
+          } else {
+            results.push({ email: member.email, status: `skipped (already ${existing.role})` });
+          }
+        } else {
+          await prisma.user.create({
+            data: {
+              name: member.name,
+              email: member.email.toLowerCase(),
+              password: hashed,
+              role: "REVIEWER",
+              institution: member.institution,
+              designation: member.designation,
+              emailVerified: true,
+            },
+          });
+          results.push({ email: member.email, status: "created" });
+        }
+      }
+      return NextResponse.json({ success: true, results });
     }
 
     // Default: schema migration

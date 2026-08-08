@@ -75,7 +75,8 @@ export default function AuthorSubmissionPage() {
             <h2 className="font-bold text-orange-800 mb-3">Revision Requested</h2>
             <p className="text-sm text-orange-700 mb-4">Please submit your revised paper below.</p>
             <form onSubmit={resubmit} className="space-y-3">
-              <input type="file" accept=".pdf,.doc,.docx" onChange={e => setRevFile(e.target.files?.[0] || null)} required className="w-full text-sm" />
+              <input type="file" accept=".pdf,.doc,.docx,.odt,.rtf,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.oasis.opendocument.text,application/rtf,text/rtf" onChange={e => setRevFile(e.target.files?.[0] || null)} required className="w-full text-sm" />
+              <p className="text-xs text-gray-400 mt-1">Accepted: PDF, Word (.doc/.docx), ODT, RTF — Word files are auto-converted to PDF.</p>
               <textarea value={revNotes} onChange={e => setRevNotes(e.target.value)} placeholder="Notes about revisions made…" rows={3}
                 className="w-full border border-orange-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
               <button type="submit" disabled={resubmitting} className="px-5 py-2 bg-orange-600 text-white rounded-lg text-sm font-semibold hover:bg-orange-700 disabled:opacity-50">

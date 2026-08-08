@@ -15,6 +15,7 @@
     "@vercel/blob": "^2.3.3",
     "basic-ftp": "^5.2.2",
     "bcryptjs": "^3.0.3",
+    "cloudconvert": "^3.0.0",
     "cloudinary": "^2.9.0",
     "mammoth": "^1.12.0",
     "next": "16.2.2",

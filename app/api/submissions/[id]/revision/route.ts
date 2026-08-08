@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { sendRevisionRequest } from "@/lib/email";
+import { sendRevisionRequest, sendRevisionSubmittedToEditors } from "@/lib/email";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
@@ -25,5 +25,27 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const { fileUrl, notes } = body;
   await prisma.revision.create({ data: { submissionId: id, fileUrl, notes } });
   await prisma.submission.update({ where: { id }, data: { status: "RESUBMITTED", fileUrl } });
+
+  // Notify all editors and sub-editors that the revised manuscript is ready
+  const sub = await prisma.submission.findUnique({
+    where: { id },
+    include: { author: { select: { name: true } } },
+  });
+  if (sub) {
+    const editorialTeam = await prisma.user.findMany({
+      where: { role: { in: ["EDITOR", "SUB_EDITOR"] } },
+      select: { email: true, name: true },
+    });
+    for (const member of editorialTeam) {
+      await sendRevisionSubmittedToEditors(
+        member.email,
+        member.name,
+        sub.author?.name ?? "Author",
+        sub.title,
+        notes || ""
+      );
+    }
+  }
+
   return NextResponse.json({ success: true });
 }
