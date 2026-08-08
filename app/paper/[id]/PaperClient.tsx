@@ -228,7 +228,7 @@ export default function PaperClient({ paper }: { paper: PaperData }) {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-blue-900">Archived on Zenodo</p>
-                    <p className="text-xs text-blue-600 mt-0.5">Permanently preserved by CERN · Indexed by Google Scholar &amp; DOAJ</p>
+                    <p className="text-xs text-blue-600 mt-0.5">Permanently preserved by CERN · Indexed by Google Scholar</p>
                     {paper.zenodoDoi && (
                       <p className="text-xs text-blue-800 font-mono mt-1.5">
                         DOI:{" "}

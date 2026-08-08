@@ -264,7 +264,7 @@ export default function GuidelinesPage() {
               {
                 step: "4",
                 title: "DOI Assignment",
-                desc: "Once the proof is approved, a Digital Object Identifier (DOI) via CrossRef is assigned to the article, permanently linking it to its online location at mediascholar.in.",
+                desc: "Once the proof is approved, a Digital Object Identifier (DOI) is assigned to the article, permanently linking it to its online location at mediascholar.in.",
                 time: "1–3 days",
               },
               {

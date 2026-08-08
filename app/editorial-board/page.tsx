@@ -63,8 +63,8 @@ const MEMBERS = [
   },
   {
     name: "Tasha Singh Parihar, Ph.D.",
-    affiliation: "Professor, School of Media and Communication Studies",
-    institution: "Galgotias University, Greater Noida, Uttar Pradesh",
+    affiliation: "Professor",
+    institution: "Metro University, Greater Noida, Uttar Pradesh",
     email: "tasha.singh@galgotiasuniversity.edu.in",
     profile: "https://www.galgotiasuniversity.edu.in/p/prof-tasha-singh",
   },
@@ -98,8 +98,8 @@ const MEMBERS = [
   },
   {
     name: "Kumari Pallavi, Ph.D.",
-    affiliation: "Assistant Professor, School of Media and Communication Studies",
-    institution: "Galgotias University, Greater Noida, Uttar Pradesh",
+    affiliation: "Assistant Professor",
+    institution: "Christ University, Ghaziabad, Delhi NCR",
     email: "kumari.pallavi@galgotiasuniversity.edu.in",
     profile: "https://www.galgotiasuniversity.edu.in/p/dr-kumari-pallavi",
   },
