@@ -74,6 +74,8 @@ model Submission {
   zenodoDoi       String?
   downloadCount   Int      @default(0)
   viewCount       Int      @default(0)
+  pageStart       Int?
+  pageEnd         Int?
   editorDecision  String?
   decisionNotes   String?
   decisionAt      DateTime?

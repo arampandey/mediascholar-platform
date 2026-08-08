@@ -16,7 +16,7 @@ async function getData() {
   try {
     return await prisma.volume.findMany({
       orderBy: { number: "desc" },
-      include: { issues: { orderBy: { number: "asc" }, where: { publishedAt: { not: null } }, include: { submissions: { where: { status: "PUBLISHED" }, select: { id:true, title:true, language:true, doi:true, fileUrl:true, publishedAt:true, author: { select: { name:true } } } } } } },
+      include: { issues: { orderBy: { number: "asc" }, where: { publishedAt: { not: null } }, include: { submissions: { where: { status: "PUBLISHED" }, orderBy: { pageStart: "asc" }, select: { id:true, title:true, language:true, doi:true, fileUrl:true, publishedAt:true, pageStart:true, pageEnd:true, author: { select: { name:true } } } } } } },
     });
   } catch { return []; }
 }
@@ -50,7 +50,7 @@ export default async function ArchivePage() {
                           <div key={s.id} className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg hover:bg-gray-50">
                             <div className="flex-1 min-w-0">
                               <Link href={`/paper/${s.id}`} className="text-sm font-medium text-indigo-800 hover:text-indigo-600 hover:underline transition-colors">{s.title}</Link>
-                              <p className="text-xs text-gray-400">{s.author?.name}</p>
+                              <p className="text-xs text-gray-400">{s.author?.name}{(s.pageStart && s.pageEnd) ? ` · ${s.pageStart === s.pageEnd ? `p. ${s.pageStart}` : `pp. ${s.pageStart}–${s.pageEnd}`}` : ""}</p>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
                               <span className={`text-xs px-2 py-0.5 rounded-full ${s.language==="hi"?"bg-orange-100 text-orange-700":"bg-blue-100 text-blue-700"}`}>{s.language==="hi"?"HI":"EN"}</span>

@@ -42,6 +42,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     citation_publication_date: pubDate,
     ...(vol ? { citation_volume: String(vol.number) } : {}),
     ...(iss ? { citation_issue: String(iss.number) } : {}),
+    ...(paper.pageStart ? { citation_firstpage: String(paper.pageStart) } : {}),
+    ...(paper.pageEnd ? { citation_lastpage: String(paper.pageEnd) } : {}),
     ...(paper.doi ? { citation_doi: paper.doi } : {}),
     ...(paper.fileUrl ? { citation_pdf_url: `https://mediascholar.in/pdfs/${paper.id}.pdf` } : {}),
     citation_fulltext_html_url: `https://mediascholar.in/paper/${paper.id}`,
@@ -95,6 +97,8 @@ export default async function PaperPage({ params }: { params: Promise<{ id: stri
       "name": "Media Scholar — Journal of Media Studies and Humanities",
       "url": "https://mediascholar.in",
     },
+    ...(paper.pageStart ? { "pageStart": String(paper.pageStart) } : {}),
+    ...(paper.pageEnd ? { "pageEnd": String(paper.pageEnd) } : {}),
     "isPartOf": {
       "@type": "Periodical",
       "name": "Media Scholar — Journal of Media Studies and Humanities",
@@ -114,7 +118,10 @@ export default async function PaperPage({ params }: { params: Promise<{ id: stri
   const authorName = paper.author?.name || "Unknown Author";
   const year = vol?.year || new Date(paper.publishedAt || Date.now()).getFullYear();
   const journalShort = "Media Scholar";
-  const volIss = `${vol ? `Vol. ${vol.number}` : ""}${iss ? `, Issue ${iss.number}` : ""}`;
+  const pageRange = paper.pageStart && paper.pageEnd
+    ? (paper.pageStart === paper.pageEnd ? `p. ${paper.pageStart}` : `pp. ${paper.pageStart}–${paper.pageEnd}`)
+    : "";
+  const volIss = `${vol ? `Vol. ${vol.number}` : ""}${iss ? `, Issue ${iss.number}` : ""}${pageRange ? `, ${pageRange}` : ""}`;
   const issn = "ISSN: 3048-5029";
   const pageUrl = `https://mediascholar.in/paper/${paper.id}`;
 
@@ -136,6 +143,8 @@ export default async function PaperPage({ params }: { params: Promise<{ id: stri
     author: paper.author,
     vol: vol ? { number: vol.number, year: vol.year } : null,
     iss: iss ? { number: iss.number, title: iss.title } : null,
+    pageStart: paper.pageStart ?? null,
+    pageEnd: paper.pageEnd ?? null,
     citations,
     pageUrl,
     zenodoUrl: paper.zenodoUrl || null,

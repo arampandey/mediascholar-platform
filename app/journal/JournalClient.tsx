@@ -61,7 +61,7 @@ export default function JournalClient({ articles }: { articles: any[] }) {
                   <div className="flex-1 min-w-0">
                     <Link href={`/paper/${a.id}`} className="text-lg font-bold text-indigo-800 hover:text-indigo-600 hover:underline transition-colors leading-snug block">{a.title}</Link>
                     <p className="text-sm text-gray-500 mt-0.5">{a.author?.name}{a.author?.institution ? ` · ${a.author.institution}` : ""}</p>
-                    {a.issue && <p className="text-xs text-indigo-600 font-medium mt-1">Vol. {a.issue.volume.number} ({a.issue.volume.year}) · Issue {a.issue.number}{a.issue.title ? ` — ${a.issue.title}` : ""}</p>}
+                    {a.issue && <p className="text-xs text-indigo-600 font-medium mt-1">Vol. {a.issue.volume.number} ({a.issue.volume.year}) · Issue {a.issue.number}{a.issue.title ? ` — ${a.issue.title}` : ""}{(a.pageStart && a.pageEnd) ? ` · ${a.pageStart === a.pageEnd ? `p. ${a.pageStart}` : `pp. ${a.pageStart}–${a.pageEnd}`}` : ""}</p>}
                     <p className="text-sm text-gray-600 mt-2 line-clamp-3">{a.abstract}</p>
                     {a.keywords?.length > 0 && <div className="flex flex-wrap gap-1.5 mt-3">{a.keywords.map((k: string) => <button key={k} onClick={() => setSearch(k)} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full hover:bg-indigo-100 hover:text-indigo-700 transition-colors">{k}</button>)}</div>}
                     <div className="flex items-center gap-4 mt-3 text-xs text-gray-400 flex-wrap">

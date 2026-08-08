@@ -14,6 +14,8 @@ type PaperData = {
   author: { id: string; name: string; institution: string | null; email: string } | null;
   vol: { number: number; year: number } | null;
   iss: { number: number; title: string | null } | null;
+  pageStart: number | null;
+  pageEnd: number | null;
   citations: { apa: string; mla: string; chicago: string };
   pageUrl: string;
   zenodoUrl: string | null;
@@ -112,6 +114,11 @@ export default function PaperClient({ paper }: { paper: PaperData }) {
           <div className="flex items-center gap-2 mb-4 flex-wrap">
             {paper.vol && <span className="text-xs bg-white/20 text-white px-3 py-1 rounded-full font-medium">Vol. {paper.vol.number} ({paper.vol.year})</span>}
             {paper.iss && <span className="text-xs bg-white/20 text-white px-3 py-1 rounded-full font-medium">Issue {paper.iss.number}{paper.iss.title ? ` — ${paper.iss.title}` : ""}</span>}
+            {(paper.pageStart && paper.pageEnd) && (
+              <span className="text-xs bg-white/20 text-white px-3 py-1 rounded-full font-medium">
+                {paper.pageStart === paper.pageEnd ? `p. ${paper.pageStart}` : `pp. ${paper.pageStart}–${paper.pageEnd}`}
+              </span>
+            )}
             <span className={`text-xs px-3 py-1 rounded-full font-medium ${paper.language === "hi" ? "bg-orange-400/80 text-white" : "bg-blue-400/80 text-white"}`}>
               {paper.language === "hi" ? "हिंदी" : "English"}
             </span>

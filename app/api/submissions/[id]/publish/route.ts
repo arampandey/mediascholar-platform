@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { depositToZenodo } from "@/lib/zenodo";
 import { sendPaperPublished } from "@/lib/email";
+import { recalcIssuePageNumbers } from "@/lib/pageNumbers";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
@@ -13,7 +14,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const { id } = await params;
   const { issueId, doi } = await req.json();
 
-  const submission = await prisma.submission.update({
+  let submission = await prisma.submission.update({
     where: { id },
     data: { status: "PUBLISHED", publishedAt: new Date(), issueId, doi },
     include: {
@@ -21,6 +22,24 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       issue: { include: { volume: true } },
     },
   });
+
+  // 📄 Assign sequential page numbers across the whole issue (Paper 1: 1–n,
+  // Paper 2: n+1–m, ...). Recalculated for the full issue every time a new
+  // paper is published into it, in publish order.
+  if (issueId) {
+    try {
+      await recalcIssuePageNumbers(issueId);
+      submission = await prisma.submission.findUniqueOrThrow({
+        where: { id },
+        include: {
+          author: { select: { name: true, email: true } },
+          issue: { include: { volume: true } },
+        },
+      });
+    } catch (e) {
+      console.error("[pageNumbers] recalc failed for issue", issueId, e);
+    }
+  }
 
   // 📧 Notify the author their paper is now live, with the correct Volume/Issue/DOI
   if (submission.author?.email && submission.issue) {
