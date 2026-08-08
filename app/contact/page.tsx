@@ -25,7 +25,7 @@ export default function ContactPage() {
         </div>
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h2 className="font-bold text-gray-900 mb-4">Editor-in-Chief</h2>
-          <p className="font-semibold text-gray-900">Dr. A Ram Pandey</p>
+          <p className="font-semibold text-gray-900">A Ram Pandey, Ph.D.</p>
           <p className="text-sm text-gray-600">Chairperson, Department of Mass Communication</p>
           <p className="text-sm text-gray-600">Guru Jambheshwar University of Science and Technology, Hisar, Haryana</p>
           <p className="text-sm text-gray-500 mt-1">For editorial queries: <a href="mailto:editor@mediascholar.in" className="text-indigo-700 hover:underline">editor@mediascholar.in</a></p>

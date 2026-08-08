@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 const EDITOR_IN_CHIEF = {
-  name: "Dr. A Ram Pandey",
+  name: "A Ram Pandey, Ph.D.",
   role: "Editor",
   affiliation: "Chairperson, Department of Mass Communication",
   institution: "Guru Jambheshwar University of Science and Technology, Hisar, Haryana",
