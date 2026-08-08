@@ -156,7 +156,7 @@ export const DEFAULT_TEMPLATES: {
   <p style="margin:0;font-size:13px;color:#4a5568;"><strong>Status:</strong> Accepted for Publication</p>
 </div>
 <p {{P}}>You will be notified of the publication details including volume, issue, and DOI in due course.</p>
-<p {{SIGN}}>Yours sincerely,<br><strong>Prof. (Dr.) A. Ram Pandey</strong><br>Editor-in-Chief<br>{{JOURNAL}}</p>`,
+<p {{SIGN}}>Yours sincerely,<br><strong>A Ram Pandey, Ph.D.</strong><br>Editor-in-Chief<br>{{JOURNAL}}</p>`,
     variables: ["authorName", "title"],
   },
   {
@@ -174,7 +174,7 @@ export const DEFAULT_TEMPLATES: {
 </div>
 <p {{P}}>Please log in to your author dashboard at <a href="{{WEBSITE}}" style="color:#1a2744;">{{WEBSITE}}</a> to upload your revised manuscript. Kindly address all reviewer comments carefully before resubmission.</p>
 <p {{P}}>Once you submit the revised version, it will be forwarded to the editorial team for final review and publication.</p>
-<p {{SIGN}}>Yours sincerely,<br><strong>Prof. (Dr.) A. Ram Pandey</strong><br>Editor-in-Chief<br>{{JOURNAL}}</p>`,
+<p {{SIGN}}>Yours sincerely,<br><strong>A Ram Pandey, Ph.D.</strong><br>Editor-in-Chief<br>{{JOURNAL}}</p>`,
     variables: ["authorName", "title", "remarks", "deadline"],
   },
   {
@@ -207,7 +207,7 @@ export const DEFAULT_TEMPLATES: {
   <p style="margin:0;font-size:13px;color:#4a5568;"><strong>Status:</strong> Not Accepted</p>
 </div>
 <p {{P}}>We encourage you to consider the reviewers' feedback and revise the manuscript for submission to another suitable journal.</p>
-<p {{SIGN}}>Yours sincerely,<br><strong>Prof. (Dr.) A. Ram Pandey</strong><br>Editor-in-Chief<br>{{JOURNAL}}</p>`,
+<p {{SIGN}}>Yours sincerely,<br><strong>A Ram Pandey, Ph.D.</strong><br>Editor-in-Chief<br>{{JOURNAL}}</p>`,
     variables: ["authorName", "title", "remarks"],
   },
   {
@@ -240,7 +240,7 @@ export const DEFAULT_TEMPLATES: {
   <p style="margin:0 0 6px;font-size:13px;color:#4a5568;"><strong>Decision:</strong> <strong style="color:#1a2744;">{{decisionText}}</strong></p>
 </div>
 <p {{P}}>For any queries, please write to us at <a href="mailto:{{EMAIL}}" style="color:#1a2744;">{{EMAIL}}</a>.</p>
-<p {{SIGN}}>Yours sincerely,<br><strong>Prof. (Dr.) A. Ram Pandey</strong><br>Editor-in-Chief<br>{{JOURNAL}}</p>`,
+<p {{SIGN}}>Yours sincerely,<br><strong>A Ram Pandey, Ph.D.</strong><br>Editor-in-Chief<br>{{JOURNAL}}</p>`,
     variables: ["authorName", "title", "decisionText", "notes"],
   },
   {
@@ -258,7 +258,7 @@ export const DEFAULT_TEMPLATES: {
 <p {{P}}>You can view and share your published paper here:</p>
 <p {{P}}><a href="{{paperUrl}}" style="color:#1a2744;font-weight:bold;">{{paperUrl}}</a></p>
 <p {{P}}>Thank you for choosing {{JOURNAL}} for your research. We look forward to your future contributions.</p>
-<p {{SIGN}}>Yours sincerely,<br><strong>Prof. (Dr.) A. Ram Pandey</strong><br>Editor-in-Chief<br>{{JOURNAL}}</p>`,
+<p {{SIGN}}>Yours sincerely,<br><strong>A Ram Pandey, Ph.D.</strong><br>Editor-in-Chief<br>{{JOURNAL}}</p>`,
     variables: ["authorName", "title", "issueLabel", "doi", "paperUrl"],
   },
   {
