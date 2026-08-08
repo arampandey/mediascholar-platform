@@ -17,7 +17,7 @@ const EDITOR_IN_CHIEF = {
 };
 
 const SUB_EDITOR = {
-  name: "Apoorva Shukla",
+  name: "Apoorva Shukla, Ph.D.",
   role: "Sub-Editor",
   affiliation: "Assistant Professor, Department of Mass Communication",
   institution: "Galgotias University, Greater Noida, Uttar Pradesh, India",
