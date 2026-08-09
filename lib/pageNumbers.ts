@@ -21,10 +21,17 @@ export async function countPdfPages(fileUrl: string): Promise<number | null> {
  * Paper 1: pages 1–n, Paper 2: pages n+1–m, etc. — continuous numbering
  * across the whole issue, matching standard academic journal convention.
  *
- * Papers whose PDF page count can't be determined are skipped (page fields
- * left as-is) so a single bad file doesn't break numbering for the rest.
+ * Papers whose PDF page count can't be determined are left with pageStart/
+ * pageEnd = null (not guessed) and do NOT advance the cursor, so every paper
+ * whose length IS known still gets a correct, non-overlapping page range.
+ * Guessing a fake "1 page" length here would silently corrupt the numbering
+ * for every subsequent paper in the issue, which is worse than leaving one
+ * paper temporarily unnumbered.
+ *
+ * Returns the ids of any papers whose page count could not be determined,
+ * so the caller can surface a warning to the editor.
  */
-export async function recalcIssuePageNumbers(issueId: string): Promise<void> {
+export async function recalcIssuePageNumbers(issueId: string): Promise<{ failedIds: string[] }> {
   const papers = await prisma.submission.findMany({
     where: { issueId, status: "PUBLISHED" },
     orderBy: [{ publishedAt: "asc" }, { createdAt: "asc" }],
@@ -32,18 +39,16 @@ export async function recalcIssuePageNumbers(issueId: string): Promise<void> {
   });
 
   let cursor = 1;
+  const failedIds: string[] = [];
   for (const paper of papers) {
     const pageCount = await countPdfPages(paper.fileUrl);
     if (pageCount == null || pageCount < 1) {
-      // Can't determine length — leave existing values, don't advance the cursor
-      // incorrectly for papers after it. Skip and continue with next paper's
-      // numbering starting where this one *would* have started, using 1 page
-      // as a conservative fallback so the sequence doesn't break entirely.
+      console.error(`[pageNumbers] could not determine page count for submission ${paper.id} — leaving pageStart/pageEnd unset. Fix the file and re-run recalcIssuePageNumbers for issue ${issueId}.`);
       await prisma.submission.update({
         where: { id: paper.id },
-        data: { pageStart: cursor, pageEnd: cursor },
+        data: { pageStart: null, pageEnd: null },
       });
-      cursor += 1;
+      failedIds.push(paper.id);
       continue;
     }
     const start = cursor;
@@ -54,4 +59,5 @@ export async function recalcIssuePageNumbers(issueId: string): Promise<void> {
     });
     cursor = end + 1;
   }
+  return { failedIds };
 }

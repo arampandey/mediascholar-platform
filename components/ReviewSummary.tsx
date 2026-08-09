@@ -29,7 +29,15 @@ export default function ReviewSummary({ reviews }: { reviews: Review[] }) {
     { label: "Originality", key: "originalityScore" as keyof Review },
   ];
 
-  const decisionColor: Record<string, string> = { ACCEPT: "text-green-600", MINOR_REVISION: "text-yellow-600", MAJOR_REVISION: "text-orange-600", REJECT: "text-red-600" };
+  // Combined text + background classes — Tailwind's bg-opacity-* utility only works
+  // alongside an explicit bg-* class, so the badge previously rendered with no
+  // visible background at all. Pairing them here fixes that.
+  const decisionColor: Record<string, string> = {
+    ACCEPT: "text-green-700 bg-green-100",
+    MINOR_REVISION: "text-yellow-700 bg-yellow-100",
+    MAJOR_REVISION: "text-orange-700 bg-orange-100",
+    REJECT: "text-red-700 bg-red-100",
+  };
 
   const hasScores = submitted.some(r => r.clarityScore !== null && r.clarityScore !== undefined);
 
@@ -69,7 +77,7 @@ export default function ReviewSummary({ reviews }: { reviews: Review[] }) {
               <span className="text-xs font-semibold text-gray-700">Reviewer {i + 1}{r.reviewer ? ` — ${r.reviewer.name}` : ""}</span>
               {r.decision && (
                 <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                  decisionColor[r.decision] ? `bg-opacity-10 ${decisionColor[r.decision]}` : "text-gray-600"
+                  decisionColor[r.decision] || "text-gray-600 bg-gray-100"
                 }`}>{r.decision.replace(/_/g, " ")}</span>
               )}
             </div>

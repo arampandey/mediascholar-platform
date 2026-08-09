@@ -50,8 +50,14 @@ export default function EditorSubmissionPage() {
 
   async function act(url: string, method: string, body: object) {
     const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-    if (res.ok) { setMsg("✅ Done"); load(); } else setMsg("❌ Error");
-    setTimeout(() => setMsg(""), 4000);
+    if (res.ok) {
+      // Some endpoints (e.g. publish) return a non-fatal `warning` alongside success —
+      // surface it instead of silently showing "Done" when something needs attention.
+      const data = await res.json().catch(() => ({} as any));
+      setMsg(data?.warning ? `⚠️ Done, but: ${data.warning}` : "✅ Done");
+      load();
+    } else setMsg("❌ Error");
+    setTimeout(() => setMsg(""), 8000);
   }
 
   async function submitPlagiarism() {

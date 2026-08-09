@@ -35,9 +35,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   // 📄 Assign sequential page numbers across the whole issue (Paper 1: 1–n,
   // Paper 2: n+1–m, ...). Recalculated for the full issue every time a new
   // paper is published into it, in publish order.
+  let pageNumberWarning: string | null = null;
   if (issueId) {
     try {
-      await recalcIssuePageNumbers(issueId);
+      const { failedIds } = await recalcIssuePageNumbers(issueId);
+      if (failedIds.length > 0) {
+        pageNumberWarning = `Could not determine page count for ${failedIds.length} paper(s) in this issue — their page numbers were left unset. Check the PDF file(s) and re-run publish or contact support.`;
+      }
       submission = await prisma.submission.findUniqueOrThrow({
         where: { id },
         include: {
@@ -47,6 +51,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       });
     } catch (e) {
       console.error("[pageNumbers] recalc failed for issue", issueId, e);
+      pageNumberWarning = "Page number recalculation failed for this issue — check server logs.";
     }
   }
 
@@ -136,5 +141,5 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }).catch(() => {}); // silently ignore if social post fails
   } catch {}
 
-  return NextResponse.json({ submission });
+  return NextResponse.json({ submission, ...(pageNumberWarning ? { warning: pageNumberWarning } : {}) });
 }
