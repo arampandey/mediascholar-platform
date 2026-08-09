@@ -23,11 +23,43 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ sub
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { submissionId } = await params;
-  const reviews = await prisma.review.findMany({
-    where: { submissionId },
-    include: { reviewer: { select: { name: true, email: true } } },
+  const userId = (session.user as any).id;
+  const role = (session.user as any).role;
+
+  const submission = await prisma.submission.findUnique({
+    where: { id: submissionId },
+    select: { authorId: true },
   });
-  return NextResponse.json({ reviews });
+  if (!submission) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  const isEditorial = ["EDITOR", "SUB_EDITOR"].includes(role);
+  const isOwner = submission.authorId === userId;
+
+  if (isEditorial) {
+    // Editors/sub-editors see everything, including who reviewed
+    const reviews = await prisma.review.findMany({
+      where: { submissionId, submittedAt: { not: null } },
+      include: { reviewer: { select: { name: true, email: true } } },
+    });
+    return NextResponse.json({ reviews });
+  }
+
+  if (isOwner) {
+    // Author sees the review content but not the reviewer's identity
+    // (preserves double-blind review anonymity)
+    const reviews = await prisma.review.findMany({
+      where: { submissionId, submittedAt: { not: null } },
+      select: {
+        id: true, clarityScore: true, methodologyScore: true, relevanceScore: true,
+        originalityScore: true, remarks: true, decision: true, submittedAt: true,
+      },
+    });
+    return NextResponse.json({ reviews });
+  }
+
+  // Any other logged-in user (e.g. a different reviewer/author) has no business
+  // seeing this submission's reviews.
+  return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 }
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ submissionId: string }> }) {
@@ -37,16 +69,32 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ sub
   const reviewerId = (session.user as any).id;
   const body = await req.json();
 
-  // Destructure only valid Review fields — never pass reviewId or other non-schema keys to Prisma
-  const { reviewId, clarityScore, methodologyScore, relevanceScore, originalityScore, remarks, decision } = body;
+  // Verify this user is actually an active (non-retracted, non-declined) reviewer
+  // on this submission — prevents random logged-in users from submitting reviews.
+  const assignment = await prisma.submissionReviewer.findFirst({
+    where: { submissionId, userId: reviewerId, retractedAt: null, declinedAt: null },
+  });
+  if (!assignment) {
+    return NextResponse.json({ error: "You are not assigned to review this submission" }, { status: 403 });
+  }
+
+  // Destructure only valid Review fields — never pass reviewId or other non-schema keys to Prisma.
+  // Note: reviewId from the request body is NOT trusted as the upsert key — a client could
+  // pass another reviewer's review id and overwrite it. We always scope the upsert to this
+  // submission + this reviewer via the schema's compound identity instead.
+  const { clarityScore, methodologyScore, relevanceScore, originalityScore, remarks, decision } = body;
   const reviewData = { clarityScore, methodologyScore, relevanceScore, originalityScore, remarks, decision };
 
-  // Save the review
-  const review = await prisma.review.upsert({
-    where: { id: reviewId || "nonexistent" },
-    update: { ...reviewData, submittedAt: new Date() },
-    create: { submissionId, reviewerId, ...reviewData, submittedAt: new Date() },
-  });
+  // Save the review — scoped to (submissionId, reviewerId), never to an arbitrary client-supplied id
+  const existingReview = await prisma.review.findFirst({ where: { submissionId, reviewerId } });
+  const review = existingReview
+    ? await prisma.review.update({
+        where: { id: existingReview.id },
+        data: { ...reviewData, submittedAt: new Date() },
+      })
+    : await prisma.review.create({
+        data: { submissionId, reviewerId, ...reviewData, submittedAt: new Date() },
+      });
 
   const submission = await prisma.submission.findUnique({
     where: { id: submissionId },

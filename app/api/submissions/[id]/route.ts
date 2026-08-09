@@ -6,6 +6,9 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
+  const userId = (session.user as any).id;
+  const role = (session.user as any).role;
+
   const submission = await prisma.submission.findUnique({
     where: { id },
     include: {
@@ -17,7 +20,51 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     },
   });
   if (!submission) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return NextResponse.json({ submission });
+
+  const isEditorial = ["EDITOR", "SUB_EDITOR"].includes(role);
+  const isOwner = submission.authorId === userId;
+
+  // Editors/sub-editors get the full record, including reviewer identities,
+  // plagiarism score, and editor decision notes.
+  if (isEditorial) {
+    return NextResponse.json({ submission });
+  }
+
+  // Authors get their own paper, but reviewer identities are stripped to
+  // preserve double-blind review anonymity.
+  if (isOwner) {
+    const { reviewers, ...rest } = submission;
+    return NextResponse.json({
+      submission: {
+        ...rest,
+        reviews: submission.reviews.map(({ reviewer, ...r }) => r),
+      },
+    });
+  }
+
+  // A reviewer currently assigned to this submission gets only the minimal
+  // fields they need to do the review — no other reviewer's identity, no
+  // plagiarism score, no editor decision notes.
+  const isAssignedReviewer = submission.reviewers.some(
+    (r) => r.userId === userId && !r.retractedAt && !r.declinedAt
+  );
+  if (isAssignedReviewer) {
+    return NextResponse.json({
+      submission: {
+        id: submission.id,
+        title: submission.title,
+        abstract: submission.abstract,
+        keywords: submission.keywords,
+        language: submission.language,
+        fileUrl: submission.fileUrl,
+        status: submission.status,
+        coAuthors: submission.coAuthors,
+      },
+    });
+  }
+
+  // Any other logged-in user has no business viewing this submission.
+  return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

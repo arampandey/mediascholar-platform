@@ -21,7 +21,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json({ success: true });
   }
 
-  // Author resubmission
+  // Author resubmission — verify the logged-in user actually owns this submission
+  const existing = await prisma.submission.findUnique({ where: { id }, select: { authorId: true } });
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (existing.authorId !== (session.user as any).id) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   const { fileUrl, notes } = body;
   await prisma.revision.create({ data: { submissionId: id, fileUrl, notes } });
   await prisma.submission.update({ where: { id }, data: { status: "RESUBMITTED", fileUrl } });

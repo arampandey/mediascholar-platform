@@ -5,7 +5,14 @@ import bcrypt from "bcryptjs";
 export async function POST(req: NextRequest) {
   const body = await req.json();
   const { secret, action } = body;
-  if (secret !== "mediascholar-migrate-2026") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  // Fail closed: this is a powerful admin endpoint (raw SQL, email verification bypass,
+  // reviewer seeding). It must never fall back to a hardcoded default — that default
+  // was sitting in this file in a PUBLIC GitHub repo, so anyone could read it.
+  const MIGRATE_SECRET = process.env.MIGRATE_SECRET;
+  if (!MIGRATE_SECRET) {
+    return NextResponse.json({ error: "MIGRATE_SECRET not configured on server" }, { status: 500 });
+  }
+  if (secret !== MIGRATE_SECRET) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   try {
     if (action === "sync-keywords") {

@@ -13,9 +13,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendReviewReminder, sendReviewRetraction } from "@/lib/email";
 
-const CRON_SECRET = process.env.CRON_SECRET || "mediascholar-cron-2026";
+// Fail closed: no hardcoded fallback — this file lives in a public GitHub repo,
+// so a hardcoded default here would be visible to anyone.
+const CRON_SECRET = process.env.CRON_SECRET;
 
 export async function GET(req: NextRequest) {
+  if (!CRON_SECRET) {
+    return NextResponse.json({ error: "CRON_SECRET not configured on server" }, { status: 500 });
+  }
   // Verify cron secret
   const authHeader = req.headers.get("authorization");
   if (authHeader !== `Bearer ${CRON_SECRET}`) {
