@@ -1,12 +1,15 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import Navbar from "@/components/Navbar";
 import StatusBadge from "@/components/StatusBadge";
 import Link from "next/link";
 
 export default function AuthorDashboard() {
+  const { data: session } = useSession();
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const role = (session?.user as any)?.role;
 
   useEffect(() => {
     fetch("/api/submissions").then(r => r.json()).then(d => setSubmissions(d.submissions || [])).finally(() => setLoading(false));
@@ -16,13 +19,21 @@ export default function AuthorDashboard() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1 max-w-5xl mx-auto px-4 py-10 w-full">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">My Submissions</h1>
             <p className="text-sm text-gray-500 mt-1">Track the status of your research papers</p>
           </div>
-          <div className="flex gap-2">
-            <Link href="/dashboard/apply-reviewer" className="px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">Apply as Reviewer</Link>
+          <div className="flex gap-2 items-center flex-wrap">
+            {role === "REVIEWER" ? (
+              <Link href="/dashboard/reviewer" className="px-4 py-2 text-sm border border-indigo-200 text-indigo-700 bg-indigo-50/60 rounded-lg hover:bg-indigo-100 transition-colors font-medium">
+                Reviewer Dashboard →
+              </Link>
+            ) : (
+              <Link href="/dashboard/apply-reviewer" className="px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                Apply as Reviewer
+              </Link>
+            )}
             <Link href="/dashboard/author/submit" style={{ backgroundColor: "#1a2744" }} className="px-4 py-2 text-sm text-white rounded-lg hover:opacity-90 transition-opacity font-semibold">+ New Submission</Link>
           </div>
         </div>

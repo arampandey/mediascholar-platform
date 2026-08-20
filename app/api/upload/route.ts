@@ -121,30 +121,43 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Convert to PDF if not already PDF
-    let pdfBuffer: Buffer;
-    if (inputFormat === "pdf") {
-      pdfBuffer = rawBuffer;
-    } else {
-      pdfBuffer = await convertToPdf(rawBuffer, file.name, inputFormat);
+    let uploadBuffer = rawBuffer;
+    let extension = inputFormat;
+
+    // Convert to PDF if not already PDF and CloudConvert is available
+    if (inputFormat !== "pdf" && process.env.CLOUDCONVERT_API_KEY) {
+      try {
+        uploadBuffer = await convertToPdf(rawBuffer, file.name, inputFormat);
+        extension = "pdf";
+      } catch (convErr) {
+        console.warn("CloudConvert conversion failed, uploading original format:", convErr);
+        uploadBuffer = rawBuffer;
+        extension = inputFormat;
+      }
     }
 
-    // Build a clean filename with .pdf extension
+    // Build a clean filename
     const timestamp = Date.now();
-    const baseName = file.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9._-]/g, "_");
-    const filename = `${timestamp}-${baseName}.pdf`;
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const filename = `${timestamp}-${safeName}`;
 
-    // Upload PDF to Cloudinary
+    // Upload to Cloudinary
     const fileUrl = await new Promise<string>((resolve, reject) => {
-      const publicId = `mediascholar/papers/${filename.replace(/\.pdf$/, "")}`;
+      const publicId = `mediascholar/papers/${filename.replace(/\.[^/.]+$/, "")}`;
       const uploadStream = cloudinary.uploader.upload_stream(
-        { resource_type: "raw", public_id: publicId, overwrite: true, access_mode: "public" },
+        {
+          resource_type: "raw",
+          public_id: publicId,
+          overwrite: true,
+          access_mode: "public",
+          format: extension === "pdf" ? "pdf" : undefined,
+        },
         (error, result) => {
           if (error) return reject(error);
           resolve(result!.secure_url);
         }
       );
-      uploadStream.end(pdfBuffer);
+      uploadStream.end(uploadBuffer);
     });
 
     return NextResponse.json({ fileUrl });

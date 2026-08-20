@@ -88,8 +88,20 @@ export default function ReviewerDashboard() {
       )}
 
       <main className="flex-1 max-w-5xl mx-auto px-4 py-10 w-full">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Reviewer Dashboard</h1>
-        <p className="text-sm text-gray-500 mb-6">Papers assigned to you for review</p>
+        <div className="flex items-center justify-between gap-4 mb-6 flex-wrap">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Reviewer Dashboard</h1>
+            <p className="text-sm text-gray-500 mt-1">Papers assigned to you for review</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/dashboard/author"
+              className="px-4 py-2 text-sm font-medium border border-indigo-200 text-indigo-700 bg-indigo-50/60 rounded-lg hover:bg-indigo-100 transition-colors flex items-center gap-1.5"
+            >
+              <span>📄</span> My Submissions as Author
+            </Link>
+          </div>
+        </div>
 
         {msg && (
           <div className="mb-5 text-sm font-medium px-4 py-3 rounded-lg bg-green-50 border border-green-200 text-green-800">
