@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import { formatIssueLabel } from "@/lib/format";
 
 type PaperData = {
   id: string;
@@ -113,7 +114,7 @@ export default function PaperClient({ paper }: { paper: PaperData }) {
         <div style={{ backgroundColor: "#1a2744" }} className="px-8 py-8 text-white">
           <div className="flex items-center gap-2 mb-4 flex-wrap">
             {paper.vol && <span className="text-xs bg-white/20 text-white px-3 py-1 rounded-full font-medium">Vol. {paper.vol.number} ({paper.vol.year})</span>}
-            {paper.iss && <span className="text-xs bg-white/20 text-white px-3 py-1 rounded-full font-medium">Issue {paper.iss.number}{paper.iss.title ? ` — ${paper.iss.title}` : ""}</span>}
+            {paper.iss && <span className="text-xs bg-white/20 text-white px-3 py-1 rounded-full font-medium">{formatIssueLabel(paper.iss.number, paper.iss.title)}</span>}
             {(paper.pageStart && paper.pageEnd) && (
               <span className="text-xs bg-white/20 text-white px-3 py-1 rounded-full font-medium">
                 {paper.pageStart === paper.pageEnd ? `p. ${paper.pageStart}` : `pp. ${paper.pageStart}–${paper.pageEnd}`}

@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { formatIssueLabel } from "@/lib/format";
 import type { Metadata } from "next";
 
 async function getAuthor(id: string) {
@@ -106,7 +107,7 @@ export default async function AuthorPage({ params }: { params: Promise<{ id: str
                 </Link>
                 {vol && iss && (
                   <p className="text-xs text-indigo-600 font-medium mb-2">
-                    Vol. {vol.number} ({vol.year}) · Issue {iss.number}{iss.title ? ` — ${iss.title}` : ""}
+                    Vol. {vol.number} ({vol.year}) · {formatIssueLabel(iss.number, iss.title)}
                   </p>
                 )}
                 {paper.abstract && (

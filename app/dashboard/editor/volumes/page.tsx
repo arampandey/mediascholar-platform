@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
+import { formatIssueLabel } from "@/lib/format";
 import Link from "next/link";
 
 export default function VolumesPage() {
@@ -59,7 +60,7 @@ export default function VolumesPage() {
               <div className="space-y-2 mb-4">
                 {vol.issues.map((iss: any) => (
                   <div key={iss.id} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
-                    <span className="text-sm font-medium">Issue {iss.number}{iss.title ? ` — ${iss.title}` : ""} <span className="text-xs text-gray-400">({iss._count?.submissions||0} papers)</span></span>
+                    <span className="text-sm font-medium">{formatIssueLabel(iss.number, iss.title)} <span className="text-xs text-gray-400">({iss._count?.submissions||0} papers)</span></span>
                     {!iss.publishedAt ? (
                       <button onClick={() => publishIssue(iss.id)} className="text-xs px-3 py-1 bg-emerald-600 text-white rounded-full hover:bg-emerald-700">Publish Issue</button>
                     ) : <span className="text-xs text-emerald-600 font-semibold">✅ Published</span>}

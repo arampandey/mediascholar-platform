@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { v2 as cloudinary } from "cloudinary";
 import { depositToZenodo } from "@/lib/zenodo";
 import { sendPaperPublished } from "@/lib/email";
+import { formatIssueLabel } from "@/lib/format";
 import { recalcIssuePageNumbers } from "@/lib/pageNumbers";
 import { fetchFileBuffer } from "@/lib/pdfFetch";
 import { stampPdf } from "@/lib/pdfStamp";
@@ -97,7 +98,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   // 📧 Notify the author their paper is now live, with the correct Volume/Issue/DOI
   if (submission.author?.email && submission.issue) {
-    const issueLabel = `Vol. ${submission.issue.volume.number} (${submission.issue.volume.year}), ${submission.issue.title || `Issue ${submission.issue.number}`}`;
+    const issueLabel = `Vol. ${submission.issue.volume.number} (${submission.issue.volume.year}), ${formatIssueLabel(submission.issue.number, submission.issue.title)}`;
     void sendPaperPublished(submission.author.email, submission.author.name, submission.title, issueLabel, doi || null, paperUrl).catch((e) =>
       console.error("[email] paper_published send failed:", e)
     );

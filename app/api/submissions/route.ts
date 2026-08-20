@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendSubmissionConfirmation } from "@/lib/email";
+import { formatIssueLabel } from "@/lib/format";
 import { v2 as cloudinary } from "cloudinary";
 
 cloudinary.config({
@@ -137,7 +138,7 @@ export async function POST(req: NextRequest) {
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (user) {
       const issueLabel = submission.issue
-        ? `Vol. ${submission.issue.volume.number} (${submission.issue.volume.year}), ${submission.issue.title || `Issue ${submission.issue.number}`}`
+        ? `Vol. ${submission.issue.volume.number} (${submission.issue.volume.year}), ${formatIssueLabel(submission.issue.number, submission.issue.title)}`
         : undefined;
       await sendSubmissionConfirmation(user.email, user.name, title, issueLabel);
     }

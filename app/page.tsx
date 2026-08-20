@@ -1,3 +1,5 @@
+import { formatIssueLabel } from "@/lib/format";
+
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
@@ -59,8 +61,7 @@ export default async function HomePage() {
                 <h2 className="text-2xl font-extrabold text-gray-900">Latest Issue</h2>
                 {latestIssue && (
                   <p className="text-sm text-indigo-600 font-medium mt-0.5">
-                    Vol. {latestIssue.volume.number} ({latestIssue.volume.year}) — Issue {latestIssue.number}
-                    {latestIssue.title ? ` · ${latestIssue.title}` : ""}
+                    Vol. {latestIssue.volume.number} ({latestIssue.volume.year}) — {formatIssueLabel(latestIssue.number, latestIssue.title)}
                   </p>
                 )}
               </div>

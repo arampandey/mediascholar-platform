@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import StatusBadge from "@/components/StatusBadge";
 import Link from "next/link";
+import { formatIssueLabel } from "@/lib/format";
 
 type ViewMode = "flat" | "issue";
 
@@ -468,7 +469,7 @@ export default function EditorDashboard() {
                 {volumes.flatMap(v =>
                   (v.issues || []).map((iss: any) => (
                     <option key={iss.id} value={iss.id}>
-                      Vol. {v.number} ({v.year}) — Issue {iss.number}{iss.title ? `: ${iss.title}` : ""}
+                      Vol. {v.number} ({v.year}) — {formatIssueLabel(iss.number, iss.title)}
                     </option>
                   ))
                 )}
