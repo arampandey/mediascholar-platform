@@ -5,6 +5,9 @@ import { prisma } from "@/lib/prisma";
 export async function GET(req: NextRequest) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!["EDITOR", "SUB_EDITOR"].includes((session.user as { role?: string }).role || "")) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   // Optional: filter out reviewers already actively assigned to any submission in the same issue
   const { searchParams } = new URL(req.url);

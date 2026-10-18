@@ -11,6 +11,7 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { isFetchableFileUrl } from "@/lib/fileUrl";
 import { v2 as cloudinary } from "cloudinary";
 
 cloudinary.config({
@@ -34,6 +35,10 @@ export async function GET(
   });
 
   if (!paper?.fileUrl) {
+    return new NextResponse("PDF not found", { status: 404 });
+  }
+
+  if (!isFetchableFileUrl(paper.fileUrl)) {
     return new NextResponse("PDF not found", { status: 404 });
   }
 

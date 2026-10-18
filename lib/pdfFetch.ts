@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from "cloudinary";
+import { isFetchableFileUrl } from "./fileUrl";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -12,6 +13,7 @@ cloudinary.config({
  * endpoint (same approach used by /pdfs/[slug] and /api/download).
  */
 export async function fetchFileBuffer(fileUrl: string): Promise<Buffer> {
+  if (!isFetchableFileUrl(fileUrl)) throw new Error("Refusing to fetch untrusted file URL");
   let url = fileUrl;
   if (url.startsWith("/")) {
     url = `https://mediascholar.in${url}`;

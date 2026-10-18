@@ -3,6 +3,7 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { isFetchableFileUrl } from "@/lib/fileUrl";
 import { auth } from "@/lib/auth";
 import { v2 as cloudinary } from "cloudinary";
 
@@ -44,6 +45,10 @@ export async function GET(req: NextRequest) {
       allowed = !!assignment;
     }
     if (!allowed) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  if (!isFetchableFileUrl(submission.fileUrl)) {
+    return NextResponse.json({ error: "File not available" }, { status: 404 });
   }
 
   // Fire-and-forget download count increment

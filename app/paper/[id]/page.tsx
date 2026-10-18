@@ -163,7 +163,7 @@ export default async function PaperPage({ params }: { params: Promise<{ id: stri
       {/* JSON-LD ScholarlyArticle Schema */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
       />
 
       <PaperClient paper={paperData} />

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isSafeFileUrl } from "@/lib/fileUrl";
 import { sendRevisionRequest, sendRevisionSubmittedToEditors } from "@/lib/email";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -22,13 +23,21 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   }
 
   // Author resubmission — verify the logged-in user actually owns this submission
-  const existing = await prisma.submission.findUnique({ where: { id }, select: { authorId: true } });
+  const existing = await prisma.submission.findUnique({ where: { id }, select: { authorId: true, status: true } });
   if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
   if (existing.authorId !== (session.user as any).id) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  // Only a paper the editors sent back for revision can be resubmitted
+  if (existing.status !== "REVISION_REQUESTED") {
+    return NextResponse.json({ error: "This submission is not awaiting a revision" }, { status: 400 });
+  }
+
   const { fileUrl, notes } = body;
+  if (!isSafeFileUrl(fileUrl)) {
+    return NextResponse.json({ error: "Invalid file URL" }, { status: 400 });
+  }
   await prisma.revision.create({ data: { submissionId: id, fileUrl, notes } });
   await prisma.submission.update({ where: { id }, data: { status: "RESUBMITTED", fileUrl } });
 
