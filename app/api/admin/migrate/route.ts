@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { timingSafeEqual } from "crypto";
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
+  const body = await req.json().catch(() => null);
+  if (!body || typeof body !== "object") return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   const { secret, action } = body;
   // Fail closed: this is a powerful admin endpoint (raw SQL, email verification bypass,
   // reviewer seeding). It must never fall back to a hardcoded default — that default
@@ -12,7 +14,9 @@ export async function POST(req: NextRequest) {
   if (!MIGRATE_SECRET) {
     return NextResponse.json({ error: "MIGRATE_SECRET not configured on server" }, { status: 500 });
   }
-  if (secret !== MIGRATE_SECRET) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const a = Buffer.from(String(secret ?? ""));
+  const b = Buffer.from(MIGRATE_SECRET);
+  if (a.length !== b.length || !timingSafeEqual(a, b)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   try {
     // NOTE (2026-08-09): removed several one-time data-fix actions that had
@@ -96,7 +100,11 @@ export async function POST(req: NextRequest) {
         { name: "Mehak Pandit", email: "mehak.pandit@galgotiasuniversity.edu.in", institution: "Galgotias University, Greater Noida, Uttar Pradesh", designation: "Assistant Professor & Research Coordinator, School of Media and Communication Studies" },
       ];
 
-      const defaultPassword = body.password || "Reviewer@2026";
+      // No built-in default: a shared known password is a liability.
+      const defaultPassword = body.password;
+      if (typeof defaultPassword !== "string" || defaultPassword.length < 12) {
+        return NextResponse.json({ error: "Provide a `password` of at least 12 characters" }, { status: 400 });
+      }
       const hashed = await bcrypt.hash(defaultPassword, 12);
 
       const results: { email: string; status: string }[] = [];

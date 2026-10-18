@@ -28,7 +28,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     where: { id },
     data: { status: "PUBLISHED", publishedAt: new Date(), issueId, doi },
     include: {
-      author: { select: { name: true, email: true } },
+      author: { select: { name: true, email: true, institution: true } },
       issue: { include: { volume: true } },
     },
   });
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       submission = await prisma.submission.findUniqueOrThrow({
         where: { id },
         include: {
-          author: { select: { name: true, email: true } },
+          author: { select: { name: true, email: true, institution: true } },
           issue: { include: { volume: true } },
         },
       });
@@ -86,7 +86,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
           where: { id },
           data: { fileUrl: uploadResult.secure_url },
           include: {
-            author: { select: { name: true, email: true } },
+            author: { select: { name: true, email: true, institution: true } },
             issue: { include: { volume: true } },
           },
         });

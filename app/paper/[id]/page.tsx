@@ -116,7 +116,7 @@ export default async function PaperPage({ params }: { params: Promise<{ id: stri
 
   // Citation strings
   const authorName = paper.author?.name || "Unknown Author";
-  const year = vol?.year || new Date(paper.publishedAt || Date.now()).getFullYear();
+  const year = vol?.year || (paper.publishedAt ? new Date(paper.publishedAt) : paper.createdAt).getFullYear();
   const journalShort = "Media Scholar";
   const pageRange = paper.pageStart && paper.pageEnd
     ? (paper.pageStart === paper.pageEnd ? `p. ${paper.pageStart}` : `pp. ${paper.pageStart}–${paper.pageEnd}`)
@@ -150,9 +150,9 @@ export default async function PaperPage({ params }: { params: Promise<{ id: stri
     zenodoUrl: paper.zenodoUrl || null,
     zenodoDoi: paper.zenodoDoi || null,
     // Best-effort file type from URL extension (actual detection happens in /pdfs/ route)
-    fileType: (paper.fileUrl || "").toLowerCase().endsWith(".docx") ? "docx"
+    fileType: ((paper.fileUrl || "").toLowerCase().endsWith(".docx") ? "docx"
             : (paper.fileUrl || "").toLowerCase().endsWith(".doc")  ? "doc"
-            : "pdf",
+            : "pdf") as "pdf" | "doc" | "docx",
     coAuthors: (paper.coAuthors as string[]) || [],
   };
 

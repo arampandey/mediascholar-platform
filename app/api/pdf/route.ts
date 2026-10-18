@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
 import { v2 as cloudinary } from "cloudinary";
 
 cloudinary.config({
@@ -11,6 +12,17 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const publicId = searchParams.get("id");
   if (!publicId) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+
+  // Signs requests with the account API key, so it must not be open to the public
+  // and must not reach outside the manuscript folder.
+  const session = await auth();
+  const role = (session?.user as { role?: string } | undefined)?.role;
+  if (!session || !["EDITOR", "SUB_EDITOR"].includes(role || "")) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+  if (!publicId.startsWith("mediascholar/papers/") || publicId.includes("..")) {
+    return NextResponse.json({ error: "Invalid id" }, { status: 400 });
+  }
 
   try {
     // Use Cloudinary Admin API download endpoint with SHA1 signature —

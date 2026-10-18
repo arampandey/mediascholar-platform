@@ -39,7 +39,15 @@ export async function GET(req: NextRequest) {
     },
   });
 
+  const nodemailer = (await import("nodemailer")).default;
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD },
+  });
+  let failures = 0;
+
   for (const a of assignments) {
+   try {
     if (!a.deadlineAt) continue;
 
     // Check if review already submitted
@@ -77,11 +85,6 @@ export async function GET(req: NextRequest) {
 
       // Notify editors to assign replacement
       const editors = await prisma.user.findMany({ where: { role: "EDITOR" }, select: { email: true, name: true } });
-      const nodemailer = (await import("nodemailer")).default;
-      const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD },
-      });
       for (const ed of editors) {
         await transporter.sendMail({
           from: `"Media Scholar" <${process.env.GMAIL_USER}>`,
@@ -94,6 +97,11 @@ export async function GET(req: NextRequest) {
       console.log(`Retracted: ${a.user.name} for ${a.submission.title}`);
       retractions++;
     }
+   } catch (e) {
+    // One bad assignment/email must not stop the rest of the run
+    failures++;
+    console.error(`[cron] failed for assignment ${a.id}:`, e);
+   }
   }
 
   return NextResponse.json({
@@ -101,6 +109,7 @@ export async function GET(req: NextRequest) {
     processed: assignments.length,
     reminders,
     retractions,
+    failures,
     timestamp: now.toISOString(),
   });
 }

@@ -25,22 +25,28 @@ function isPdf(buf: Buffer): boolean {
   return buf[0] === 0x25 && buf[1] === 0x50 && buf[2] === 0x44 && buf[3] === 0x46; // %PDF
 }
 
+// Content signatures: the claimed type must match the actual bytes.
+function matchesSignature(format: string, buf: Buffer): boolean {
+  switch (format) {
+    case "pdf":  return isPdf(buf);
+    case "docx":
+    case "odt":  return buf[0] === 0x50 && buf[1] === 0x4b; // ZIP container "PK"
+    case "doc":  return buf[0] === 0xd0 && buf[1] === 0xcf && buf[2] === 0x11 && buf[3] === 0xe0; // OLE2
+    case "rtf":  return buf.subarray(0, 5).toString("latin1") === "{\\rtf";
+    default:     return false;
+  }
+}
+
 function detectFormat(file: File, buf: Buffer): string | null {
   // Magic bytes check for PDF
   if (isPdf(buf)) return "pdf";
 
-  // MIME type check
-  const mimeFormat = SUPPORTED_TYPES[file.type];
-  if (mimeFormat) return mimeFormat;
-
-  // Extension check (fallback — browsers sometimes send wrong MIME)
-  const ext = file.name.slice(file.name.lastIndexOf(".")).toLowerCase();
-  if (ext === ".doc") return "doc";
-  if (ext === ".docx") return "docx";
-  if (ext === ".odt") return "odt";
-  if (ext === ".rtf") return "rtf";
-
-  return null;
+  // MIME type, then extension (browsers sometimes send wrong MIME)
+  const dot = file.name.lastIndexOf(".");
+  const ext = dot >= 0 ? file.name.slice(dot).toLowerCase() : "";
+  const claimed = SUPPORTED_TYPES[file.type] ?? (SUPPORTED_EXTENSIONS.includes(ext) ? ext.slice(1) : null);
+  if (!claimed) return null;
+  return matchesSignature(claimed, buf) ? claimed : null;
 }
 
 async function convertToPdf(buffer: Buffer, filename: string, inputFormat: string): Promise<Buffer> {
@@ -121,7 +127,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    let uploadBuffer = rawBuffer;
+    let uploadBuffer: Buffer = rawBuffer;
     let extension = inputFormat;
 
     // Convert to PDF if not already PDF and CloudConvert is available

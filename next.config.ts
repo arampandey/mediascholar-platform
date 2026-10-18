@@ -6,7 +6,6 @@ const nextConfig: NextConfig = {
     "*.trycloudflare.com",
   ],
   images: { remotePatterns: [{ protocol: "https", hostname: "mediascholar.in" }] },
-  typescript: { ignoreBuildErrors: true },
   async redirects() {
     return [
       {

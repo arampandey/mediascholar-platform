@@ -3,6 +3,7 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
 import { v2 as cloudinary } from "cloudinary";
 
 cloudinary.config({
@@ -21,11 +22,28 @@ export async function GET(req: NextRequest) {
 
   const submission = await prisma.submission.findUnique({
     where: { id: submissionId },
-    select: { fileUrl: true, title: true },
+    select: { fileUrl: true, title: true, status: true, authorId: true },
   });
 
   if (!submission?.fileUrl) {
     return NextResponse.json({ error: "File not found" }, { status: 404 });
+  }
+
+  // Published papers are public. Anything else (manuscripts under review) is
+  // restricted to editorial staff, the author, and currently assigned reviewers.
+  if (submission.status !== "PUBLISHED") {
+    const session = await auth();
+    const user = session?.user as { id?: string; role?: string } | undefined;
+    if (!user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    let allowed = ["EDITOR", "SUB_EDITOR"].includes(user.role || "") || submission.authorId === user.id;
+    if (!allowed) {
+      const assignment = await prisma.submissionReviewer.findFirst({
+        where: { submissionId, userId: user.id, retractedAt: null },
+        select: { id: true },
+      });
+      allowed = !!assignment;
+    }
+    if (!allowed) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   // Fire-and-forget download count increment

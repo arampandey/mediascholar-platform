@@ -2,12 +2,15 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "./prisma";
+import { rateLimited } from "./rateLimit";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
       credentials: { email: { type: "email" }, password: { type: "password" } },
       async authorize(credentials) {
+        if (typeof credentials?.email !== "string" || typeof credentials?.password !== "string") return null;
+        if (rateLimited(`login:${credentials.email.toLowerCase()}`, 10)) return null;
         const user = await prisma.user.findUnique({
           where: { email: (credentials.email as string).toLowerCase() },
         });
