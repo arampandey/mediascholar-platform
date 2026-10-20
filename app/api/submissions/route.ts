@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { sendSubmissionConfirmation } from "@/lib/email";
+import { sendSubmissionConfirmation, sendNewSubmissionEditor } from "@/lib/email";
 import { formatIssueLabel } from "@/lib/format";
 import { v2 as cloudinary } from "cloudinary";
 
@@ -141,6 +141,15 @@ export async function POST(req: NextRequest) {
         ? `Vol. ${submission.issue.volume.number} (${submission.issue.volume.year}), ${formatIssueLabel(submission.issue.number, submission.issue.title)}`
         : undefined;
       await sendSubmissionConfirmation(user.email, user.name, title, issueLabel);
+
+      // Notify every editor and sub-editor on their registered email
+      const editors = await prisma.user.findMany({
+        where: { role: { in: ["EDITOR", "SUB_EDITOR"] } },
+        select: { email: true },
+      });
+      for (const ed of editors) {
+        await sendNewSubmissionEditor(ed.email, user.name, user.email, title);
+      }
     }
 
     return NextResponse.json({ submission });

@@ -171,6 +171,10 @@ export async function sendPlagiarismPassed(editorEmail: string, authorName: stri
   await sendTemplate(editorEmail, "plagiarism_passed", { authorName, title, score: String(score) });
 }
 
+export async function sendPlagiarismScoreToReviewer(to: string, reviewerName: string, title: string, score: number) {
+  await sendTemplate(to, "plagiarism_score_reviewer", { reviewerName, title, score: String(score) });
+}
+
 export async function sendBothMinorRevision(to: string, authorName: string, title: string, remarks: string) {
   const remarksHtml = remarks
     ? remarks

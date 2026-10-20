@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { sendPlagiarismFailed, sendPlagiarismPassed } from "@/lib/email";
+import { sendPlagiarismFailed, sendPlagiarismScoreToReviewer } from "@/lib/email";
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
@@ -30,31 +30,25 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     },
   });
 
-  // Get editor emails for notification
-  const editors = await prisma.user.findMany({
-    where: { role: "EDITOR" },
-    select: { email: true },
-  });
-
-  if (submission.author) {
-    if (score > 20) {
-      // Notify author: manuscript not considered
+  if (score > 20) {
+    // Notify author: manuscript not considered
+    if (submission.author) {
       await sendPlagiarismFailed(
         submission.author.email,
         submission.author.name,
         submission.title,
         score
       );
-    } else {
-      // Notify editor: ready for reviewer assignment
-      for (const ed of editors) {
-        await sendPlagiarismPassed(
-          ed.email,
-          submission.author.name,
-          submission.title,
-          score
-        );
-      }
+    }
+  } else {
+    // Editors are intentionally not emailed (they entered the score themselves);
+    // only reviewers already assigned to this manuscript are notified.
+    const assigned = await prisma.submissionReviewer.findMany({
+      where: { submissionId: id, retractedAt: null, declinedAt: null },
+      include: { user: { select: { name: true, email: true } } },
+    });
+    for (const a of assigned) {
+      await sendPlagiarismScoreToReviewer(a.user.email, a.user.name, submission.title, score);
     }
   }
 

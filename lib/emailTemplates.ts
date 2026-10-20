@@ -145,6 +145,20 @@ export const DEFAULT_TEMPLATES: {
     variables: ["title", "authorName", "score"],
   },
   {
+    key: "plagiarism_score_reviewer",
+    label: "Plagiarism Score Recorded (to Reviewer)",
+    subject: "Plagiarism Check Cleared — {{title}}",
+    body: `<p {{P}}>Dear <strong>{{reviewerName}}</strong>,</p>
+<p {{P}}>The plagiarism check for the manuscript assigned to you has been completed and the similarity score is within the acceptable limit.</p>
+<div {{BOX}}>
+  <p style="margin:0 0 6px;font-size:13px;color:#4a5568;"><strong>Manuscript Title:</strong> {{title}}</p>
+  <p style="margin:0;font-size:13px;color:#4a5568;"><strong>Similarity Score:</strong> {{score}}% (acceptable limit: up to 20%)</p>
+</div>
+<p {{P}}>Please log in to your reviewer account to continue with your evaluation.</p>
+<p {{SIGN}}>Regards,<br><strong>Media Scholar Platform</strong></p>`,
+    variables: ["reviewerName", "title", "score"],
+  },
+  {
     key: "both_reviewers_accepted",
     label: "Both Reviewers Accepted (to Author)",
     subject: "Congratulations — Manuscript Accepted: {{title}}",
