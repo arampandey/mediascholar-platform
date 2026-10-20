@@ -2,10 +2,22 @@ import nodemailer from "nodemailer";
 import { prisma } from "@/lib/prisma";
 import { DEFAULT_TEMPLATES } from "@/lib/emailTemplates";
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD },
-});
+// Prefer the journal's own domain mailbox (Hostinger SMTP); fall back to Gmail
+// when SMTP_* env vars are not configured.
+const useSmtp = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+const SENDER = useSmtp ? process.env.SMTP_USER! : process.env.GMAIL_USER;
+
+const transporter = useSmtp
+  ? nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT || 465),
+      secure: Number(process.env.SMTP_PORT || 465) === 465,
+      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+    })
+  : nodemailer.createTransport({
+      service: "gmail",
+      auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD },
+    });
 
 const JOURNAL = "Media Scholar — Journal of Media Studies and Humanities";
 const ISSN = "ISSN: 3048-5029";
@@ -82,7 +94,7 @@ function interpolate(str: string, vars: Record<string, string>): string {
 async function sendRaw(to: string, subject: string, html: string) {
   try {
     await transporter.sendMail({
-      from: `"${JOURNAL}" <${process.env.GMAIL_USER}>`,
+      from: `"${JOURNAL}" <${SENDER}>`,
       replyTo: `"${JOURNAL}" <editor@mediascholar.in>`,
       to,
       subject,
