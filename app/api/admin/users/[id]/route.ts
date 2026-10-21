@@ -11,10 +11,20 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (role !== undefined) updateData.role = role;
   if (institution !== undefined) updateData.institution = institution;
   if (designation !== undefined) updateData.designation = designation;
-  if (email !== undefined) updateData.email = email;
+  if (email !== undefined) {
+    const e = String(email).trim().toLowerCase();
+    if (!/^\S+@\S+\.\S+$/.test(e)) return NextResponse.json({ error: "Please enter a valid email address." }, { status: 400 });
+    const clash = await prisma.user.findFirst({ where: { email: e, id: { not: id } }, select: { name: true } });
+    if (clash) return NextResponse.json({ error: `This email is already used by another account (${clash.name}).` }, { status: 409 });
+    updateData.email = e;
+  }
   if (name !== undefined) updateData.name = name;
-  const user = await prisma.user.update({ where: { id }, data: updateData });
-  return NextResponse.json({ user });
+  try {
+    const user = await prisma.user.update({ where: { id }, data: updateData });
+    return NextResponse.json({ user });
+  } catch (e: any) {
+    return NextResponse.json({ error: e.code === "P2002" ? "This email is already in use." : e.message || "Update failed" }, { status: e.code === "P2002" ? 409 : 500 });
+  }
 }
 
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

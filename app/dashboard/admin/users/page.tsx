@@ -14,6 +14,7 @@ export default function AdminUsersPage() {
   const [updating, setUpdating] = useState<string|null>(null);
   const [editingEmail, setEditingEmail] = useState<string|null>(null);
   const [emailDraft, setEmailDraft] = useState("");
+  const [emailError, setEmailError] = useState("");
   const [msg, setMsg] = useState("");
   const [confirmDelete, setConfirmDelete] = useState<{id:string;name:string}|null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -28,13 +29,17 @@ export default function AdminUsersPage() {
   }
 
   async function saveEmail(id: string) {
-    if (!emailDraft.trim() || !emailDraft.includes("@")) return;
+    const email = emailDraft.trim().toLowerCase();
+    setEmailError("");
+    if (!/^\S+@\S+\.\S+$/.test(email)) { setEmailError("Please enter a valid email address."); return; }
     setUpdating(id);
-    const res = await fetch(`/api/admin/users/${id}`, { method:"PATCH", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ email: emailDraft.trim() }) });
-    if (res.ok) { setMsg("✅ Email updated"); setEditingEmail(null); load(); }
-    else setMsg("❌ Failed to update email");
+    try {
+      const res = await fetch(`/api/admin/users/${id}`, { method:"PATCH", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ email }) });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) { setMsg("✅ Email updated"); setEditingEmail(null); load(); setTimeout(() => setMsg(""), 4000); }
+      else setEmailError(data.error || "Failed to update email");
+    } catch { setEmailError("Network error — please try again."); }
     setUpdating(null);
-    setTimeout(() => setMsg(""), 4000);
   }
 
   async function resendAssignment(id: string, name: string) {
@@ -125,12 +130,14 @@ export default function AdminUsersPage() {
                           />
                           <button onClick={() => saveEmail(u.id)} disabled={updating===u.id} className="text-green-600 hover:text-green-800 font-bold text-xs">✔</button>
                           <button onClick={() => setEditingEmail(null)} className="text-gray-400 hover:text-gray-600 text-xs">✕</button>
+                          {updating===u.id && <span className="text-gray-500 text-xs">Saving…</span>}
+                          {emailError && <span className="text-red-600 text-xs font-medium ml-1">{emailError}</span>}
                         </div>
                       ) : (
                         <div className="flex items-center gap-1">
                           <span className={u.email?.includes("@mediascholar.in") && u.email !== "archive@mediascholar.in" ? "text-orange-600 font-semibold" : "text-gray-500"}>{u.email}</span>
                           {u.email?.includes("@mediascholar.in") && u.email !== "archive@mediascholar.in" && <span className="text-orange-500" title="Placeholder email — click pencil to fix">⚠️</span>}
-                          <button onClick={() => { setEditingEmail(u.id); setEmailDraft(u.email); }} className="ml-1 text-gray-300 hover:text-indigo-500" title="Edit email">✏️</button>
+                          <button onClick={() => { setEditingEmail(u.id); setEmailDraft(u.email); setEmailError(""); }} className="ml-1 text-gray-300 hover:text-indigo-500" title="Edit email">✏️</button>
                         </div>
                       )}
                     </td>
