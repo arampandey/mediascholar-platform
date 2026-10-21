@@ -222,6 +222,10 @@ export async function sendEmailVerification(to: string, name: string, verifyUrl:
   await sendTemplate(to, "email_verification", { name, verifyUrl });
 }
 
+export async function sendAccountInvitation(to: string, name: string, roleLabel: string, setupUrl: string) {
+  await sendTemplate(to, "account_invitation", { name, roleLabel, setupUrl });
+}
+
 export async function sendPasswordReset(to: string, name: string, resetUrl: string) {
   await sendTemplate(to, "password_reset", { name, resetUrl });
 }

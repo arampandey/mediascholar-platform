@@ -20,6 +20,10 @@ export default function AdminUsersPage() {
   const [confirmDelete, setConfirmDelete] = useState<{id:string;name:string}|null>(null);
   const [deleting, setDeleting] = useState(false);
   const [deleteErr, setDeleteErr] = useState("");
+  const [addUser, setAddUser] = useState<any|null>(null);
+  const [addErr, setAddErr] = useState("");
+  const [addSaving, setAddSaving] = useState(false);
+  const [addedLink, setAddedLink] = useState("");
   const [editUser, setEditUser] = useState<any|null>(null);
   const [editErr, setEditErr] = useState("");
   const [editSaving, setEditSaving] = useState(false);
@@ -56,6 +60,22 @@ export default function AdminUsersPage() {
     else setMsg(`❌ ${data.error || "Failed to resend"}`);
     setUpdating(null);
     setTimeout(() => setMsg(""), 5000);
+  }
+
+  async function saveAdd() {
+    if (!addUser) return;
+    const name = (addUser.name||"").trim();
+    const email = (addUser.email||"").trim().toLowerCase();
+    if (!name) { setAddErr("Name is required."); return; }
+    if (!/^\S+@\S+\.\S+$/.test(email)) { setAddErr("Please enter a valid email address."); return; }
+    setAddSaving(true); setAddErr("");
+    try {
+      const res = await fetch("/api/admin/users", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ ...addUser, name, email }) });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) { setAddedLink(data.setupUrl); setMsg(`✅ Account created for ${name} — invitation emailed to ${email}`); load(); }
+      else setAddErr(data.error || "Could not create the account.");
+    } catch { setAddErr("Network error — please try again."); }
+    setAddSaving(false);
   }
 
   async function saveEdit() {
@@ -102,6 +122,7 @@ export default function AdminUsersPage() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
             <p className="text-sm text-gray-500">{users.length} total users</p>
+            <button onClick={() => { setAddUser({ name:"", email:"", role:"SUB_EDITOR", institution:"", designation:"" }); setAddErr(""); setAddedLink(""); }} className="mt-2 px-3 py-1.5 text-sm font-semibold bg-indigo-700 text-white rounded-lg hover:bg-indigo-800">+ Add user</button>
             {badEmailCount > 0 && (
               <div className="mt-1 flex items-center gap-2 text-xs font-semibold text-orange-700 bg-orange-50 border border-orange-200 px-3 py-1.5 rounded-lg">
                 ⚠️ {badEmailCount} user{badEmailCount>1?"s have":" has"} placeholder @mediascholar.in email — click ✏️ on any highlighted row to fix, or <Link href="/dashboard/admin/users/fix-emails" className="underline font-bold">fix them all in one go →</Link>
@@ -193,6 +214,42 @@ export default function AdminUsersPage() {
           </div>
         )}
       </main>
+
+      {addUser && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full">
+            <h3 className="font-bold text-gray-900 text-lg mb-1">Add user</h3>
+            {addedLink ? (
+              <>
+                <p className="text-sm text-green-700 font-medium mt-2">Account created. An email with a link to set their password has been sent.</p>
+                <p className="text-xs text-gray-500 mt-3 mb-1">If it does not arrive, send them this link (valid 7 days):</p>
+                <input readOnly value={addedLink} onFocus={e => e.currentTarget.select()} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs font-mono" />
+                <button onClick={() => setAddUser(null)} className="mt-4 w-full px-4 py-2 bg-indigo-700 text-white rounded-lg text-sm font-bold hover:bg-indigo-800">Done</button>
+              </>
+            ) : (
+              <>
+                <p className="text-xs text-gray-500 mb-4">They will get an email with a link to set their own password.</p>
+                {([["name","Full name (e.g. Dr. Pallavi …)"],["email","Email"],["institution","Institution (optional)"],["designation","Designation (optional)"]] as const).map(([k,label]) => (
+                  <label key={k} className="block mb-3 text-xs font-semibold text-gray-600">{label}
+                    <input type={k==="email"?"email":"text"} value={addUser[k]} onChange={e => setAddUser({ ...addUser, [k]: e.target.value })} onKeyDown={e => { if (e.key==="Enter") saveAdd(); }}
+                      className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-normal text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                  </label>
+                ))}
+                <label className="block mb-3 text-xs font-semibold text-gray-600">Role
+                  <select value={addUser.role} onChange={e => setAddUser({ ...addUser, role: e.target.value })} className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-normal text-gray-900">
+                    {ROLES.map(r => <option key={r} value={r}>{r.replace("_"," ")}</option>)}
+                  </select>
+                </label>
+                {addErr && <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-3">{addErr}</p>}
+                <div className="flex gap-3">
+                  <button onClick={() => setAddUser(null)} disabled={addSaving} className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-50 disabled:opacity-40">Cancel</button>
+                  <button onClick={saveAdd} disabled={addSaving} className="flex-1 px-4 py-2 bg-indigo-700 text-white rounded-lg text-sm font-bold hover:bg-indigo-800 disabled:opacity-40">{addSaving ? "Creating…" : "Create & send invite"}</button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {editUser && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">

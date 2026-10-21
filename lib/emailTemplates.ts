@@ -347,4 +347,17 @@ export const DEFAULT_TEMPLATES: {
 <p {{SIGN}}>Yours sincerely,<br><strong>Editorial Team</strong><br>{{JOURNAL}}</p>`,
     variables: ["name", "resetUrl"],
   },
+  {
+    key: "account_invitation",
+    label: "Account Invitation (to new Sub-Editor / Reviewer / Editor)",
+    subject: "Your Media Scholar account — set your password",
+    body: `<p {{P}}>Dear <strong>{{name}}</strong>,</p>
+<p {{P}}>An account has been created for you on <em>{{JOURNAL}}</em> with the role of <strong>{{roleLabel}}</strong>. Please click the button below to set your password and sign in. This link is valid for 7 days.</p>
+<p style="margin:24px 0;">
+  <a href="{{setupUrl}}" style="display:inline-block;background:#1a2744;color:#ffffff;padding:12px 28px;border-radius:4px;text-decoration:none;font-size:14px;font-weight:bold;">Set My Password</a>
+</p>
+<p {{P}}>If the button does not work, copy this address into your browser:<br><span style="font-size:12px;color:#4a5568;word-break:break-all;">{{setupUrl}}</span></p>
+<p {{SIGN}}>Yours sincerely,<br><strong>Editorial Team</strong><br>{{JOURNAL}}</p>`,
+    variables: ["name", "roleLabel", "setupUrl"],
+  },
 ];
