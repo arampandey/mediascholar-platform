@@ -126,8 +126,9 @@ export default function EditorSubmissionPage() {
                         body: JSON.stringify({ email: authorEmailDraft.toLowerCase().trim() }),
                       });
                       setAuthorEmailSaving(false);
+                      const data = await res.json().catch(() => ({}));
                       if (res.ok) { setEditingAuthorEmail(false); load(); setMsg("✅ Author email updated"); setTimeout(() => setMsg(""), 4000); }
-                      else setMsg("❌ Failed to update email");
+                      else { window.alert(data.error || "Failed to update email"); }
                     }}
                     className="text-xs px-2 py-0.5 bg-indigo-700 text-white rounded hover:bg-indigo-800 disabled:opacity-40"
                   >{authorEmailSaving ? "Saving…" : "Save"}</button>

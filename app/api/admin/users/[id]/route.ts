@@ -27,17 +27,30 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   }
 }
 
-export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session || (session.user as any).role !== "EDITOR") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   const { id } = await params;
   if (id === (session.user as any).id) return NextResponse.json({ error: "Cannot delete yourself" }, { status: 400 });
+  const { deleteSubmissions } = await req.json().catch(() => ({}));
   try {
-    // Cascade: remove dependent records before deleting user
-    await prisma.submissionReviewer.deleteMany({ where: { userId: id } });
-    await prisma.review.deleteMany({ where: { reviewerId: id } });
-    await prisma.reviewerApplication.deleteMany({ where: { userId: id } });
-    await prisma.user.delete({ where: { id } });
+    const subs = await prisma.submission.findMany({ where: { authorId: id }, select: { id: true, status: true } });
+    const published = subs.filter(s => s.status === "PUBLISHED").length;
+    if (published > 0)
+      return NextResponse.json({ error: `This author has ${published} published paper(s) and cannot be deleted. Published papers must stay on the journal record.` }, { status: 400 });
+    if (subs.length > 0 && deleteSubmissions !== true)
+      return NextResponse.json({ code: "HAS_SUBMISSIONS", count: subs.length, error: `This author has ${subs.length} unpublished submission(s). Deleting the author will also permanently delete these submissions.` }, { status: 409 });
+
+    const subIds = subs.map(s => s.id);
+    // Cascade: remove dependent records before deleting the user
+    await prisma.$transaction([
+      prisma.review.deleteMany({ where: { OR: [{ submissionId: { in: subIds } }, { reviewerId: id }] } }),
+      prisma.submissionReviewer.deleteMany({ where: { OR: [{ submissionId: { in: subIds } }, { userId: id }] } }),
+      prisma.revision.deleteMany({ where: { submissionId: { in: subIds } } }),
+      prisma.submission.deleteMany({ where: { id: { in: subIds } } }),
+      prisma.reviewerApplication.deleteMany({ where: { userId: id } }),
+      prisma.user.delete({ where: { id } }),
+    ]);
     return NextResponse.json({ success: true });
   } catch (e: any) {
     return NextResponse.json({ error: e.message || "Delete failed" }, { status: 500 });

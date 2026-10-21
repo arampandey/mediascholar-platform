@@ -18,6 +18,8 @@ export default function AdminUsersPage() {
   const [msg, setMsg] = useState("");
   const [confirmDelete, setConfirmDelete] = useState<{id:string;name:string}|null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [deleteErr, setDeleteErr] = useState("");
+  const [needsSubsConfirm, setNeedsSubsConfirm] = useState(false);
 
   function load() { fetch("/api/admin/users").then(r => r.json()).then(d => setUsers(d.users||[])).finally(() => setLoading(false)); }
   useEffect(() => { load(); }, []);
@@ -54,14 +56,15 @@ export default function AdminUsersPage() {
 
   async function deleteUser() {
     if (!confirmDelete) return;
-    setDeleting(true);
-    const res = await fetch(`/api/admin/users/${confirmDelete.id}`, { method:"DELETE" });
-    const data = await res.json();
+    setDeleting(true); setDeleteErr("");
+    try {
+      const res = await fetch(`/api/admin/users/${confirmDelete.id}`, { method:"DELETE", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ deleteSubmissions: needsSubsConfirm }) });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) { setMsg(`✅ Deleted "${confirmDelete.name}" successfully`); setConfirmDelete(null); setNeedsSubsConfirm(false); load(); setTimeout(() => setMsg(""), 5000); }
+      else if (data.code === "HAS_SUBMISSIONS") { setNeedsSubsConfirm(true); setDeleteErr(data.error); }
+      else setDeleteErr(data.error || "Delete failed");
+    } catch { setDeleteErr("Network error — please try again."); }
     setDeleting(false);
-    setConfirmDelete(null);
-    if (res.ok) { setMsg(`✅ Deleted "${confirmDelete.name}" successfully`); load(); }
-    else setMsg(`❌ ${data.error || "Delete failed"}`);
-    setTimeout(() => setMsg(""), 5000);
   }
 
   const filtered = users.filter(u => {
@@ -158,7 +161,7 @@ export default function AdminUsersPage() {
                             className="text-xs text-indigo-500 hover:text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full disabled:opacity-40"
                           >📧 Resend</button>
                         )}
-                        <button onClick={() => setConfirmDelete({id: u.id, name: u.name})} className="text-xs text-red-400 hover:text-red-600 border border-red-200 px-2 py-0.5 rounded-full">Delete</button>
+                        <button onClick={() => { setConfirmDelete({id: u.id, name: u.name}); setDeleteErr(""); setNeedsSubsConfirm(false); }} className="text-xs text-red-400 hover:text-red-600 border border-red-200 px-2 py-0.5 rounded-full">Delete</button>
                       </div>
                     </td>
                   </tr>
@@ -177,10 +180,11 @@ export default function AdminUsersPage() {
             <h3 className="font-bold text-gray-900 text-lg mb-2">Delete User?</h3>
             <p className="text-sm text-gray-600 mb-1">You are about to permanently delete:</p>
             <p className="font-semibold text-gray-900 mb-1">{confirmDelete.name}</p>
-            <p className="text-xs text-gray-400 mb-5">This will also remove all their review assignments and reviews. This cannot be undone.</p>
+            <p className="text-xs text-gray-400 mb-3">This will also remove all their review assignments and reviews. This cannot be undone.</p>
+            {deleteErr && <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-4">{deleteErr}</p>}
             <div className="flex gap-3">
               <button
-                onClick={() => setConfirmDelete(null)}
+                onClick={() => { setConfirmDelete(null); setDeleteErr(""); setNeedsSubsConfirm(false); }}
                 disabled={deleting}
                 className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-50 disabled:opacity-40"
               >Cancel</button>
@@ -188,7 +192,7 @@ export default function AdminUsersPage() {
                 onClick={deleteUser}
                 disabled={deleting}
                 className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-bold hover:bg-red-700 disabled:opacity-40"
-              >{deleting ? "Deleting…" : "Yes, Delete"}</button>
+              >{deleting ? "Deleting…" : needsSubsConfirm ? "Delete user and submissions" : "Yes, Delete"}</button>
             </div>
           </div>
         </div>
