@@ -20,6 +20,10 @@ export default function AdminUsersPage() {
   const [confirmDelete, setConfirmDelete] = useState<{id:string;name:string}|null>(null);
   const [deleting, setDeleting] = useState(false);
   const [deleteErr, setDeleteErr] = useState("");
+  const [mergeFrom, setMergeFrom] = useState<any|null>(null);
+  const [mergeInto, setMergeInto] = useState("");
+  const [mergeErr, setMergeErr] = useState("");
+  const [merging, setMerging] = useState(false);
   const [addUser, setAddUser] = useState<any|null>(null);
   const [addErr, setAddErr] = useState("");
   const [addSaving, setAddSaving] = useState(false);
@@ -60,6 +64,21 @@ export default function AdminUsersPage() {
     else setMsg(`❌ ${data.error || "Failed to resend"}`);
     setUpdating(null);
     setTimeout(() => setMsg(""), 5000);
+  }
+
+  async function doMerge() {
+    if (!mergeFrom || !mergeInto) { setMergeErr("Choose the account to keep."); return; }
+    setMerging(true); setMergeErr("");
+    try {
+      const res = await fetch("/api/admin/users/merge", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ keepId: mergeInto, mergeId: mergeFrom.id }) });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        const m = data.moved;
+        setMsg(`✅ Merged into ${data.kept.name} (${data.kept.email}) — moved ${m.papers} paper(s), ${m.reviews} review(s), ${m.assignments} assignment(s)`);
+        setMergeFrom(null); setMergeInto(""); load();
+      } else setMergeErr(data.error || "Merge failed");
+    } catch { setMergeErr("Network error — please try again."); }
+    setMerging(false);
   }
 
   async function saveAdd() {
@@ -202,6 +221,7 @@ export default function AdminUsersPage() {
                             className="text-xs text-indigo-500 hover:text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full disabled:opacity-40"
                           >📧 Resend</button>
                         )}
+                        <button onClick={() => { setMergeFrom(u); setMergeInto(""); setMergeErr(""); }} title="Merge this duplicate into another account" className="text-xs text-purple-600 hover:text-purple-800 border border-purple-200 px-2 py-0.5 rounded-full">Merge</button>
                         <button onClick={() => { setEditUser({ id: u.id, name: u.name||"", email: u.email||"", institution: u.institution||"", designation: u.designation||"" }); setEditErr(""); }} className="text-xs text-indigo-600 hover:text-indigo-800 border border-indigo-200 px-2 py-0.5 rounded-full">Edit</button>
                         <button onClick={() => { setConfirmDelete({id: u.id, name: u.name}); setDeleteErr(""); setNeedsSubsConfirm(false); }} className="text-xs text-red-400 hover:text-red-600 border border-red-200 px-2 py-0.5 rounded-full">Delete</button>
                       </div>
@@ -214,6 +234,38 @@ export default function AdminUsersPage() {
           </div>
         )}
       </main>
+
+      {mergeFrom && (() => {
+        const first = (mergeFrom.name || "").toLowerCase().replace(/^dr\.?\s+/, "").split(/\s+/)[0];
+        const others = users.filter(x => x.id !== mergeFrom.id);
+        const similar = others.filter(x => first && (x.name || "").toLowerCase().includes(first));
+        const target = others.find(x => x.id === mergeInto);
+        return (
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
+            <div className="bg-white rounded-2xl shadow-xl p-6 max-w-lg w-full">
+              <h3 className="font-bold text-gray-900 text-lg mb-1">Merge duplicate account</h3>
+              <p className="text-sm text-gray-600 mb-3">Duplicate to remove: <strong>{mergeFrom.name}</strong> <span className="text-gray-400">({mergeFrom.email})</span> — {mergeFrom._count.submissions} paper(s), {mergeFrom._count.reviews} review(s)</p>
+              <label className="block text-xs font-semibold text-gray-600 mb-3">Merge into (the account to keep)
+                <select value={mergeInto} onChange={e => setMergeInto(e.target.value)} className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-normal text-gray-900">
+                  <option value="">— choose —</option>
+                  {similar.length > 0 && <optgroup label="Similar names">{similar.map(x => <option key={x.id} value={x.id}>{x.name} — {x.email}</option>)}</optgroup>}
+                  <optgroup label="All other users">{others.filter(x => !similar.includes(x)).map(x => <option key={x.id} value={x.id}>{x.name} — {x.email}</option>)}</optgroup>
+                </select>
+              </label>
+              {target && (
+                <p className="text-sm bg-purple-50 border border-purple-200 rounded-lg px-3 py-2 mb-3 text-purple-900">
+                  All papers, reviews and reviewer assignments of <strong>{mergeFrom.email}</strong> will move to <strong>{target.name}</strong> (<strong>{target.email}</strong>). Then <strong>{mergeFrom.email}</strong> is deleted. Published papers stay published. This cannot be undone.
+                </p>
+              )}
+              {mergeErr && <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-3">{mergeErr}</p>}
+              <div className="flex gap-3">
+                <button onClick={() => setMergeFrom(null)} disabled={merging} className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-50 disabled:opacity-40">Cancel</button>
+                <button onClick={doMerge} disabled={merging || !mergeInto} className="flex-1 px-4 py-2 bg-purple-700 text-white rounded-lg text-sm font-bold hover:bg-purple-800 disabled:opacity-40">{merging ? "Merging…" : "Merge & delete duplicate"}</button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {addUser && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
