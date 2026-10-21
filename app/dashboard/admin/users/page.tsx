@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
+import { PLACEHOLDER_RE } from "@/lib/placeholderEmail";
 
 const ROLES = ["AUTHOR","REVIEWER","SUB_EDITOR","EDITOR"];
 const ROLE_COLORS: Record<string,string> = { AUTHOR:"bg-blue-100 text-blue-700", REVIEWER:"bg-purple-100 text-purple-700", SUB_EDITOR:"bg-orange-100 text-orange-700", EDITOR:"bg-green-100 text-green-700" };
@@ -91,7 +92,7 @@ export default function AdminUsersPage() {
     return (filterRole==="ALL"||u.role===filterRole) && (!q || u.name?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q) || u.institution?.toLowerCase().includes(q));
   });
 
-  const badEmailCount = users.filter(u => u.email?.includes("@mediascholar.in") && u.email !== "archive@mediascholar.in").length;
+  const badEmailCount = users.filter(u => PLACEHOLDER_RE.test(u.email || "")).length;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -103,7 +104,7 @@ export default function AdminUsersPage() {
             <p className="text-sm text-gray-500">{users.length} total users</p>
             {badEmailCount > 0 && (
               <div className="mt-1 flex items-center gap-2 text-xs font-semibold text-orange-700 bg-orange-50 border border-orange-200 px-3 py-1.5 rounded-lg">
-                ⚠️ {badEmailCount} user{badEmailCount>1?"s have":" has"} placeholder @mediascholar.in email — click ✏️ on any highlighted row to fix.
+                ⚠️ {badEmailCount} user{badEmailCount>1?"s have":" has"} placeholder @mediascholar.in email — click ✏️ on any highlighted row to fix, or <Link href="/dashboard/admin/users/fix-emails" className="underline font-bold">fix them all in one go →</Link>
               </div>
             )}
           </div>
@@ -157,8 +158,8 @@ export default function AdminUsersPage() {
                         </div>
                       ) : (
                         <div className="flex items-center gap-1">
-                          <span className={u.email?.includes("@mediascholar.in") && u.email !== "archive@mediascholar.in" ? "text-orange-600 font-semibold" : "text-gray-500"}>{u.email}</span>
-                          {u.email?.includes("@mediascholar.in") && u.email !== "archive@mediascholar.in" && <span className="text-orange-500" title="Placeholder email — click pencil to fix">⚠️</span>}
+                          <span className={PLACEHOLDER_RE.test(u.email || "") ? "text-orange-600 font-semibold" : "text-gray-500"}>{u.email}</span>
+                          {PLACEHOLDER_RE.test(u.email || "") && <span className="text-orange-500" title="Placeholder email — click pencil to fix">⚠️</span>}
                           <button onClick={() => { setEditingEmail(u.id); setEmailDraft(u.email); setEmailError(""); }} className="ml-1 text-gray-300 hover:text-indigo-500" title="Edit email">✏️</button>
                         </div>
                       )}
