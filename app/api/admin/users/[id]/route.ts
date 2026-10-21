@@ -9,8 +9,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const { role, institution, designation, email, name } = await req.json();
   const updateData: any = {};
   if (role !== undefined) updateData.role = role;
-  if (institution !== undefined) updateData.institution = institution;
-  if (designation !== undefined) updateData.designation = designation;
+  if (institution !== undefined) updateData.institution = String(institution).trim() || null;
+  if (designation !== undefined) updateData.designation = String(designation).trim() || null;
   if (email !== undefined) {
     const e = String(email).trim().toLowerCase();
     if (!/^\S+@\S+\.\S+$/.test(e)) return NextResponse.json({ error: "Please enter a valid email address." }, { status: 400 });
@@ -18,7 +18,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if (clash) return NextResponse.json({ error: `This email is already used by another account (${clash.name}).` }, { status: 409 });
     updateData.email = e;
   }
-  if (name !== undefined) updateData.name = name;
+  if (name !== undefined) {
+    if (!String(name).trim()) return NextResponse.json({ error: "Name cannot be empty." }, { status: 400 });
+    updateData.name = String(name).trim();
+  }
   try {
     const user = await prisma.user.update({ where: { id }, data: updateData });
     return NextResponse.json({ user });

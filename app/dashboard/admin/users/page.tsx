@@ -19,6 +19,9 @@ export default function AdminUsersPage() {
   const [confirmDelete, setConfirmDelete] = useState<{id:string;name:string}|null>(null);
   const [deleting, setDeleting] = useState(false);
   const [deleteErr, setDeleteErr] = useState("");
+  const [editUser, setEditUser] = useState<any|null>(null);
+  const [editErr, setEditErr] = useState("");
+  const [editSaving, setEditSaving] = useState(false);
   const [needsSubsConfirm, setNeedsSubsConfirm] = useState(false);
 
   function load() { fetch("/api/admin/users").then(r => r.json()).then(d => setUsers(d.users||[])).finally(() => setLoading(false)); }
@@ -52,6 +55,22 @@ export default function AdminUsersPage() {
     else setMsg(`❌ ${data.error || "Failed to resend"}`);
     setUpdating(null);
     setTimeout(() => setMsg(""), 5000);
+  }
+
+  async function saveEdit() {
+    if (!editUser) return;
+    const email = (editUser.email||"").trim().toLowerCase();
+    const name = (editUser.name||"").trim();
+    if (!name) { setEditErr("Name cannot be empty."); return; }
+    if (!/^\S+@\S+\.\S+$/.test(email)) { setEditErr("Please enter a valid email address."); return; }
+    setEditSaving(true); setEditErr("");
+    try {
+      const res = await fetch(`/api/admin/users/${editUser.id}`, { method:"PATCH", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ name, email, institution: (editUser.institution||"").trim(), designation: (editUser.designation||"").trim() }) });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) { setMsg(`✅ Updated ${name}`); setEditUser(null); load(); setTimeout(() => setMsg(""), 4000); }
+      else setEditErr(data.error || "Update failed");
+    } catch { setEditErr("Network error — please try again."); }
+    setEditSaving(false);
   }
 
   async function deleteUser() {
@@ -161,6 +180,7 @@ export default function AdminUsersPage() {
                             className="text-xs text-indigo-500 hover:text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full disabled:opacity-40"
                           >📧 Resend</button>
                         )}
+                        <button onClick={() => { setEditUser({ id: u.id, name: u.name||"", email: u.email||"", institution: u.institution||"", designation: u.designation||"" }); setEditErr(""); }} className="text-xs text-indigo-600 hover:text-indigo-800 border border-indigo-200 px-2 py-0.5 rounded-full">Edit</button>
                         <button onClick={() => { setConfirmDelete({id: u.id, name: u.name}); setDeleteErr(""); setNeedsSubsConfirm(false); }} className="text-xs text-red-400 hover:text-red-600 border border-red-200 px-2 py-0.5 rounded-full">Delete</button>
                       </div>
                     </td>
@@ -172,6 +192,30 @@ export default function AdminUsersPage() {
           </div>
         )}
       </main>
+
+      {editUser && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full">
+            <h3 className="font-bold text-gray-900 text-lg mb-4">Edit user</h3>
+            {([["name","Name"],["email","Email"],["institution","Institution"],["designation","Designation"]] as const).map(([k,label]) => (
+              <label key={k} className="block mb-3 text-xs font-semibold text-gray-600">{label}
+                <input
+                  type={k==="email"?"email":"text"}
+                  value={editUser[k]}
+                  onChange={e => setEditUser({ ...editUser, [k]: e.target.value })}
+                  onKeyDown={e => { if (e.key==="Enter") saveEdit(); }}
+                  className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-normal text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </label>
+            ))}
+            {editErr && <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-3">{editErr}</p>}
+            <div className="flex gap-3">
+              <button onClick={() => setEditUser(null)} disabled={editSaving} className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-50 disabled:opacity-40">Cancel</button>
+              <button onClick={saveEdit} disabled={editSaving} className="flex-1 px-4 py-2 bg-indigo-700 text-white rounded-lg text-sm font-bold hover:bg-indigo-800 disabled:opacity-40">{editSaving ? "Saving…" : "Save changes"}</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Inline delete confirmation — no window.confirm() */}
       {confirmDelete && (
