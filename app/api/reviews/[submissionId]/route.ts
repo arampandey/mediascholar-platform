@@ -115,7 +115,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ sub
     // If reviewer REJECTED — notify all sub-editors immediately
     if (body.decision === "REJECT") {
       const subEditors = await prisma.user.findMany({
-        where: { role: "SUB_EDITOR" },
+        // Skip the reviewer themself if they are also a sub-editor
+        where: { role: "SUB_EDITOR", id: { not: reviewerId } },
         select: { name: true, email: true },
       });
       for (const se of subEditors) {

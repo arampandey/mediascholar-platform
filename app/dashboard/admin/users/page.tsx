@@ -213,7 +213,7 @@ export default function AdminUsersPage() {
                     <td className="px-4 py-3 text-xs text-gray-400">{u._count.submissions>0&&<span className="mr-2">📄 {u._count.submissions}</span>}{u._count.reviews>0&&<span>🔍 {u._count.reviews}</span>}{u._count.submissions===0&&u._count.reviews===0&&"—"}</td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        {u.role==="REVIEWER" && (
+                        {(u.role==="REVIEWER" || u.role==="SUB_EDITOR") && (
                           <button
                             onClick={() => resendAssignment(u.id, u.name)}
                             disabled={updating===u.id}

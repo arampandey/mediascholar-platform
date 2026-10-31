@@ -11,7 +11,8 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ id
   const { id } = await params;
 
   const reviewer = await prisma.user.findUnique({ where: { id } });
-  if (!reviewer || reviewer.role !== "REVIEWER")
+  // Sub-editors can also hold review assignments
+  if (!reviewer || !["REVIEWER", "SUB_EDITOR"].includes(reviewer.role))
     return NextResponse.json({ error: "Reviewer not found" }, { status: 404 });
 
   // Find all active assignments for this reviewer

@@ -39,10 +39,11 @@ export async function GET(req: NextRequest) {
 
   const reviewers = await prisma.user.findMany({
     where: {
-      role: "REVIEWER",
+      // Sub-editors can also review papers (e.g. a board member who is both reviewer and sub-editor)
+      role: { in: ["REVIEWER", "SUB_EDITOR"] },
       ...(excludeReviewerIds.length > 0 ? { id: { notIn: excludeReviewerIds } } : {}),
     },
-    select: { id: true, name: true, email: true, institution: true },
+    select: { id: true, name: true, email: true, institution: true, role: true },
     orderBy: { name: "asc" },
   });
   return NextResponse.json({ reviewers });

@@ -108,7 +108,15 @@ export default function SubEditorDashboard() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1 max-w-7xl mx-auto px-4 py-10 w-full">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Sub-Editor Dashboard</h1>
+        <div className="flex items-center justify-between gap-4 mb-6 flex-wrap">
+          <h1 className="text-2xl font-bold text-gray-900">Sub-Editor Dashboard</h1>
+          <Link
+            href="/dashboard/reviewer"
+            className="px-4 py-2 text-sm font-medium border border-indigo-200 text-indigo-700 bg-indigo-50/60 rounded-lg hover:bg-indigo-100 transition-colors flex items-center gap-1.5"
+          >
+            <span>🔍</span> My Review Assignments
+          </Link>
+        </div>
 
         {msg && (
           <div className={`mb-5 text-sm font-medium px-4 py-3 rounded-lg border ${msg.startsWith("✅") ? "bg-green-50 border-green-200 text-green-800" : "bg-red-50 border-red-200 text-red-800"}`}>

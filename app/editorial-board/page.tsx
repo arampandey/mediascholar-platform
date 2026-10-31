@@ -16,14 +16,24 @@ const EDITOR_IN_CHIEF = {
   profile: "https://www.galgotiasuniversity.edu.in/p/a-ram-pandey",
 };
 
-const SUB_EDITOR = {
-  name: "Apoorva Shukla, Ph.D.",
-  role: "Sub-Editor",
-  affiliation: "Assistant Professor, Department of Mass Communication",
-  institution: "Galgotias University, Greater Noida, Uttar Pradesh, India",
-  email: "mediascholarjournal@gmail.com",
-  profile: null,
-};
+const SUB_EDITORS: { name: string; role: string; affiliation: string; institution: string; email: string; profile: string | null }[] = [
+  {
+    name: "Apoorva Shukla, Ph.D.",
+    role: "Sub-Editor",
+    affiliation: "Assistant Professor, Department of Mass Communication",
+    institution: "Galgotias University, Greater Noida, Uttar Pradesh, India",
+    email: "mediascholarjournal@gmail.com",
+    profile: null,
+  },
+  {
+    name: "Kumari Pallavi, Ph.D.",
+    role: "Sub-Editor",
+    affiliation: "Assistant Professor",
+    institution: "Christ University, Ghaziabad, Delhi NCR",
+    email: "pallavi.ranjan@gmail.com",
+    profile: "https://www.galgotiasuniversity.edu.in/p/dr-kumari-pallavi",
+  },
+];
 
 const MEMBERS = [
   {
@@ -97,13 +107,6 @@ const MEMBERS = [
     profile: "https://www.galgotiasuniversity.edu.in/p/dr-gajendra-pratap-singh",
   },
   {
-    name: "Kumari Pallavi, Ph.D.",
-    affiliation: "Assistant Professor",
-    institution: "Christ University, Ghaziabad, Delhi NCR",
-    email: "kumari.pallavi@galgotiasuniversity.edu.in",
-    profile: "https://www.galgotiasuniversity.edu.in/p/dr-kumari-pallavi",
-  },
-  {
     name: "Pramod Kumar Pandey, Ph.D.",
     affiliation: "Assistant Professor, School of Media and Communication Studies",
     institution: "Galgotias University, Greater Noida, Uttar Pradesh",
@@ -127,8 +130,8 @@ export default function EditorialBoardPage() {
         <h1 className="text-3xl font-extrabold text-gray-900 mb-1">Editorial Board</h1>
         <p className="text-gray-500 mb-8">Media Scholar — Journal of Media Studies and Humanities</p>
 
-        {/* Editor & Sub-Editor side by side */}
-        <div className="grid sm:grid-cols-2 gap-4 mb-6">
+        {/* Editor & Sub-Editors */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
           <div className="bg-white rounded-xl border border-gray-200 p-5">
             <span className="text-xs font-medium uppercase tracking-widest px-2.5 py-1 rounded-full" style={{color:"#1a2744",backgroundColor:"#e8ecf4"}}>Editor</span>
             <p className="text-base font-bold text-gray-900 mt-2 mb-0.5">{EDITOR_IN_CHIEF.name}</p>
@@ -139,15 +142,20 @@ export default function EditorialBoardPage() {
               <a href={EDITOR_IN_CHIEF.profile} target="_blank" rel="noopener noreferrer" className="text-sm transition-colors" style={{color:"#1a2744"}}>🔗 Profile</a>
             </div>
           </div>
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
-            <span className="text-xs font-medium uppercase tracking-widest px-2.5 py-1 rounded-full" style={{color:"#1a2744",backgroundColor:"#e8ecf4"}}>Sub-Editor</span>
-            <p className="text-base font-bold text-gray-900 mt-2 mb-0.5">{SUB_EDITOR.name}</p>
-            <p className="text-sm font-medium" style={{color:"#1a2744"}}>{SUB_EDITOR.affiliation}</p>
-            <p className="text-sm text-gray-500 mt-0.5 mb-3">{SUB_EDITOR.institution}</p>
-            <div className="flex gap-4 flex-wrap">
-              <a href={`mailto:${SUB_EDITOR.email}`} className="text-sm text-gray-400 transition-colors">✉ {SUB_EDITOR.email}</a>
+          {SUB_EDITORS.map(se => (
+            <div key={se.name} className="bg-white rounded-xl border border-gray-200 p-5">
+              <span className="text-xs font-medium uppercase tracking-widest px-2.5 py-1 rounded-full" style={{color:"#1a2744",backgroundColor:"#e8ecf4"}}>{se.role}</span>
+              <p className="text-base font-bold text-gray-900 mt-2 mb-0.5">{se.name}</p>
+              <p className="text-sm font-medium" style={{color:"#1a2744"}}>{se.affiliation}</p>
+              <p className="text-sm text-gray-500 mt-0.5 mb-3">{se.institution}</p>
+              <div className="flex gap-4 flex-wrap">
+                <a href={`mailto:${se.email}`} className="text-sm text-gray-400 transition-colors">✉ {se.email}</a>
+                {se.profile && (
+                  <a href={se.profile} target="_blank" rel="noopener noreferrer" className="text-sm transition-colors shrink-0" style={{color:"#1a2744"}}>🔗 Profile</a>
+                )}
+              </div>
             </div>
-          </div>
+          ))}
         </div>
 
         {/* Board Members */}
