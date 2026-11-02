@@ -11,15 +11,15 @@ export const DEFAULT_TEMPLATES: {
   {
     key: "submission_confirmation",
     label: "Submission Confirmation (to Author)",
-    subject: "Manuscript Received — {{title}}",
+    subject: "Manuscript Received{{#if issueLabel}} for {{issueLabel}}{{/if}} — {{title}}",
     body: `<p {{P}}>Dear <strong>{{authorName}}</strong>,</p>
 <p {{P}}>Thank you for submitting your manuscript to <em>{{JOURNAL}}</em>. We confirm receipt of your submission and will notify you as the editorial process progresses.</p>
 <div {{BOX}}>
   <p style="margin:0 0 6px;font-size:13px;color:#4a5568;"><strong>Manuscript Title:</strong></p>
   <p style="margin:0 0 10px;font-size:14px;color:#1a202c;">{{title}}</p>
-  {{#if issueLabel}}<p style="margin:0;font-size:13px;color:#4a5568;"><strong>Tentatively Scheduled For:</strong> {{issueLabel}}</p>{{/if}}
+  {{#if issueLabel}}<p style="margin:0;font-size:13px;color:#4a5568;"><strong>Scheduled For:</strong> {{issueLabel}}</p>{{/if}}
 </div>
-{{#if issueLabel}}<p {{P}}>Note: your manuscript has been provisionally slotted into the issue above based on your submission date. This may change depending on the outcome of peer review and the editorial timeline.</p>{{/if}}
+{{#if issueLabel}}<p {{P}}>Your manuscript has been assigned to the issue above. Manuscripts received after the closing date of an issue are considered for the next issue.</p>{{/if}}
 <p {{P}}>If you have any queries, please write to us at <a href="mailto:{{EMAIL}}" style="color:#1a2744;">{{EMAIL}}</a>.</p>
 <p {{SIGN}}>Yours sincerely,<br><strong>Editorial Team</strong><br>{{JOURNAL}}</p>`,
     variables: ["authorName", "title", "issueLabel"],
