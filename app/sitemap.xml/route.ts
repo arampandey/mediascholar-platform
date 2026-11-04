@@ -11,6 +11,7 @@ export async function GET() {
     { loc: "https://mediascholar.in/archive", priority: "0.9", changefreq: "weekly", lastmod: today },
     { loc: "https://mediascholar.in/editorial-board", priority: "0.7", changefreq: "monthly", lastmod: "2026-01-01" },
     { loc: "https://mediascholar.in/aims-and-scope", priority: "0.8", changefreq: "monthly", lastmod: "2026-01-01" },
+    { loc: "https://mediascholar.in/publication-ethics", priority: "0.6", changefreq: "monthly", lastmod: "2026-11-04" },
     { loc: "https://mediascholar.in/guidelines", priority: "0.6", changefreq: "monthly", lastmod: "2026-01-01" },
     { loc: "https://mediascholar.in/call-for-papers", priority: "0.9", changefreq: "weekly", lastmod: today },
     { loc: "https://mediascholar.in/contact", priority: "0.5", changefreq: "yearly", lastmod: "2026-01-01" },
