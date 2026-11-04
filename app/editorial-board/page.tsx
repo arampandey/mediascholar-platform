@@ -31,7 +31,7 @@ const SUB_EDITORS: { name: string; role: string; affiliation: string; institutio
     affiliation: "Assistant Professor",
     institution: "Christ University, Ghaziabad, Delhi NCR",
     email: "pallavi.ranjan@gmail.com",
-    profile: null,
+    profile: "https://ncr.christuniversity.in/media-studies-ncr/faculty-details/MTEwNDY=/NDA5",
   },
 ];
 
