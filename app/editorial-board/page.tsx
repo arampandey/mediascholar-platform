@@ -24,7 +24,7 @@ const SUB_EDITORS: { name: string; role: string; affiliation: string; institutio
     institution: "Galgotias University, Greater Noida, Uttar Pradesh, India",
     email: "apoorva.shukla@galgotiasuniversity.edu.in",
     email2: "mediascholarjournal@gmail.com",
-    profile: null,
+    profile: "https://www.galgotiasuniversity.edu.in/p/dr-apoorva-shukla",
   },
   {
     name: "Kumari Pallavi, Ph.D.",
