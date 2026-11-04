@@ -76,7 +76,7 @@ const MEMBERS = [
     affiliation: "Professor",
     institution: "Metro University, Greater Noida, Uttar Pradesh",
     email: "tasha.singh@galgotiasuniversity.edu.in",
-    profile: null,
+    profile: "https://metrouniversity.in/school-of-journalism-and-mass-communication/",
   },
   {
     name: "Alessandro Martinisi, Ph.D.",
