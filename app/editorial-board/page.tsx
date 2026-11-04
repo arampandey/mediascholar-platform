@@ -76,7 +76,7 @@ const MEMBERS = [
     name: "Tasha Singh Parihar, Ph.D.",
     affiliation: "Associate Dean and Professor, School of Journalism and Mass Communication",
     institution: "Metro University, Greater Noida, Uttar Pradesh",
-    email: "tasha.singh@galgotiasuniversity.edu.in",
+    email: "tasha.parihar@metrouniversity.in",
     profile: "https://metrouniversity.in/school-of-journalism-and-mass-communication/",
   },
   {
