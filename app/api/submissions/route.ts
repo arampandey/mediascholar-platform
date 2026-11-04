@@ -86,10 +86,12 @@ export async function POST(req: NextRequest) {
     // May 4 – Oct 31 → Issue 2 of the current year's volume
     // Nov 1 – Dec 31 → Issue 1 of the NEXT year's volume
     async function resolveIssue(): Promise<string | null> {
-      const now = new Date();
-      const month = now.getMonth() + 1; // 1-12
-      const day = now.getDate();
-      const year = now.getFullYear();
+      // Use Indian Standard Time (UTC+5:30) — the server runs in UTC, so a paper sent
+      // just after midnight IST on 1 Nov / 4 May would otherwise count as the previous day.
+      const now = new Date(Date.now() + 5.5 * 60 * 60 * 1000);
+      const month = now.getUTCMonth() + 1; // 1-12, IST
+      const day = now.getUTCDate();
+      const year = now.getUTCFullYear();
 
       let targetYear = year;
       let targetIssue = 1;
