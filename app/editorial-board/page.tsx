@@ -22,7 +22,7 @@ const SUB_EDITORS: { name: string; role: string; affiliation: string; institutio
     role: "Sub-Editor",
     affiliation: "Assistant Professor, Department of Mass Communication",
     institution: "Galgotias University, Greater Noida, Uttar Pradesh, India",
-    email: "mediascholarjournal@gmail.com",
+    email: "apoorva.shukla@galgotiasuniversity.edu.in",
     profile: null,
   },
   {
