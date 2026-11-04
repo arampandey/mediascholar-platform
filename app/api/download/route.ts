@@ -4,6 +4,7 @@ export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isFetchableFileUrl } from "@/lib/fileUrl";
+import { contentDisposition } from "@/lib/fileName";
 import { auth } from "@/lib/auth";
 import { v2 as cloudinary } from "cloudinary";
 
@@ -132,7 +133,7 @@ export async function GET(req: NextRequest) {
       status: 200,
       headers: {
         "Content-Type": contentType,
-        "Content-Disposition": `${disposition}; filename="${slug}.${fileExt}"`,
+        "Content-Disposition": contentDisposition(disposition, submission.title, submissionId, fileExt),
         // public so Google Scholar / Googlebot can access and cache
         "Cache-Control": "public, max-age=86400, stale-while-revalidate=3600",
         "X-Robots-Tag": "index",

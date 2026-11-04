@@ -12,6 +12,7 @@ export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isFetchableFileUrl } from "@/lib/fileUrl";
+import { contentDisposition } from "@/lib/fileName";
 import { v2 as cloudinary } from "cloudinary";
 
 cloudinary.config({
@@ -116,7 +117,7 @@ export async function GET(
       status: 200,
       headers: {
         "Content-Type": contentType,
-        "Content-Disposition": `${disposition}; filename="${slug_clean}.${fileExt}"`,
+        "Content-Disposition": contentDisposition(disposition, paper.title, paperId, fileExt),
         // Public caching — Google Scholar and Googlebot must be able to access this
         "Cache-Control": "public, max-age=86400, stale-while-revalidate=3600",
         "X-Robots-Tag": "index",
