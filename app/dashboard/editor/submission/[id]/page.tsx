@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import StatusBadge from "@/components/StatusBadge";
 import ReviewSummary from "@/components/ReviewSummary";
 import Link from "next/link";
+import EnglishVersionPanel from "@/components/EnglishVersionPanel";
 
 export default function EditorSubmissionPage() {
   const { id } = useParams();
@@ -284,6 +285,9 @@ export default function EditorSubmissionPage() {
               assignedIds.length >= 2 ? "bg-green-100 text-green-700" : assignedIds.length === 1 ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-500"
             }`}>{assignedIds.length}/2 Reviewers Assigned</span>
           </div>
+
+          {/* English title + abstract for Hindi papers (needed for international indexing) */}
+          {sub.language === "hi" && <EnglishVersionPanel submissionId={sub.id} mode="editor" />}
 
           {/* Current reviewers */}
           {sub.reviewers?.length > 0 && (

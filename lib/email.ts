@@ -276,3 +276,60 @@ export async function sendReviewerDeclined(
   `;
   await send(to, subject, html);
 }
+
+// ── English title + abstract for Hindi papers ─────────────────────────────────
+function escHtml(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+export async function sendEnglishVersionForApproval(
+  to: string,
+  authorName: string,
+  title: string,
+  titleEn: string,
+  abstractEn: string,
+  submissionId: string
+) {
+  const subject = `Please approve the English title and abstract: ${title}`;
+  const link = `https://mediascholar.in/dashboard/author/submission/${submissionId}`;
+  const html = `
+    <p ${P}>Dear ${escHtml(authorName)},</p>
+    <p ${P}>To make your Hindi paper discoverable in international indexes, the journal needs an English title and abstract. The editorial office has prepared them for you. <strong>Your paper itself stays in Hindi.</strong></p>
+    <div ${BOX}>
+      <p ${LABEL}><strong>Paper:</strong> ${escHtml(title)}</p>
+      <p ${LABEL}><strong>English title:</strong> ${escHtml(titleEn)}</p>
+      <p ${LABEL}><strong>English abstract:</strong><br/>${escHtml(abstractEn).replace(/\n/g, "<br/>")}</p>
+    </div>
+    <p ${P}>Please log in, read it, and either approve it or ask for changes. Nothing is shown publicly until you approve.</p>
+    <p ${P}><a href="${link}" style="color:#1a2744;font-weight:bold;">Review and approve →</a></p>
+    <p ${SIGN}>Regards,<br/>Media Scholar Editorial Office</p>
+  `;
+  await send(to, subject, html);
+}
+
+export async function sendEnglishVersionResponse(
+  to: string,
+  editorName: string,
+  title: string,
+  authorName: string,
+  approved: boolean,
+  note: string,
+  submissionId: string
+) {
+  const subject = approved
+    ? `English title and abstract approved: ${title}`
+    : `Changes requested to the English title and abstract: ${title}`;
+  const link = `https://mediascholar.in/dashboard/editor/submission/${submissionId}`;
+  const html = `
+    <p ${P}>Dear ${escHtml(editorName)},</p>
+    <p ${P}>${escHtml(authorName)} has ${approved ? "<strong>approved</strong> the English title and abstract" : "<strong>asked for changes</strong> to the English title and abstract"} for:</p>
+    <div ${BOX}>
+      <p ${LABEL}><strong>Paper:</strong> ${escHtml(title)}</p>
+      ${!approved && note ? `<p ${LABEL}><strong>Requested changes:</strong><br/>${escHtml(note).replace(/\n/g, "<br/>")}</p>` : ""}
+    </div>
+    <p ${P}>${approved ? "It is now ready to be shown on the paper page." : "Please update the English version and send it to the author again."}</p>
+    <p ${P}><a href="${link}" style="color:#1a2744;font-weight:bold;">Open the submission →</a></p>
+    <p ${SIGN}>Regards,<br/>Media Scholar Platform</p>
+  `;
+  await send(to, subject, html);
+}

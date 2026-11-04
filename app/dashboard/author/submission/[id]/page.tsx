@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import StatusBadge from "@/components/StatusBadge";
 import ReviewSummary from "@/components/ReviewSummary";
 import Link from "next/link";
+import EnglishVersionPanel from "@/components/EnglishVersionPanel";
 
 export default function AuthorSubmissionPage() {
   const { id } = useParams();
@@ -62,6 +63,8 @@ export default function AuthorSubmissionPage() {
             <a href={sub.fileUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-indigo-700 hover:underline">📄 View Paper</a>
           </div>
         </div>
+
+        {sub.language === "hi" && <EnglishVersionPanel submissionId={sub.id} mode="author" />}
 
         {reviews.length > 0 && (
           <div className="bg-white rounded-xl border border-gray-200 p-6">

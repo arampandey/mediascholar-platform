@@ -8,6 +8,7 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import type { Metadata } from "next";
 import PaperClient from "./PaperClient";
+import { getApprovedEnglishVersion } from "@/lib/englishVersion";
 
 // Co-authors are typed one per line, usually as "Name, Institution". Google Scholar wants the
 // name only (no affiliation or degree), one tag per author.
@@ -96,6 +97,7 @@ export default async function PaperPage({ params }: { params: Promise<{ id: stri
 
   const vol = paper.issue?.volume;
   const iss = paper.issue;
+  const english = paper.language === "hi" ? await getApprovedEnglishVersion(id) : null;
 
   // JSON-LD ScholarlyArticle schema for Google
   const jsonLd = {
@@ -103,6 +105,7 @@ export default async function PaperPage({ params }: { params: Promise<{ id: stri
     "@type": "ScholarlyArticle",
     "headline": paper.title,
     "name": paper.title,
+    ...(english ? { "alternateName": english.titleEn } : {}),
     "abstract": paper.abstract || "",
     "keywords": paper.keywords?.join(", ") || "",
     "author": [
@@ -179,6 +182,8 @@ export default async function PaperPage({ params }: { params: Promise<{ id: stri
             : (paper.fileUrl || "").toLowerCase().endsWith(".doc")  ? "doc"
             : "pdf") as "pdf" | "doc" | "docx",
     coAuthors: (paper.coAuthors as string[]) || [],
+    titleEn: english?.titleEn ?? null,
+    abstractEn: english?.abstractEn ?? null,
   };
 
   return (

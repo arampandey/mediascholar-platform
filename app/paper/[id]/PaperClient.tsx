@@ -23,6 +23,8 @@ type PaperData = {
   zenodoDoi: string | null;
   coAuthors: string[];
   fileType: "pdf" | "docx" | "doc";
+  titleEn?: string | null;
+  abstractEn?: string | null;
 };
 
 export default function PaperClient({ paper }: { paper: PaperData }) {
@@ -186,6 +188,15 @@ export default function PaperClient({ paper }: { paper: PaperData }) {
             <section className="mb-7">
               <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Abstract</h2>
               <p className="text-gray-700 leading-relaxed text-base">{paper.abstract}</p>
+            </section>
+          )}
+
+          {/* English title + abstract (Hindi papers, approved by the author) */}
+          {paper.titleEn && paper.abstractEn && (
+            <section className="mb-7">
+              <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">English title and abstract</h2>
+              <p className="text-gray-900 font-semibold mb-2" lang="en">{paper.titleEn}</p>
+              <p className="text-gray-700 leading-relaxed text-base whitespace-pre-line" lang="en">{paper.abstractEn}</p>
             </section>
           )}
 
