@@ -16,13 +16,14 @@ const EDITOR_IN_CHIEF = {
   profile: "https://gjust.ac.in/Page/Index_Department/Department-of-Mass-Communication/287",
 };
 
-const SUB_EDITORS: { name: string; role: string; affiliation: string; institution: string; email: string; profile: string | null }[] = [
+const SUB_EDITORS: { name: string; role: string; affiliation: string; institution: string; email: string; email2?: string; profile: string | null }[] = [
   {
     name: "Apoorva Shukla, Ph.D.",
     role: "Sub-Editor",
     affiliation: "Assistant Professor, Department of Mass Communication",
     institution: "Galgotias University, Greater Noida, Uttar Pradesh, India",
     email: "apoorva.shukla@galgotiasuniversity.edu.in",
+    email2: "mediascholarjournal@gmail.com",
     profile: null,
   },
   {
@@ -152,6 +153,9 @@ export default function EditorialBoardPage() {
               <p className="text-sm text-gray-500 mt-0.5 mb-3">{se.institution}</p>
               <div className="flex gap-4 flex-wrap">
                 <a href={`mailto:${se.email}`} className="text-sm text-gray-400 transition-colors">✉ {se.email}</a>
+                {se.email2 && (
+                  <a href={`mailto:${se.email2}`} className="text-sm text-gray-400 transition-colors">✉ {se.email2}</a>
+                )}
                 {se.profile && (
                   <a href={se.profile} target="_blank" rel="noopener noreferrer" className="text-sm transition-colors shrink-0" style={{color:"#1a2744"}}>🔗 Profile</a>
                 )}
