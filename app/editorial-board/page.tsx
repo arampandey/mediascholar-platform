@@ -29,7 +29,7 @@ const SUB_EDITORS: { name: string; role: string; affiliation: string; institutio
     name: "Kumari Pallavi, Ph.D.",
     role: "Sub-Editor",
     affiliation: "Assistant Professor",
-    institution: "Christ University, Ghaziabad, Delhi NCR",
+    institution: "CHRIST (Deemed to be University), Delhi NCR Campus, Ghaziabad, Uttar Pradesh",
     email: "pallavi.ranjan@gmail.com",
     profile: "https://ncr.christuniversity.in/media-studies-ncr/faculty-details/MTEwNDY=/NDA5",
   },
