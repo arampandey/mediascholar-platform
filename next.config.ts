@@ -16,6 +16,15 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  // Google Scholar wants the PDF in the same folder as the abstract page (/paper/<id>),
+  // so /paper/<id>.pdf is served by the existing /pdfs/<id>.pdf route. Nothing else changes.
+  async rewrites() {
+    return {
+      beforeFiles: [
+        { source: "/paper/:id.pdf", destination: "/pdfs/:id.pdf" },
+      ],
+    };
+  },
   async headers() {
     return [
       {

@@ -63,7 +63,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     ...(paper.pageStart ? { citation_firstpage: String(paper.pageStart) } : {}),
     ...(paper.pageEnd ? { citation_lastpage: String(paper.pageEnd) } : {}),
     ...(paper.doi ? { citation_doi: paper.doi } : {}),
-    ...(paper.fileUrl ? { citation_pdf_url: `https://mediascholar.in/pdfs/${paper.id}.pdf` } : {}),
+    ...(paper.fileUrl ? { citation_pdf_url: `https://mediascholar.in/paper/${paper.id}.pdf` } : {}),
     citation_fulltext_html_url: `https://mediascholar.in/paper/${paper.id}`,
     citation_language: paper.language === "hi" ? "hi" : "en",
     citation_publisher: "Media Scholar",
