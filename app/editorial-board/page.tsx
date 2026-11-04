@@ -13,7 +13,7 @@ const EDITOR_IN_CHIEF = {
   affiliation: "Chairperson, Department of Mass Communication",
   institution: "Guru Jambheshwar University of Science and Technology, Hisar, Haryana",
   email: "editor@mediascholar.in",
-  profile: "https://www.galgotiasuniversity.edu.in/p/a-ram-pandey",
+  profile: null as string | null, // add the correct profile URL here
 };
 
 const SUB_EDITORS: { name: string; role: string; affiliation: string; institution: string; email: string; profile: string | null }[] = [
@@ -31,7 +31,7 @@ const SUB_EDITORS: { name: string; role: string; affiliation: string; institutio
     affiliation: "Assistant Professor",
     institution: "Christ University, Ghaziabad, Delhi NCR",
     email: "pallavi.ranjan@gmail.com",
-    profile: "https://www.galgotiasuniversity.edu.in/p/dr-kumari-pallavi",
+    profile: null,
   },
 ];
 
@@ -76,7 +76,7 @@ const MEMBERS = [
     affiliation: "Professor",
     institution: "Metro University, Greater Noida, Uttar Pradesh",
     email: "tasha.singh@galgotiasuniversity.edu.in",
-    profile: "https://www.galgotiasuniversity.edu.in/p/prof-tasha-singh",
+    profile: null,
   },
   {
     name: "Alessandro Martinisi, Ph.D.",
@@ -139,7 +139,9 @@ export default function EditorialBoardPage() {
             <p className="text-sm text-gray-500 mt-0.5 mb-3">{EDITOR_IN_CHIEF.institution}</p>
             <div className="flex gap-4 flex-wrap">
               <a href={`mailto:${EDITOR_IN_CHIEF.email}`} className="text-sm text-gray-400 transition-colors">✉ {EDITOR_IN_CHIEF.email}</a>
-              <a href={EDITOR_IN_CHIEF.profile} target="_blank" rel="noopener noreferrer" className="text-sm transition-colors" style={{color:"#1a2744"}}>🔗 Profile</a>
+              {EDITOR_IN_CHIEF.profile && (
+                <a href={EDITOR_IN_CHIEF.profile} target="_blank" rel="noopener noreferrer" className="text-sm transition-colors" style={{color:"#1a2744"}}>🔗 Profile</a>
+              )}
             </div>
           </div>
           {SUB_EDITORS.map(se => (
