@@ -105,7 +105,7 @@ export default function AimsAndScopePage() {
             </div>
             <div>
               <h3 className="font-bold text-gray-900 mb-2">Language Policy</h3>
-              <p className="leading-relaxed">Media Scholar accepts manuscripts in <strong>English and Hindi</strong>. Authors must clearly specify the submission language. Mixed-language manuscripts are not accepted. Abstracts in both languages are encouraged but not mandatory.</p>
+              <p className="leading-relaxed">Media Scholar accepts manuscripts in <strong>English and Hindi</strong>. Authors must clearly specify the submission language. Mixed-language manuscripts are not accepted. For Hindi manuscripts, an English title and abstract are required for international indexing: the editorial office prepares them and the author approves them before publication. The paper itself stays in Hindi.</p>
             </div>
           </div>
         </section>

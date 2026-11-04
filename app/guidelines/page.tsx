@@ -22,7 +22,7 @@ const sections = [
   {
     id: "language",
     title: "Language",
-    content: "Submissions are accepted in English and Hindi only. The language must be clearly specified at the time of submission. Mixed-language manuscripts are not accepted. Abstracts in both languages are encouraged but not mandatory.",
+    content: "Submissions are accepted in English and Hindi only. The language must be clearly specified at the time of submission. Mixed-language manuscripts are not accepted. For Hindi manuscripts, an English title and abstract are required for international indexing: the editorial office prepares them and the author approves them before publication. The paper itself stays in Hindi.",
   },
   {
     id: "originality",

@@ -5,7 +5,7 @@ import Navbar from "@/components/Navbar";
 import StatusBadge from "@/components/StatusBadge";
 import ReviewSummary from "@/components/ReviewSummary";
 import Link from "next/link";
-import EnglishVersionPanel from "@/components/EnglishVersionPanel";
+import EnglishVersionPanel, { EnglishVersionPublishNotice } from "@/components/EnglishVersionPanel";
 
 export default function EditorSubmissionPage() {
   const { id } = useParams();
@@ -541,6 +541,7 @@ export default function EditorSubmissionPage() {
               <span className="text-lg">🌐</span>
               <h2 className="font-bold text-gray-900">Step 6 — Publish to Issue</h2>
             </div>
+            {sub.language === "hi" && <EnglishVersionPublishNotice submissionId={sub.id} />}
             <div className="flex gap-2 flex-wrap">
               <select value={selIssue} onChange={e => setSelIssue(e.target.value)}
                 className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">

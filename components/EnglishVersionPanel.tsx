@@ -149,3 +149,22 @@ export default function EnglishVersionPanel({ submissionId, mode }: { submission
     </div>
   );
 }
+
+// Small notice for the Publish step: a Hindi paper should have an approved English title + abstract.
+export function EnglishVersionPublishNotice({ submissionId }: { submissionId: string }) {
+  const [status, setStatus] = useState<string | null | undefined>(undefined);
+  useEffect(() => {
+    fetch(`/api/submissions/${submissionId}/english`)
+      .then((r) => r.json())
+      .then((d) => setStatus(d.english ? d.english.status : null))
+      .catch(() => setStatus(undefined));
+  }, [submissionId]);
+  if (status === undefined || status === "APPROVED") return null;
+  return (
+    <div className="text-sm bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg px-3 py-2 mb-3">
+      This Hindi paper has no approved English title and abstract yet
+      {status === "PENDING_APPROVAL" ? " (waiting for the author)" : status === "CHANGES_REQUESTED" ? " (the author asked for changes)" : ""}.
+      It can still be published, but it will not meet international indexing requirements until one is approved.
+    </div>
+  );
+}
