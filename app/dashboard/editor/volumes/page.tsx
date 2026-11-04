@@ -8,6 +8,9 @@ export default function VolumesPage() {
   const [volumes, setVolumes] = useState<any[]>([]);
   const [volForm, setVolForm] = useState({ number: "", year: "" });
   const [issueForm, setIssueForm] = useState<Record<string, { number: string; title: string }>>({});
+  const [editIssue, setEditIssue] = useState<{ id: string; number: string; title: string } | null>(null);
+  const [editErr, setEditErr] = useState("");
+  const [saving, setSaving] = useState(false);
 
   function load() { fetch("/api/volumes").then(r => r.json()).then(d => setVolumes(d.volumes || [])); }
   useEffect(() => { load(); }, []);
@@ -24,6 +27,18 @@ export default function VolumesPage() {
     if (!f.number) return;
     await fetch(`/api/volumes/${volId}/issues`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ number: +f.number, title: f.title }) });
     setIssueForm(p => ({ ...p, [volId]: { number: "", title: "" } }));
+    load();
+  }
+
+  async function saveIssue() {
+    if (!editIssue) return;
+    if (!editIssue.number) { setEditErr("Please enter an issue number."); return; }
+    setSaving(true); setEditErr("");
+    const res = await fetch(`/api/issues/${editIssue.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ number: +editIssue.number, title: editIssue.title }) });
+    const d = await res.json().catch(() => ({}));
+    setSaving(false);
+    if (!res.ok) { setEditErr(d.error || "Could not save."); return; }
+    setEditIssue(null);
     load();
   }
 
@@ -59,12 +74,27 @@ export default function VolumesPage() {
             {vol.issues.length > 0 && (
               <div className="space-y-2 mb-4">
                 {vol.issues.map((iss: any) => (
+                  editIssue && editIssue.id === iss.id ? (
+                    <div key={iss.id} className="bg-indigo-50 border border-indigo-200 rounded-lg px-3 py-2">
+                      <div className="flex gap-2 flex-wrap items-center">
+                        <input type="number" min={1} value={editIssue.number} onChange={e => setEditIssue(p => p && ({ ...p, number: e.target.value }))} placeholder="Issue No." className="w-24 border rounded-lg px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                        <input type="text" value={editIssue.title} onChange={e => setEditIssue(p => p && ({ ...p, title: e.target.value }))} placeholder="Issue title (optional)" className="flex-1 min-w-[10rem] border rounded-lg px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                        <button onClick={saveIssue} disabled={saving} className="px-3 py-1.5 bg-indigo-700 text-white rounded-lg text-sm font-semibold hover:bg-indigo-800 disabled:opacity-50">{saving ? "Saving…" : "Save"}</button>
+                        <button onClick={() => { setEditIssue(null); setEditErr(""); }} className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900">Cancel</button>
+                      </div>
+                      {editErr && <p className="text-xs text-red-600 mt-1.5">{editErr}</p>}
+                    </div>
+                  ) : (
                   <div key={iss.id} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
                     <span className="text-sm font-medium">{formatIssueLabel(iss.number, iss.title)} <span className="text-xs text-gray-400">({iss._count?.submissions||0} papers)</span></span>
-                    {!iss.publishedAt ? (
-                      <button onClick={() => publishIssue(iss.id)} className="text-xs px-3 py-1 bg-emerald-600 text-white rounded-full hover:bg-emerald-700">Publish Issue</button>
-                    ) : <span className="text-xs text-emerald-600 font-semibold">✅ Published</span>}
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => { setEditIssue({ id: iss.id, number: String(iss.number), title: iss.title || "" }); setEditErr(""); }} className="text-xs text-indigo-600 hover:text-indigo-800 border border-indigo-200 px-2 py-0.5 rounded-full">Edit</button>
+                      {!iss.publishedAt ? (
+                        <button onClick={() => publishIssue(iss.id)} className="text-xs px-3 py-1 bg-emerald-600 text-white rounded-full hover:bg-emerald-700">Publish Issue</button>
+                      ) : <span className="text-xs text-emerald-600 font-semibold">✅ Published</span>}
+                    </div>
                   </div>
+                  )
                 ))}
               </div>
             )}
