@@ -9,6 +9,14 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import PaperClient from "./PaperClient";
 
+// Co-authors are typed one per line, usually as "Name, Institution". Google Scholar wants the
+// name only (no affiliation or degree), one tag per author.
+function parseCoAuthor(raw: string): { name: string; affiliation?: string } {
+  const [name, ...rest] = raw.split(",");
+  const affiliation = rest.join(",").trim();
+  return { name: name.trim(), ...(affiliation ? { affiliation } : {}) };
+}
+
 async function getPaper(id: string) {
   try {
     return await prisma.submission.findUnique({
@@ -30,16 +38,26 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
   const vol = paper.issue?.volume;
   const iss = paper.issue;
+  // Google Scholar date format: yyyy/mm/dd (or a year alone)
   const pubDate = paper.publishedAt
-    ? new Date(paper.publishedAt).toISOString().split("T")[0]
+    ? new Date(paper.publishedAt).toISOString().split("T")[0].replace(/-/g, "/")
     : vol?.year?.toString() || "";
 
-  const highwire: Record<string, string> = {
+  // One citation_author tag per author, main author first
+  const authorNames = [
+    paper.author?.name,
+    ...((paper.coAuthors as string[]) || []).map(c => parseCoAuthor(c).name),
+  ].filter((n): n is string => !!n && n.trim().length > 0);
+
+  const highwire: Record<string, string | string[]> = {
     citation_title: paper.title,
-    citation_author: paper.author?.name || "",
+    citation_author: authorNames.length ? authorNames : "Unknown Author",
     citation_journal_title: "Media Scholar — Journal of Media Studies and Humanities",
     citation_issn: "3048-5029",
     citation_publication_date: pubDate,
+    ...(paper.publishedAt ? { citation_online_date: pubDate } : {}),
+    ...(paper.keywords?.length ? { citation_keywords: paper.keywords.join("; ") } : {}),
+    citation_abstract_html_url: `https://mediascholar.in/paper/${paper.id}`,
     ...(vol ? { citation_volume: String(vol.number) } : {}),
     ...(iss ? { citation_issue: String(iss.number) } : {}),
     ...(paper.pageStart ? { citation_firstpage: String(paper.pageStart) } : {}),
@@ -87,11 +105,18 @@ export default async function PaperPage({ params }: { params: Promise<{ id: stri
     "name": paper.title,
     "abstract": paper.abstract || "",
     "keywords": paper.keywords?.join(", ") || "",
-    "author": {
-      "@type": "Person",
-      "name": paper.author?.name || "Unknown Author",
-      ...(paper.author?.institution ? { "affiliation": { "@type": "Organization", "name": paper.author.institution } } : {}),
-    },
+    "author": [
+      {
+        "@type": "Person",
+        "name": paper.author?.name || "Unknown Author",
+        ...(paper.author?.institution ? { "affiliation": { "@type": "Organization", "name": paper.author.institution } } : {}),
+      },
+      ...((paper.coAuthors as string[]) || []).map(parseCoAuthor).filter(c => c.name).map(c => ({
+        "@type": "Person",
+        "name": c.name,
+        ...(c.affiliation ? { "affiliation": { "@type": "Organization", "name": c.affiliation } } : {}),
+      })),
+    ],
     "publisher": {
       "@type": "Organization",
       "name": "Media Scholar — Journal of Media Studies and Humanities",
