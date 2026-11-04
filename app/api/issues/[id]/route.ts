@@ -10,7 +10,15 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const { id } = await params;
   const body = await req.json().catch(() => ({}));
 
-  const data: { number?: number; title?: string | null } = {};
+  const data: { number?: number; title?: string | null; publishedAt?: null } = {};
+
+  // Unpublish: only allowed while the issue has no published papers (e.g. it was published by mistake while empty)
+  if (body.unpublish === true) {
+    const published = await prisma.submission.count({ where: { issueId: id, status: "PUBLISHED" } });
+    if (published > 0)
+      return NextResponse.json({ error: `This issue has ${published} published paper(s) and cannot be unpublished.` }, { status: 400 });
+    data.publishedAt = null;
+  }
   if (body.number !== undefined) {
     const n = Number(body.number);
     if (!Number.isInteger(n) || n < 1) return NextResponse.json({ error: "Issue number must be a whole number of 1 or more." }, { status: 400 });

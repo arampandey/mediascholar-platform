@@ -42,6 +42,14 @@ export default function VolumesPage() {
     load();
   }
 
+  async function unpublishIssue(issueId: string) {
+    if (!confirm("Unpublish this issue? It will be hidden from the Archive until you publish it again.")) return;
+    const res = await fetch(`/api/issues/${issueId}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ unpublish: true }) });
+    const d = await res.json().catch(() => ({}));
+    if (!res.ok) alert(d.error || "Could not unpublish.");
+    load();
+  }
+
   async function publishIssue(issueId: string) {
     if (!confirm("Publish this issue? All accepted papers in it will become PUBLISHED.")) return;
     await fetch(`/api/issues/${issueId}/publish`, { method: "POST" });
@@ -91,7 +99,14 @@ export default function VolumesPage() {
                       <button onClick={() => { setEditIssue({ id: iss.id, number: String(iss.number), title: iss.title || "" }); setEditErr(""); }} className="text-xs text-indigo-600 hover:text-indigo-800 border border-indigo-200 px-2 py-0.5 rounded-full">Edit</button>
                       {!iss.publishedAt ? (
                         <button onClick={() => publishIssue(iss.id)} className="text-xs px-3 py-1 bg-emerald-600 text-white rounded-full hover:bg-emerald-700">Publish Issue</button>
-                      ) : <span className="text-xs text-emerald-600 font-semibold">✅ Published</span>}
+                      ) : (
+                        <>
+                          <span className="text-xs text-emerald-600 font-semibold">✅ Published</span>
+                          {(iss._count?.submissions || 0) === 0 && (
+                            <button onClick={() => unpublishIssue(iss.id)} className="text-xs text-red-500 hover:text-red-700 border border-red-200 px-2 py-0.5 rounded-full">Unpublish</button>
+                          )}
+                        </>
+                      )}
                     </div>
                   </div>
                   )
