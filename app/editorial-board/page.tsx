@@ -13,7 +13,7 @@ const EDITOR_IN_CHIEF = {
   affiliation: "Chairperson, Department of Mass Communication",
   institution: "Guru Jambheshwar University of Science and Technology, Hisar, Haryana",
   email: "editor@mediascholar.in",
-  profile: null as string | null, // add the correct profile URL here
+  profile: "https://gjust.ac.in/Page/Index_Department/Department-of-Mass-Communication/287",
 };
 
 const SUB_EDITORS: { name: string; role: string; affiliation: string; institution: string; email: string; profile: string | null }[] = [
