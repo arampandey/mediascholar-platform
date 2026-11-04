@@ -373,6 +373,15 @@ export default function PaperClient({ paper }: { paper: PaperData }) {
         </div>
       </div>
 
+      {/* Licence */}
+      <p className="mt-6 text-xs text-gray-500 text-center leading-relaxed">
+        This article is published open access under the{" "}
+        <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="license noopener noreferrer" className="text-indigo-600 hover:underline">
+          Creative Commons Attribution 4.0 International (CC BY 4.0)
+        </a>{" "}
+        licence. Authors retain copyright.
+      </p>
+
       {/* Back / forward nav */}
       <div className="mt-6 flex justify-between text-sm">
         <Link href="/archive" className="text-indigo-600 hover:underline">← Back to Archive</Link>

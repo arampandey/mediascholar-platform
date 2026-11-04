@@ -94,7 +94,7 @@ export default function GuidelinesPage() {
         <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
           <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Jump to Section</p>
           <div className="flex flex-wrap gap-2 text-xs">
-            {["About", "Article Types", "Formatting", "Peer Review", "Revision Policy", "Withdrawal Policy", "Self-Archiving", "Copyright", "Post-Acceptance"].map(s => (
+            {["About", "Article Types", "Formatting", "Peer Review", "Revision Policy", "Withdrawal Policy", "Self-Archiving", "Digital Preservation", "Copyright", "Post-Acceptance"].map(s => (
               <a key={s} href={`#${s.toLowerCase().replace(/\s+/g, "-")}`}
                 className="px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg font-semibold hover:bg-indigo-100 transition-colors">
                 {s}
@@ -212,6 +212,20 @@ export default function GuidelinesPage() {
               <p className="text-sm text-green-700 mt-2">Attribution to the original publication in <em>Media Scholar</em> with the DOI (where assigned) must be included.</p>
             </div>
           </div>
+        </div>
+
+        {/* Digital Preservation */}
+        <div id="digital-preservation" className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm scroll-mt-8">
+          <h2 className="font-extrabold text-gray-900 text-lg mb-3">Digital Preservation &amp; Archiving</h2>
+          <p className="text-sm text-gray-600 leading-relaxed mb-3">
+            Every published article remains permanently available, free of charge, on the Media Scholar website in the journal archive. Published articles are never removed, except under the corrections and retractions procedure described in our <a href="/publication-ethics" className="text-indigo-700 hover:underline">Publication Ethics</a> statement.
+          </p>
+          <p className="text-sm text-gray-600 leading-relaxed mb-3">
+            The editorial office keeps a master copy of the final PDF of every published issue. In addition, the journal intends to deposit published issues with a free, independent web archive (such as the Internet Archive) so that the content stays accessible if the journal&apos;s website becomes unavailable.
+          </p>
+          <p className="text-sm text-gray-600 leading-relaxed">
+            Authors are also encouraged to deposit the final published version in their institutional repository (see Self-Archiving above).
+          </p>
         </div>
 
         {/* Copyright */}
