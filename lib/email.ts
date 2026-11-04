@@ -175,6 +175,10 @@ export async function sendReviewThankYou(to: string, reviewerName: string, title
   await sendTemplate(to, "review_thank_you", { reviewerName, title });
 }
 
+export async function sendReviewerReleased(to: string, reviewerName: string, title: string) {
+  await sendTemplate(to, "review_released", { reviewerName, title });
+}
+
 export async function sendPlagiarismFailed(to: string, authorName: string, title: string, score: number) {
   await sendTemplate(to, "plagiarism_failed", { authorName, title, score: String(score) });
 }

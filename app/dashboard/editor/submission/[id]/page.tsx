@@ -12,6 +12,8 @@ export default function EditorSubmissionPage() {
   const [sub, setSub] = useState<any>(null);
   const [reviewers, setReviewers] = useState<any[]>([]);
   const [selectedReviewer, setSelectedReviewer] = useState("");
+  const [canOverride, setCanOverride] = useState(false);
+  const [showBlocked, setShowBlocked] = useState(false);
   const [plagScore, setPlagScore] = useState("");
   const [plagReport, setPlagReport] = useState("");
   const [plagLoading, setPlagLoading] = useState(false);
@@ -38,7 +40,7 @@ export default function EditorSubmissionPage() {
 
   function load() {
     fetch(`/api/submissions/${id}`).then(r => r.json()).then(d => setSub(d.submission));
-    fetch(`/api/reviewers?submissionId=${id}`).then(r => r.json()).then(d => setReviewers(d.reviewers || []));
+    fetch(`/api/reviewers?submissionId=${id}`).then(r => r.json()).then(d => { setReviewers(d.reviewers || []); setCanOverride(!!d.canOverride); });
     fetch("/api/volumes").then(r => r.json()).then(d => {
       const allIssues = (d.volumes || []).flatMap((v: any) =>
         v.issues.map((i: any) => ({ ...i, volNum: v.number, volYear: v.year }))
@@ -57,7 +59,10 @@ export default function EditorSubmissionPage() {
       const data = await res.json().catch(() => ({} as any));
       setMsg(data?.warning ? `⚠️ Done, but: ${data.warning}` : "✅ Done");
       load();
-    } else setMsg("❌ Error");
+    } else {
+      const err = await res.json().catch(() => ({} as any));
+      setMsg(err?.error ? `❌ ${err.error}` : "❌ Error");
+    }
     setTimeout(() => setMsg(""), 8000);
   }
 
@@ -283,7 +288,7 @@ export default function EditorSubmissionPage() {
             </div>
             <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
               assignedIds.length >= 2 ? "bg-green-100 text-green-700" : assignedIds.length === 1 ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-500"
-            }`}>{assignedIds.length}/2 Reviewers Assigned</span>
+            }`}>{assignedIds.length}/3 Reviewers Assigned (2 needed)</span>
           </div>
 
           {/* English title + abstract for Hindi papers (needed for international indexing) */}
@@ -328,20 +333,38 @@ export default function EditorSubmissionPage() {
           )}
 
           {/* Assign new reviewer */}
-          {assignedIds.length < 2 && (
+          {assignedIds.length < 3 && (
             <>
               <p className="text-xs text-gray-500 mb-2">Each reviewer gets <strong>15 days</strong> to complete the review. Reminders sent at day 15, retraction at day 21.</p>
+              <p className="text-xs text-gray-500 mb-2">You may assign up to <strong>three</strong> reviewers. The <strong>first two reviews received</strong> are used. If they agree, the third reviewer is released with thanks; if they disagree, the third review acts as the tie-breaker.</p>
+              {reviewers.some(r => r.blockedReason) && (
+                <p className="text-xs text-amber-700 mb-2">
+                  {reviewers.filter(r => r.blockedReason).length} reviewer(s) are hidden because they have a paper in this issue or are already reviewing another paper in this issue.
+                  {canOverride && (
+                    <label className="ml-2 inline-flex items-center gap-1 font-semibold cursor-pointer">
+                      <input type="checkbox" checked={showBlocked} onChange={e => setShowBlocked(e.target.checked)} /> Show them (Editor override)
+                    </label>
+                  )}
+                </p>
+              )}
               <div className="flex gap-2">
                 <select value={selectedReviewer} onChange={e => setSelectedReviewer(e.target.value)}
                   className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
                   <option value="">Select reviewer {assignedIds.length + 1}…</option>
-                  {reviewers.filter(r => !assignedIds.includes(r.id)).map(r => (
-                    <option key={r.id} value={r.id}>{r.name} — {r.institution || r.email}</option>
-              ))}
+                  {reviewers.filter(r => !assignedIds.includes(r.id) && (!r.blockedReason || (showBlocked && canOverride && !r.blockedHard))).map(r => {
+                    const st = r.stats;
+                    const rankNo = st && st.completed > 0 ? reviewers.filter(x => x.stats && x.stats.completed > 0).findIndex(x => x.id === r.id) + 1 : 0;
+                    const record = st && st.completed > 0
+                      ? ` · #${rankNo} · on time ${st.onTime}/${st.completed}${st.avgDays !== null ? `, avg ${st.avgDays} d` : ""}`
+                      : " · no record yet";
+                    return (
+                    <option key={r.id} value={r.id}>{r.name} — {r.institution || r.email}{record}{r.blockedReason ? ` ⚠ ${r.blockedReason}` : ""}</option>
+                    );
+                  })}
             </select>
             <button
               disabled={!selectedReviewer}
-              onClick={() => { act(`/api/submissions/${id}/assign-reviewer`, "POST", { reviewerId: selectedReviewer }); setSelectedReviewer(""); }}
+              onClick={() => { act(`/api/submissions/${id}/assign-reviewer`, "POST", { reviewerId: selectedReviewer, override: showBlocked && canOverride }); setSelectedReviewer(""); }}
               className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-bold hover:bg-purple-700 disabled:opacity-40"
             >
               Assign
@@ -350,7 +373,7 @@ export default function EditorSubmissionPage() {
             </>
           )}
           {assignedIds.length >= 2 && (
-            <p className="text-xs text-green-600 font-medium mt-1">✅ Both reviewers assigned. Emails sent with 15-day deadline.</p>
+            <p className="text-xs text-green-600 font-medium mt-1">✅ {assignedIds.length >= 3 ? "Three reviewers assigned" : "Two reviewers assigned (a third is optional)"}. Emails sent with 15-day deadline.</p>
           )}
         </div>
 

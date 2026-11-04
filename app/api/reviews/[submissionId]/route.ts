@@ -9,6 +9,7 @@ import {
   sendBothMinorRevision,
   sendConflictingReviews,
   sendSubEditorReviewAlert,
+  sendReviewerReleased,
 } from "@/lib/email";
 
 // Decisions considered as POSITIVE (accept/minor revision)
@@ -130,17 +131,39 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ sub
       }
     }
 
-    // Check if both reviewers have now submitted
+    // Up to three reviewers may be assigned; the first two reviews to arrive are enough for a decision.
+    // A decision is never re-run once the paper already has one (late third review).
+    const alreadyDecided = ["ACCEPTED", "REJECTED", "PUBLISHED", "REVISION_REQUESTED"].includes(submission.status as string);
+
     const allReviews = await prisma.review.findMany({
       where: { submissionId, submittedAt: { not: null } },
+      orderBy: { submittedAt: "asc" },
     });
 
-    // Get total assigned reviewers (not retracted)
+    // Active (not retracted) assigned reviewers
     const assignedReviewers = await prisma.submissionReviewer.findMany({
       where: { submissionId, retractedAt: null },
     });
 
-    if (allReviews.length >= 2 && assignedReviewers.length >= 2) {
+    // Reviewers who are still expected to submit
+    const submittedIds = new Set(allReviews.map(r => r.reviewerId));
+    const pendingReviewers = assignedReviewers.filter(a => !a.declinedAt && !submittedIds.has(a.userId));
+
+    // Release the remaining reviewers with thanks once the decision is made without them
+    async function releasePending() {
+      for (const pr of pendingReviewers) {
+        await prisma.submissionReviewer.update({
+          where: { id: pr.id },
+          data: { retractedAt: new Date(), declineReason: "RELEASED: enough reviews received" },
+        });
+        const u = await prisma.user.findUnique({ where: { id: pr.userId }, select: { email: true, name: true } });
+        if (u) {
+          try { await sendReviewerReleased(u.email, u.name, submission!.title); } catch (e) { console.error("release email failed", e); }
+        }
+      }
+    }
+
+    if (!alreadyDecided && allReviews.length >= 2 && assignedReviewers.length >= 2) {
       const decisions = allReviews.map(r => r.decision).filter(Boolean) as string[];
 
       if (decisions.length >= 2) {
@@ -150,6 +173,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ sub
         // Case 1a: Both MINOR_REVISION → request revised manuscript from author
         if (d1 === "MINOR_REVISION" && d2 === "MINOR_REVISION") {
           const remarks = allReviews
+            .slice(0, 2)
             .map(r => r.remarks)
             .filter(Boolean)
             .join(" | ");
@@ -165,6 +189,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ sub
             where: { id: submissionId },
             data: { status: "REVISION_REQUESTED" },
           });
+          await releasePending();
         }
 
         // Case 1b: Both positive (at least one ACCEPT, or mixed ACCEPT+MINOR) → accepted
@@ -180,11 +205,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ sub
             where: { id: submissionId },
             data: { status: "ACCEPTED" },
           });
+          await releasePending();
         }
 
         // Case 2: Both negative (Reject or Major Revision) → email author with rejection
         else if (isNegative(d1) && isNegative(d2)) {
           const remarks = allReviews
+            .slice(0, 2)
             .map(r => r.remarks)
             .filter(Boolean)
             .join(" | ");
@@ -200,12 +227,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ sub
             where: { id: submissionId },
             data: { status: "REJECTED" },
           });
+          await releasePending();
         }
 
-        // Case 3: Conflicting (one positive, one negative) → email editor for decision
-        else {
+        // Case 3: Conflicting (one positive, one negative)
+        else if (pendingReviewers.length > 0) {
+          // A third reviewer is still working: wait for the tie-breaking review before asking the editor.
+        } else {
+          // No one left to wait for → editor decides, with every decision shown
           for (const ed of editors) {
-            await sendConflictingReviews(ed.email, submission.title, d1, d2);
+            await sendConflictingReviews(ed.email, submission.title, d1, decisions.slice(1).join(" / "));
           }
           // Keep status as UNDER_REVIEW — editor must decide
         }

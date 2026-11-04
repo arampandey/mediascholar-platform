@@ -100,6 +100,20 @@ export const DEFAULT_TEMPLATES: {
     variables: ["reviewerName", "title"],
   },
   {
+    key: "review_released",
+    label: "Review No Longer Needed (to Reviewer)",
+    subject: "Review No Longer Required — {{title}}",
+    body: `<p {{P}}>Dear <strong>{{reviewerName}}</strong>,</p>
+<p {{P}}>Thank you for agreeing to review a manuscript for <em>{{JOURNAL}}</em>.</p>
+<div {{BOX}}>
+  <p style="margin:0 0 6px;font-size:13px;color:#4a5568;"><strong>Manuscript Title:</strong></p>
+  <p style="margin:0;font-size:14px;color:#1a202c;">{{title}}</p>
+</div>
+<p {{P}}>We have now received the reviews needed to reach a decision on this manuscript, so your review is <strong>no longer required</strong>. Please do not spend further time on it. This does not reflect on you in any way, and we are grateful for your willingness to help.</p>
+<p {{SIGN}}>Yours sincerely,<br><strong>Editorial Team</strong><br>{{JOURNAL}}</p>`,
+    variables: ["reviewerName", "title"],
+  },
+  {
     key: "review_submitted",
     label: "Review Submitted Notification (to Editor)",
     subject: "Review Submitted — {{title}}",

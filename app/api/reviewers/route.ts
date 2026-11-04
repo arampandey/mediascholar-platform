@@ -1,50 +1,50 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { blockedReviewers, reviewerStats } from "@/lib/reviewerRules";
 
 export async function GET(req: NextRequest) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (!["EDITOR", "SUB_EDITOR"].includes((session.user as { role?: string }).role || "")) {
+  const role = (session.user as { role?: string }).role || "";
+  if (!["EDITOR", "SUB_EDITOR"].includes(role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  // Optional: filter out reviewers already actively assigned to any submission in the same issue
   const { searchParams } = new URL(req.url);
   const submissionId = searchParams.get("submissionId");
 
-  let excludeReviewerIds: string[] = [];
+  // Who may not review this paper (own paper, authors in the same issue, already used in the same issue)
+  const blocked = submissionId ? await blockedReviewers(submissionId) : new Map();
 
-  if (submissionId) {
-    const submission = await prisma.submission.findUnique({
-      where: { id: submissionId },
-      select: { issueId: true },
-    });
-
-    if (submission?.issueId) {
-      // Get all reviewer IDs actively assigned to any submission in this issue
-      const issueAssignments = await prisma.submissionReviewer.findMany({
-        where: {
-          retractedAt: null,
-          declinedAt: null,
-          submission: { issueId: submission.issueId },
-          // Exclude the current submission itself (those are handled on the frontend)
-          submissionId: { not: submissionId },
-        },
-        select: { userId: true },
-      });
-      excludeReviewerIds = issueAssignments.map((a) => a.userId);
-    }
-  }
-
-  const reviewers = await prisma.user.findMany({
-    where: {
-      // Sub-editors can also review papers (e.g. a board member who is both reviewer and sub-editor)
-      role: { in: ["REVIEWER", "SUB_EDITOR"] },
-      ...(excludeReviewerIds.length > 0 ? { id: { notIn: excludeReviewerIds } } : {}),
-    },
+  const users = await prisma.user.findMany({
+    // Sub-editors can also review papers (e.g. a board member who is both reviewer and sub-editor)
+    where: { role: { in: ["REVIEWER", "SUB_EDITOR"] } },
     select: { id: true, name: true, email: true, institution: true, role: true },
     orderBy: { name: "asc" },
   });
-  return NextResponse.json({ reviewers });
+
+  const stats = await reviewerStats(users.map(u => u.id));
+
+  // Timeliness ranking: highest on-time share first, then fastest average turnaround.
+  // Reviewers with no history yet go last (alphabetical).
+  const rank = (id: string) => stats.get(id)!;
+  const sorted = [...users].sort((a, b) => {
+    const ra = rank(a.id), rb = rank(b.id);
+    if (ra.rate === null && rb.rate === null) return a.name.localeCompare(b.name);
+    if (ra.rate === null) return 1;
+    if (rb.rate === null) return -1;
+    if (rb.rate !== ra.rate) return rb.rate - ra.rate;
+    if (rb.completed !== ra.completed) return rb.completed - ra.completed;
+    return (ra.avgDays ?? 999) - (rb.avgDays ?? 999);
+  });
+
+  const reviewers = sorted.map(u => ({
+    ...u,
+    stats: stats.get(u.id),
+    blockedReason: blocked.get(u.id)?.reason || null,
+    blockedHard: blocked.get(u.id)?.hard || false,
+  }));
+
+  return NextResponse.json({ reviewers, canOverride: role === "EDITOR" });
 }
