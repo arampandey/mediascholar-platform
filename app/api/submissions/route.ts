@@ -118,8 +118,8 @@ export async function POST(req: NextRequest) {
       });
       if (!issue) {
         const label = targetIssue === 1
-          ? `Issue 1 (Jan–May ${targetYear})`
-          : `Issue 2 (May–Oct ${targetYear})`;
+          ? `Issue 1 (January ${targetYear})`
+          : `Issue 2 (July ${targetYear})`;
         issue = await prisma.issue.create({
           data: { number: targetIssue, title: label, volumeId: volume.id },
         });
