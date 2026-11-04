@@ -113,7 +113,7 @@ export default async function HomePage() {
             <strong>Media Scholar — Journal of Media Studies and Humanities</strong> is an open-access, peer-reviewed bilingual journal publishing research in Hindi and English. We cover media studies, mass communication, journalism, and related fields.
           </p>
           <p className="text-gray-600 leading-relaxed mb-6">
-            Established in January 2023 as a tri-annual journal, Media Scholar became bi-annual in 2024. We serve students, faculty members, and professionals by providing a rigorous platform for scholarly discourse in the global south.
+            Established in January 2023 with three issues in its first year, Media Scholar has published two issues a year since 2024, in the first week of January and July. We serve students, faculty members, and professionals by providing a rigorous platform for scholarly discourse in the global south.
           </p>
           <div className="grid sm:grid-cols-3 gap-4">
             {[

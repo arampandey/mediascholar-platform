@@ -276,8 +276,8 @@ export default function GuidelinesPage() {
               {
                 step: "6",
                 title: "Issue Assignment",
-                desc: "Articles are assigned to the next available bi-annual issue (January or July). Authors are notified by email when their article appears in the published issue. The complete issue is also archived on the platform.",
-                time: "January or July",
+                desc: "Articles are assigned to the next available bi-annual issue (published in the first week of January or July). Authors are notified by email when their article appears in the published issue. The complete issue is also archived on the platform.",
+                time: "First week of January or July",
               },
             ].map((item, idx, arr) => (
               <div key={item.step} className="flex gap-4">
