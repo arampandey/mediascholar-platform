@@ -15,13 +15,19 @@ export default function ContactPage() {
         <h1 className="text-3xl font-extrabold text-gray-900 mb-2">Contact Us</h1>
         <p className="text-gray-500 mb-8">Get in touch with the Media Scholar editorial team.</p>
         <div className="grid sm:grid-cols-2 gap-5 mb-8">
-          {[{ icon: "📧", label: "Email", value: "editor@mediascholar.in", href: "mailto:editor@mediascholar.in" }, { icon: "📞", label: "Phone", value: "+91 9911893074", href: "tel:+919911893074" }, { icon: "📍", label: "Address", value: "Guru Jambheshwar University of Science and Technology, Hisar, Haryana", href: null }, { icon: "📰", label: "ISSN", value: "3048-5029", href: null }].map(c => (
+          {[{ icon: "📧", label: "Email", value: "editor@mediascholar.in", href: "mailto:editor@mediascholar.in" }, { icon: "📞", label: "Phone", value: "+91 9911893074", href: "tel:+919911893074" }, { icon: "📍", label: "Postal Address", value: "Room No. 309, Teaching Block 5, Guru Jambheshwar University of Science and Technology, Hisar, Haryana 125001, India", href: null }, { icon: "📰", label: "ISSN", value: "3048-5029", href: null }].map(c => (
             <div key={c.label} className="bg-white rounded-xl border border-gray-200 p-5">
               <div className="text-2xl mb-2">{c.icon}</div>
               <div className="text-sm font-semibold text-gray-500 mb-1">{c.label}</div>
               {c.href ? <a href={c.href} className="text-indigo-700 font-medium hover:underline">{c.value}</a> : <p className="text-gray-900 font-medium">{c.value}</p>}
             </div>
           ))}
+        </div>
+        <div className="bg-white rounded-xl border border-gray-200 p-6 mb-8">
+          <h2 className="font-bold text-gray-900 mb-4">Publisher</h2>
+          <p className="font-semibold text-gray-900">Dr. A Ram Pandey</p>
+          <p className="text-sm text-gray-600">Media Scholar — Journal of Media Studies and Humanities</p>
+          <p className="text-sm text-gray-600">Room No. 309, Teaching Block 5, Guru Jambheshwar University of Science and Technology, Hisar, Haryana 125001, India</p>
         </div>
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h2 className="font-bold text-gray-900 mb-4">Editor-in-Chief</h2>
