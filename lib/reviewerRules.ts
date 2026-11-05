@@ -44,15 +44,16 @@ export async function blockedReviewers(submissionId: string): Promise<Map<string
 }
 
 export type ReviewerStats = {
-  completed: number;   // reviews that were due (submitted or missed)
-  onTime: number;
+  assigned: number;   // times asked to review (declined and released assignments, and reviews still within their deadline, are not counted)
+  reviewed: number;   // reviews actually submitted
+  onTime: number;     // of the reviewed ones, submitted by the deadline
   late: number;
-  missed: number;      // retracted for not submitting
+  missed: number;     // retracted or overdue without a review
   avgDays: number | null; // average days from assignment to submission
-  rate: number | null;    // onTime / completed
+  rate: number | null;    // reviewed / assigned
 };
 
-/** Timeliness record per reviewer, built from existing assignment and review dates. */
+/** Review record per reviewer ("reviewed 2 of 5 assigned"), built from assignment and review rows. */
 export async function reviewerStats(userIds: string[]): Promise<Map<string, ReviewerStats>> {
   const out = new Map<string, ReviewerStats>();
   if (userIds.length === 0) return out;
@@ -65,34 +66,60 @@ export async function reviewerStats(userIds: string[]): Promise<Map<string, Revi
     where: { reviewerId: { in: userIds }, submittedAt: { not: null } },
     select: { submissionId: true, reviewerId: true, submittedAt: true },
   });
-  const done = new Map<string, Date>();
-  for (const r of reviews) done.set(`${r.submissionId}:${r.reviewerId}`, r.submittedAt as Date);
 
-  const acc = new Map<string, { onTime: number; late: number; missed: number; days: number[] }>();
-  for (const a of assignments) {
-    // Released because enough reviews had arrived: no fault, not counted.
-    if (a.declineReason && a.declineReason.startsWith("RELEASED")) continue;
-    const row = acc.get(a.userId) || { onTime: 0, late: 0, missed: 0, days: [] };
-    const submittedAt = done.get(`${a.submissionId}:${a.userId}`);
-    if (submittedAt) {
+  type Row = { reviewed: Set<string>; onTime: number; late: number; missed: number; days: number[]; seen: Set<string> };
+  const acc = new Map<string, Row>();
+  const get = (id: string) => {
+    let r = acc.get(id);
+    if (!r) { r = { reviewed: new Set(), onTime: 0, late: 0, missed: 0, days: [], seen: new Set() }; acc.set(id, r); }
+    return r;
+  };
+
+  const assignmentByKey = new Map<string, (typeof assignments)[number]>();
+  for (const a of assignments) assignmentByKey.set(`${a.submissionId}:${a.userId}`, a);
+
+  // Every submitted review counts, even if the assignment row is missing (older papers).
+  for (const rv of reviews) {
+    const row = get(rv.reviewerId);
+    const key = `${rv.submissionId}:${rv.reviewerId}`;
+    if (row.seen.has(key)) continue;
+    row.seen.add(key);
+    row.reviewed.add(rv.submissionId);
+    const a = assignmentByKey.get(key);
+    const submittedAt = rv.submittedAt as Date;
+    if (a) {
       const due = a.deadlineAt ? a.deadlineAt.getTime() : a.assignedAt.getTime() + 15 * 86400000;
       if (submittedAt.getTime() <= due) row.onTime++; else row.late++;
       row.days.push((submittedAt.getTime() - a.assignedAt.getTime()) / 86400000);
-    } else if (a.retractedAt) {
-      row.missed++;
-    } // still pending: not counted yet
-    acc.set(a.userId, row);
+    } else {
+      row.onTime++; // no deadline on record: not held against the reviewer
+    }
   }
+
+  // Assignments without a review: missed if retracted or past the deadline; otherwise still in progress (not counted yet)
+  const now = Date.now();
+  for (const a of assignments) {
+    if (a.declineReason && a.declineReason.startsWith("RELEASED")) continue; // released because enough reviews had arrived
+    const key = `${a.submissionId}:${a.userId}`;
+    const row = get(a.userId);
+    if (row.seen.has(key)) continue;
+    const overdue = a.deadlineAt ? a.deadlineAt.getTime() < now : false;
+    if (a.retractedAt || overdue) { row.missed++; row.seen.add(key); }
+  }
+
   for (const id of userIds) {
-    const r = acc.get(id) || { onTime: 0, late: 0, missed: 0, days: [] };
-    const completed = r.onTime + r.late + r.missed;
+    const r = acc.get(id);
+    const reviewed = r ? r.reviewed.size : 0;
+    const missed = r ? r.missed : 0;
+    const assigned = reviewed + missed;
     out.set(id, {
-      completed,
-      onTime: r.onTime,
-      late: r.late,
-      missed: r.missed,
-      avgDays: r.days.length ? Math.round((r.days.reduce((x, y) => x + y, 0) / r.days.length) * 10) / 10 : null,
-      rate: completed ? r.onTime / completed : null,
+      assigned,
+      reviewed,
+      onTime: r ? r.onTime : 0,
+      late: r ? r.late : 0,
+      missed,
+      avgDays: r && r.days.length ? Math.round((r.days.reduce((x, y) => x + y, 0) / r.days.length) * 10) / 10 : null,
+      rate: assigned ? reviewed / assigned : null,
     });
   }
   return out;

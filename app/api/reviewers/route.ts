@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
 
   const stats = await reviewerStats(users.map(u => u.id));
 
-  // Timeliness ranking: highest on-time share first, then fastest average turnaround.
+  // Ranking: highest share of assigned papers actually reviewed first (e.g. 2 of 5), then most reviews, then fastest turnaround.
   // Reviewers with no history yet go last (alphabetical).
   const rank = (id: string) => stats.get(id)!;
   const sorted = [...users].sort((a, b) => {
@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
     if (ra.rate === null) return 1;
     if (rb.rate === null) return -1;
     if (rb.rate !== ra.rate) return rb.rate - ra.rate;
-    if (rb.completed !== ra.completed) return rb.completed - ra.completed;
+    if (rb.reviewed !== ra.reviewed) return rb.reviewed - ra.reviewed;
     return (ra.avgDays ?? 999) - (rb.avgDays ?? 999);
   });
 

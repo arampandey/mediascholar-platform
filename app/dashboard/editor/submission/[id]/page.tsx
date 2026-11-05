@@ -353,9 +353,9 @@ export default function EditorSubmissionPage() {
                   <option value="">Select reviewer {assignedIds.length + 1}…</option>
                   {reviewers.filter(r => !assignedIds.includes(r.id) && (!r.blockedReason || (showBlocked && canOverride && !r.blockedHard))).map(r => {
                     const st = r.stats;
-                    const rankNo = st && st.completed > 0 ? reviewers.filter(x => x.stats && x.stats.completed > 0).findIndex(x => x.id === r.id) + 1 : 0;
-                    const record = st && st.completed > 0
-                      ? ` · #${rankNo} · on time ${st.onTime}/${st.completed}${st.avgDays !== null ? `, avg ${st.avgDays} d` : ""}`
+                    const rankNo = st && (st.assigned > 0 || st.reviewed > 0) ? reviewers.filter(x => x.stats && (x.stats.assigned > 0 || x.stats.reviewed > 0)).findIndex(x => x.id === r.id) + 1 : 0;
+                    const record = st && (st.assigned > 0 || st.reviewed > 0)
+                      ? ` · #${rankNo} · reviewed ${st.reviewed}/${st.assigned}${st.avgDays !== null ? `, avg ${st.avgDays} d` : ""}`
                       : " · no record yet";
                     return (
                     <option key={r.id} value={r.id}>{r.name} — {r.institution || r.email}{record}{r.blockedReason ? ` ⚠ ${r.blockedReason}` : ""}</option>
