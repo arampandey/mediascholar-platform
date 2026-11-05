@@ -23,6 +23,7 @@ export default function EditorSubmissionPage() {
   const [revisionNotes, setRevisionNotes] = useState("");
   const [issues, setIssues] = useState<any[]>([]);
   const [selIssue, setSelIssue] = useState("");
+  const [moveIssue, setMoveIssue] = useState("");
   const [doi, setDoi] = useState("");
   const [msg, setMsg] = useState("");
   const [doiLoading, setDoiLoading] = useState(false);
@@ -157,6 +158,21 @@ export default function EditorSubmissionPage() {
             </div>
             <div>Language: {sub.language === "hi" ? "Hindi (हिंदी)" : "English"}</div>
             <div>Submitted: {new Date(sub.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span>Issue: <strong>{sub.issue ? `Vol. ${sub.issue.volume?.number}, ${sub.issue.title || `Issue ${sub.issue.number}`}` : "Not assigned"}</strong></span>
+              {sub.status !== "PUBLISHED" && (
+                <>
+                  <select value={moveIssue} onChange={e => setMoveIssue(e.target.value)} className="border border-gray-300 rounded px-2 py-1 text-xs">
+                    <option value="">{sub.issue ? "Move to…" : "Assign to…"}</option>
+                    {issues.map(i => (
+                      <option key={i.id} value={i.id}>Vol. {i.volNum} ({i.volYear}) · {i.title || `Issue ${i.number}`}</option>
+                    ))}
+                  </select>
+                  <button disabled={!moveIssue} onClick={() => { act(`/api/submissions/${id}/issue`, "PATCH", { issueId: moveIssue }); setMoveIssue(""); }}
+                    className="text-xs px-2 py-1 bg-indigo-600 text-white rounded font-semibold disabled:opacity-40">Save</button>
+                </>
+              )}
+            </div>
           </div>
           <div className="mt-3 flex gap-4 flex-wrap items-center">
             {sub.fileUrl ? (
