@@ -44,83 +44,47 @@ export async function blockedReviewers(submissionId: string): Promise<Map<string
 }
 
 export type ReviewerStats = {
-  assigned: number;   // times asked to review (declined and released assignments, and reviews still within their deadline, are not counted)
+  assigned: number;   // times asked to review and either reviewed or closed without a review (declined, released and still-open assignments are not counted)
   reviewed: number;   // reviews actually submitted
-  onTime: number;     // of the reviewed ones, submitted by the deadline
-  late: number;
-  missed: number;     // retracted or overdue without a review
-  avgDays: number | null; // average days from assignment to submission
-  rate: number | null;    // reviewed / assigned
+  rate: number | null; // reviewed / assigned
 };
 
-/** Review record per reviewer ("reviewed 2 of 5 assigned"), built from assignment and review rows. */
+/** Review record per reviewer ("reviewed 2 of 5 assigned"). Speed is deliberately not considered. */
 export async function reviewerStats(userIds: string[]): Promise<Map<string, ReviewerStats>> {
   const out = new Map<string, ReviewerStats>();
   if (userIds.length === 0) return out;
 
   const assignments = await prisma.submissionReviewer.findMany({
     where: { userId: { in: userIds }, declinedAt: null },
-    select: { submissionId: true, userId: true, assignedAt: true, deadlineAt: true, retractedAt: true, declineReason: true },
+    select: { submissionId: true, userId: true, retractedAt: true, declineReason: true },
   });
   const reviews = await prisma.review.findMany({
     where: { reviewerId: { in: userIds }, submittedAt: { not: null } },
-    select: { submissionId: true, reviewerId: true, submittedAt: true },
+    select: { submissionId: true, reviewerId: true },
   });
 
-  type Row = { reviewed: Set<string>; onTime: number; late: number; missed: number; days: number[]; seen: Set<string> };
-  const acc = new Map<string, Row>();
-  const get = (id: string) => {
-    let r = acc.get(id);
-    if (!r) { r = { reviewed: new Set(), onTime: 0, late: 0, missed: 0, days: [], seen: new Set() }; acc.set(id, r); }
-    return r;
+  const reviewed = new Map<string, Set<string>>();
+  const notReviewed = new Map<string, Set<string>>();
+  const add = (m: Map<string, Set<string>>, user: string, sub: string) => {
+    let set = m.get(user);
+    if (!set) { set = new Set(); m.set(user, set); }
+    set.add(sub);
   };
 
-  const assignmentByKey = new Map<string, (typeof assignments)[number]>();
-  for (const a of assignments) assignmentByKey.set(`${a.submissionId}:${a.userId}`, a);
-
   // Every submitted review counts, even if the assignment row is missing (older papers).
-  for (const rv of reviews) {
-    const row = get(rv.reviewerId);
-    const key = `${rv.submissionId}:${rv.reviewerId}`;
-    if (row.seen.has(key)) continue;
-    row.seen.add(key);
-    row.reviewed.add(rv.submissionId);
-    const a = assignmentByKey.get(key);
-    const submittedAt = rv.submittedAt as Date;
-    if (a) {
-      const due = a.deadlineAt ? a.deadlineAt.getTime() : a.assignedAt.getTime() + 15 * 86400000;
-      if (submittedAt.getTime() <= due) row.onTime++; else row.late++;
-      row.days.push((submittedAt.getTime() - a.assignedAt.getTime()) / 86400000);
-    } else {
-      row.onTime++; // no deadline on record: not held against the reviewer
-    }
-  }
+  for (const rv of reviews) add(reviewed, rv.reviewerId, rv.submissionId);
 
-  // Assignments without a review: missed if retracted or past the deadline; otherwise still in progress (not counted yet)
-  const now = Date.now();
+  // Assignment closed without a review (retracted). Released-because-enough-reviews and still-open ones are not counted.
   for (const a of assignments) {
-    if (a.declineReason && a.declineReason.startsWith("RELEASED")) continue; // released because enough reviews had arrived
-    const key = `${a.submissionId}:${a.userId}`;
-    const row = get(a.userId);
-    if (row.seen.has(key)) continue;
-    const overdue = a.deadlineAt ? a.deadlineAt.getTime() < now : false;
-    if (a.retractedAt || overdue) { row.missed++; row.seen.add(key); }
+    if (a.declineReason && a.declineReason.startsWith("RELEASED")) continue;
+    if (reviewed.get(a.userId)?.has(a.submissionId)) continue;
+    if (a.retractedAt) add(notReviewed, a.userId, a.submissionId);
   }
 
   for (const id of userIds) {
-    const r = acc.get(id);
-    const reviewed = r ? r.reviewed.size : 0;
-    const missed = r ? r.missed : 0;
-    const assigned = reviewed + missed;
-    out.set(id, {
-      assigned,
-      reviewed,
-      onTime: r ? r.onTime : 0,
-      late: r ? r.late : 0,
-      missed,
-      avgDays: r && r.days.length ? Math.round((r.days.reduce((x, y) => x + y, 0) / r.days.length) * 10) / 10 : null,
-      rate: assigned ? reviewed / assigned : null,
-    });
+    const r = reviewed.get(id)?.size || 0;
+    const n = notReviewed.get(id)?.size || 0;
+    out.set(id, { assigned: r + n, reviewed: r, rate: r + n ? r / (r + n) : null });
   }
   return out;
 }

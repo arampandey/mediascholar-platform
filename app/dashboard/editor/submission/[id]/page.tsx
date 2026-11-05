@@ -355,7 +355,7 @@ export default function EditorSubmissionPage() {
                     const st = r.stats;
                     const rankNo = st && (st.assigned > 0 || st.reviewed > 0) ? reviewers.filter(x => x.stats && (x.stats.assigned > 0 || x.stats.reviewed > 0)).findIndex(x => x.id === r.id) + 1 : 0;
                     const record = st && (st.assigned > 0 || st.reviewed > 0)
-                      ? ` · #${rankNo} · reviewed ${st.reviewed}/${st.assigned}${st.avgDays !== null ? `, avg ${st.avgDays} d` : ""}`
+                      ? ` · #${rankNo} · reviewed ${st.reviewed}/${st.assigned}`
                       : " · no record yet";
                     return (
                     <option key={r.id} value={r.id}>{r.name} — {r.institution || r.email}{record}{r.blockedReason ? ` ⚠ ${r.blockedReason}` : ""}</option>
