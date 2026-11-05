@@ -133,6 +133,19 @@ export default function AdminUsersPage() {
 
   const badEmailCount = users.filter(u => PLACEHOLDER_RE.test(u.email || "")).length;
 
+  // Possible duplicate accounts: same first and last name once titles (Dr, Mr, Mrs, Prof…) and dots are ignored
+  const duplicateGroups: any[][] = (() => {
+    const TITLES = new Set(["dr","prof","professor","mr","mrs","ms","miss","shri","smt","sri","er","ph","d","phd"]);
+    const groups = new Map<string, any[]>();
+    for (const u of users) {
+      const tokens = String(u.name || "").toLowerCase().replace(/[^a-z\u0900-\u097f\s]/g, " ").split(/\s+/).filter(t => t && !TITLES.has(t));
+      if (tokens.length === 0) continue;
+      const key = tokens.length === 1 ? tokens[0] : `${tokens[0]} ${tokens[tokens.length - 1]}`;
+      groups.set(key, [...(groups.get(key) || []), u]);
+    }
+    return [...groups.values()].filter(g => g.length > 1);
+  })();
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -151,6 +164,25 @@ export default function AdminUsersPage() {
           <Link href="/dashboard/admin" className="text-sm text-indigo-700 hover:underline">← Analytics</Link>
         </div>
         {msg && <div className="mb-4 text-sm font-medium px-4 py-2 rounded-lg bg-blue-50 border border-blue-200 text-blue-800">{msg}</div>}
+
+        {duplicateGroups.length > 0 && (
+          <div className="mb-5 bg-amber-50 border border-amber-200 rounded-xl p-4">
+            <p className="text-sm font-bold text-amber-800 mb-1">Possible duplicate accounts ({duplicateGroups.length})</p>
+            <p className="text-xs text-amber-700 mb-3">Same first and last name (ignoring Dr, Mr, Mrs, Prof). Check each pair, then click Merge on the account you do <strong>not</strong> want to keep.</p>
+            <div className="space-y-2">
+              {duplicateGroups.map((g, gi) => (
+                <div key={gi} className="bg-white border border-amber-200 rounded-lg p-3 space-y-1">
+                  {g.map((u: any) => (
+                    <div key={u.id} className="flex items-center justify-between gap-3 text-sm flex-wrap">
+                      <span><strong>{u.name}</strong> <span className="text-gray-500">· {u.email} · {u.role}{u.institution ? ` · ${u.institution}` : ""}</span></span>
+                      <button onClick={() => { setMergeFrom(u); setMergeInto(""); setMergeErr(""); }} className="text-xs text-purple-600 hover:text-purple-800 border border-purple-200 px-2 py-0.5 rounded-full">Merge</button>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
           {ROLES.map(r => <div key={r} onClick={() => setFilterRole(filterRole===r?"ALL":r)} className={`rounded-xl p-4 text-center cursor-pointer border-2 transition-all ${filterRole===r?"border-indigo-500 shadow-md":"border-transparent"} ${ROLE_COLORS[r]}`}><div className="text-2xl font-bold">{users.filter(u=>u.role===r).length}</div><div className="text-xs font-semibold mt-0.5">{r.replace("_"," ")}</div></div>)}
