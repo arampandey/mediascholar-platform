@@ -21,6 +21,8 @@ export default function EditorSubmissionPage() {
   const [decision, setDecision] = useState("");
   const [decisionNotes, setDecisionNotes] = useState("");
   const [revisionNotes, setRevisionNotes] = useState("");
+  const [revSending, setRevSending] = useState(false);
+  const [revMsg, setRevMsg] = useState("");
   const [issues, setIssues] = useState<any[]>([]);
   const [selIssue, setSelIssue] = useState("");
   const [moveIssue, setMoveIssue] = useState("");
@@ -527,17 +529,48 @@ export default function EditorSubmissionPage() {
             <span className="text-lg">✏️</span>
             <h2 className="font-bold text-gray-900">Step 4 — Request Revision (if needed)</h2>
           </div>
+          {sub.status === "REVISION_REQUESTED" && (
+            <p className="text-xs text-orange-700 bg-orange-50 border border-orange-200 rounded-lg px-3 py-2 mb-2">
+              A revision request has already been sent for this paper. Sending again will email the author again.
+            </p>
+          )}
+          <div className="mb-2">
+            <button
+              type="button"
+              onClick={() => {
+                const done = (sub.reviews || []).filter((r: any) => r.remarks && String(r.remarks).trim());
+                if (done.length === 0) { setRevMsg("❌ No reviewer comments to add yet."); return; }
+                // Reviewers stay anonymous to the author: "Reviewer 1", "Reviewer 2"…
+                const text = done.map((r: any, i: number) =>
+                  `Reviewer ${i + 1}${r.decision ? ` (${String(r.decision).replace(/_/g, " ").toLowerCase()})` : ""}:\n${String(r.remarks).trim()}`
+                ).join("\n\n");
+                setRevisionNotes(prev => (prev.trim() ? prev.trim() + "\n\n" : "") + text);
+                setRevMsg("");
+              }}
+              className="text-xs px-3 py-1.5 border border-indigo-200 text-indigo-700 rounded-lg font-semibold hover:bg-indigo-50"
+            >➕ Add reviewers&apos; comments</button>
+          </div>
           <div className="flex gap-2">
             <textarea value={revisionNotes} onChange={e => setRevisionNotes(e.target.value)}
-              placeholder="Describe the revisions required from the author…" rows={2}
+              placeholder="Describe the revisions required from the author…" rows={6}
               className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
             <button
-              onClick={() => act(`/api/submissions/${id}/revision`, "POST", { type: "request", notes: revisionNotes })}
-              className="px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-bold hover:bg-orange-600"
+              disabled={revSending || !revisionNotes.trim()}
+              onClick={async () => {
+                setRevSending(true); setRevMsg("");
+                try {
+                  const res = await fetch(`/api/submissions/${id}/revision`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "request", notes: revisionNotes }) });
+                  if (res.ok) { setRevMsg("✅ Revision request emailed to the author."); setRevisionNotes(""); load(); }
+                  else { const err = await res.json().catch(() => ({} as any)); setRevMsg(`❌ ${err?.error || "Could not send"}`); }
+                } catch { setRevMsg("❌ Network error — please try again."); }
+                setRevSending(false);
+              }}
+              className="px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-bold hover:bg-orange-600 disabled:opacity-40 self-start"
             >
-              Send
+              {revSending ? "Sending…" : "Send"}
             </button>
           </div>
+          {revMsg && <p className={`text-sm font-medium mt-2 ${revMsg.startsWith("✅") ? "text-green-700" : "text-red-600"}`}>{revMsg}</p>}
         </div>
 
         {/* ── STEP 5: FINAL DECISION ── */}
