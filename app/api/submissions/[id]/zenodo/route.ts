@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { depositToZenodo } from "@/lib/zenodo";
+import { depositToZenodo, lastZenodoError } from "@/lib/zenodo";
 
 export async function POST(
   _req: NextRequest,
@@ -47,7 +47,7 @@ export async function POST(
 
   if (!result) {
     return NextResponse.json(
-      { error: "Zenodo deposit failed — check server logs or ZENODO_TOKEN env var", debug: { hasToken: !!process.env.ZENODO_TOKEN, hasFile: !!submission.fileUrl, submissionId: id } },
+      { error: "Zenodo deposit failed — check server logs or ZENODO_TOKEN env var", debug: { zenodoError: lastZenodoError, hasToken: !!process.env.ZENODO_TOKEN, hasFile: !!submission.fileUrl, submissionId: id } },
       { status: 500 }
     );
   }

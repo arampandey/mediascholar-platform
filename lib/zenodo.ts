@@ -13,6 +13,10 @@
 
 const ZENODO_API = "https://zenodo.org/api";
 
+/** Text of the most recent Zenodo failure (shown only to editors by the archive route). */
+export let lastZenodoError = "";
+function fail(msg: string) { lastZenodoError = String(msg).slice(0, 600); console.error("[zenodo]", lastZenodoError); }
+
 export interface ZenodoResult {
   recordId: string;
   doi: string;
@@ -36,8 +40,9 @@ export async function depositToZenodo(
   submission: ZenodoSubmission
 ): Promise<ZenodoResult | null> {
   const token = process.env.ZENODO_TOKEN;
+  lastZenodoError = "";
   if (!token) {
-    console.error("[zenodo] ZENODO_TOKEN not set — skipping deposit");
+    fail("ZENODO_TOKEN not set");
     return null;
   }
   console.log("[zenodo] starting deposit for submission", submission.id);
@@ -102,7 +107,7 @@ export async function depositToZenodo(
 
     if (!createRes.ok) {
       const err = await createRes.text();
-      console.error("[zenodo] create deposition failed:", err);
+      fail(`create deposition failed (${createRes.status}): ${err}`);
       return null;
     }
 
@@ -143,10 +148,7 @@ export async function depositToZenodo(
 
           if (!uploadRes.ok) {
             const uploadErr = await uploadRes.text();
-            console.error(
-              "[zenodo] file upload failed:",
-              uploadErr
-            );
+            fail(`file upload failed (${uploadRes.status}): ${uploadErr}`);
             // Clean up draft and bail — Zenodo requires at least one file to publish
             await fetch(`${ZENODO_API}/deposit/depositions/${depositionId}`, {
               method: "DELETE",
@@ -192,7 +194,7 @@ export async function depositToZenodo(
     );
 
     if (!publishRes.ok) {
-      console.error("[zenodo] publish failed:", await publishRes.text());
+      fail(`publish failed (${publishRes.status}): ${await publishRes.text()}`);
       return null;
     }
 
