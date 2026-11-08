@@ -28,6 +28,7 @@ export interface ZenodoSubmission {
   fileUrl: string | null;
   publishedAt: Date | string | null;
   author: { name: string; institution: string | null } | null;
+  coAuthors?: unknown;
   issue: { number: number; volume: { number: number; year: number } } | null;
 }
 
@@ -62,6 +63,16 @@ export async function depositToZenodo(
         : `Published in Media Scholar — Journal of Media Studies and Humanities.`,
       creators: [
         { name: creatorName, ...(affiliation ? { affiliation } : {}) },
+        // Co-authors are stored as "Name, Institution" text
+        ...(Array.isArray(submission.coAuthors) ? (submission.coAuthors as unknown[]) : [])
+          .filter((c): c is string => typeof c === "string" && c.trim().length > 0)
+          .map((c) => {
+            const i = c.indexOf(",");
+            const name = (i === -1 ? c : c.slice(0, i)).trim();
+            const aff = i === -1 ? "" : c.slice(i + 1).trim();
+            return { name, ...(aff ? { affiliation: aff } : {}) };
+          })
+          .filter((c) => c.name),
       ],
       ...(submission.keywords?.length ? { keywords: submission.keywords } : {}),
       language: langCode,

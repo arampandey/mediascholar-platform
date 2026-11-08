@@ -24,6 +24,7 @@ type PaperData = {
   coAuthors: string[];
   fileType: "pdf" | "docx" | "doc";
   titleEn?: string | null;
+  citedBy?: { count: number; source: string } | null;
   abstractEn?: string | null;
 };
 
@@ -155,6 +156,11 @@ export default function PaperClient({ paper }: { paper: PaperData }) {
           {paper.publishedAt && (
             <p className="text-xs text-blue-200 mt-2">
               Published {new Date(paper.publishedAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}
+            </p>
+          )}
+          {paper.citedBy && (
+            <p className="text-xs text-blue-100 mt-1" title={`Source: ${paper.citedBy.source}`}>
+              📚 Cited by <strong>{paper.citedBy.count}</strong>
             </p>
           )}
         </div>

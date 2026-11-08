@@ -113,7 +113,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         if (zenodoResult) {
           await prisma.submission.update({
             where: { id: submission.id },
-            data: { zenodoRecordId: zenodoResult.recordId, zenodoUrl: zenodoResult.url },
+            data: { zenodoRecordId: zenodoResult.recordId, zenodoUrl: zenodoResult.url, zenodoDoi: zenodoResult.doi || null },
           });
         }
       }

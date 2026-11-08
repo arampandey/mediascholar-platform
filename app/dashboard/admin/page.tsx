@@ -10,6 +10,8 @@ export default function AdminAnalytics() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [citations, setCitations] = useState<any>(null);
+  const [citEdits, setCitEdits] = useState<Record<string,string>>({});
+  const [citMsg, setCitMsg] = useState("");
   const [citLoading, setCitLoading] = useState(false);
   const [citFetched, setCitFetched] = useState(false);
 
@@ -94,7 +96,7 @@ export default function AdminAnalytics() {
           {/* Citation counts via Semantic Scholar */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <h2 className="font-bold text-gray-900 mb-1">📚 Citation Counts</h2>
-            <p className="text-xs text-gray-400 mb-4">Live data from Semantic Scholar — takes ~30 seconds to load</p>
+            <p className="text-xs text-gray-400 mb-4">Your Google Scholar numbers plus automatic OpenAlex counts — takes ~30 seconds to load</p>
             {!citFetched ? (
               <div className="flex flex-col items-center justify-center py-6 gap-3">
                 <p className="text-sm text-gray-500">Click to fetch live citation counts for all published papers</p>
@@ -103,31 +105,43 @@ export default function AdminAnalytics() {
                   disabled={citLoading}
                   className="px-5 py-2 bg-indigo-700 text-white text-sm font-semibold rounded-lg hover:bg-indigo-800 disabled:opacity-50"
                 >
-                  {citLoading ? "Fetching from Semantic Scholar…" : "Load Citation Counts"}
+                  {citLoading ? "Fetching citation counts…" : "Load Citation Counts"}
                 </button>
               </div>
             ) : citLoading ? (
-              <div className="flex items-center justify-center py-8 text-gray-400 text-sm">Querying Semantic Scholar for {data.submissionsByStatus?.find((s: any) => s.status === "PUBLISHED")?._count?.id || 0} papers…</div>
+              <div className="flex items-center justify-center py-8 text-gray-400 text-sm">Looking up citations for {data.submissionsByStatus?.find((s: any) => s.status === "PUBLISHED")?._count?.id || 0} papers…</div>
             ) : citations?.topCited?.length > 0 ? (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100">
-                  <span className="text-xs text-gray-500">Total citations found</span>
-                  <span className="text-lg font-extrabold text-indigo-700">{citations.totalCitations}</span>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between mb-2 pb-2 border-b border-gray-100">
+                  <span className="text-xs text-gray-500">Total citations ({citations.total} papers)</span>
+                  <span className="text-lg font-extrabold text-indigo-700">{citations.topCited.reduce((t: number, p: any) => t + (citEdits[p.id] !== undefined && citEdits[p.id] !== "" ? Number(citEdits[p.id]) || 0 : p.citationCount), 0)}</span>
                 </div>
+                <p className="text-xs text-gray-500 mb-2">Type the number shown on Google Scholar for each paper and press Save. The higher of your number and the automatic OpenAlex count is shown on the paper page.</p>
                 {citations.topCited.map((p: any, i: number) => (
-                  <div key={p.id} className="flex items-start justify-between gap-2">
+                  <div key={p.id} className="flex items-center justify-between gap-2">
                     <Link href={`/paper/${p.id}`} className="text-xs text-gray-700 hover:text-indigo-600 hover:underline line-clamp-2 flex-1">
                       <span className="text-gray-400 mr-1">#{i + 1}</span>{p.title}
                     </Link>
-                    <span className={`text-xs font-bold shrink-0 px-2 py-0.5 rounded-full ${p.citationCount > 0 ? "bg-indigo-100 text-indigo-700" : "bg-gray-100 text-gray-400"}`}>
-                      {p.citationCount} cited
-                    </span>
+                    <span className="text-[10px] text-gray-400 shrink-0 w-16 text-right" title="Automatic count from OpenAlex (needs a DOI)">{p.hasDoi ? `auto ${p.auto ?? "–"}` : "no DOI"}</span>
+                    <input type="number" min={0} value={citEdits[p.id] ?? (p.manual ?? "")} placeholder="0"
+                      onChange={e => setCitEdits(prev => ({ ...prev, [p.id]: e.target.value }))}
+                      className="w-16 border border-gray-300 rounded px-2 py-1 text-xs text-right" />
+                    <button
+                      disabled={citEdits[p.id] === undefined || citEdits[p.id] === ""}
+                      onClick={async () => {
+                        const res = await fetch("/api/analytics/citations", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: p.id, count: Number(citEdits[p.id]) }) });
+                        setCitMsg(res.ok ? "✅ Saved" : "❌ Could not save");
+                        setTimeout(() => setCitMsg(""), 3000);
+                      }}
+                      className="text-xs px-2 py-1 bg-indigo-600 text-white rounded font-semibold disabled:opacity-30"
+                    >Save</button>
                   </div>
                 ))}
-                <button onClick={fetchCitations} className="text-xs text-indigo-600 hover:underline mt-2">Refresh</button>
+                {citMsg && <p className="text-xs font-semibold text-green-700">{citMsg}</p>}
+                <button onClick={fetchCitations} className="text-xs text-indigo-600 hover:underline mt-2">Refresh automatic counts</button>
               </div>
             ) : (
-              <p className="text-sm text-gray-400 text-center py-4">No citations found yet — papers may not be indexed by Semantic Scholar yet</p>
+              <p className="text-sm text-gray-400 text-center py-4">No published papers found</p>
             )}
           </div>
         </div>

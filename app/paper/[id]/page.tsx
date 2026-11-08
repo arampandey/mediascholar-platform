@@ -9,6 +9,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import PaperClient from "./PaperClient";
 import { getApprovedEnglishVersion } from "@/lib/englishVersion";
+import { bestCount } from "@/lib/citations";
 
 // Co-authors are typed one per line, usually as "Name, Institution". Google Scholar wants the
 // name only (no affiliation or degree), one tag per author.
@@ -98,6 +99,8 @@ export default async function PaperPage({ params }: { params: Promise<{ id: stri
   const vol = paper.issue?.volume;
   const iss = paper.issue;
   const english = paper.language === "hi" ? await getApprovedEnglishVersion(id) : null;
+  // Citation count (editor entry or OpenAlex); never blocks the page if unavailable
+  const citedBy = await bestCount(id, paper.doi || paper.zenodoDoi || (paper.zenodoRecordId ? `10.5281/zenodo.${paper.zenodoRecordId}` : null)).catch(() => null);
 
   // JSON-LD ScholarlyArticle schema for Google
   const jsonLd = {
@@ -183,6 +186,7 @@ export default async function PaperPage({ params }: { params: Promise<{ id: stri
             : "pdf") as "pdf" | "doc" | "docx",
     coAuthors: (paper.coAuthors as string[]) || [],
     titleEn: english?.titleEn ?? null,
+    citedBy: citedBy && citedBy.count > 0 ? citedBy : null,
     abstractEn: english?.abstractEn ?? null,
   };
 
