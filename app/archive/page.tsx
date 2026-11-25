@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 
 export const metadata: Metadata = {
-  title: "Archive | Media Scholar — Journal of Media Studies and Humanities",
+  title: "Archive",
   description: "Complete archive of all published volumes and issues of Media Scholar journal since 2023. ISSN: 3048-5029.",
   alternates: { canonical: "https://mediascholar.in/archive" },
 };

@@ -2,7 +2,7 @@ import Navbar from "@/components/Navbar";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Contact | Media Scholar — Journal of Media Studies and Humanities",
+  title: "Contact",
   description: "Contact the editorial office of Media Scholar journal. Email: editor@mediascholar.in. ISSN: 3048-5029.",
   alternates: { canonical: "https://mediascholar.in/contact" },
 };

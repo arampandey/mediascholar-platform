@@ -54,7 +54,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const highwire: Record<string, string | string[]> = {
     citation_title: paper.title,
     citation_author: authorNames.length ? authorNames : "Unknown Author",
-    citation_journal_title: "Media Scholar — Journal of Media Studies and Humanities",
+    citation_journal_title: "Media Scholar",
     citation_issn: "3048-5029",
     citation_publication_date: pubDate,
     ...(paper.publishedAt ? { citation_online_date: pubDate } : {}),
@@ -66,19 +66,19 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     ...(paper.pageEnd ? { citation_lastpage: String(paper.pageEnd) } : {}),
     ...(paper.doi ? { citation_doi: paper.doi } : {}),
     ...(paper.fileUrl ? { citation_pdf_url: `https://mediascholar.in/paper/${paper.id}.pdf` } : {}),
-    citation_fulltext_html_url: `https://mediascholar.in/paper/${paper.id}`,
     citation_language: paper.language === "hi" ? "hi" : "en",
     citation_publisher: "Media Scholar",
   };
 
   return {
-    title: `${paper.title} | Media Scholar`,
+    title: paper.title,
     description: paper.abstract?.slice(0, 160) || "",
     keywords: paper.keywords?.join(", "),
     openGraph: {
       title: paper.title,
       description: paper.abstract?.slice(0, 200) || "",
       type: "article",
+      url: `https://mediascholar.in/paper/${paper.id}`,
       publishedTime: paper.publishedAt?.toISOString(),
     },
     alternates: { canonical: `https://mediascholar.in/paper/${paper.id}` },
@@ -125,14 +125,14 @@ export default async function PaperPage({ params }: { params: Promise<{ id: stri
     ],
     "publisher": {
       "@type": "Organization",
-      "name": "Media Scholar — Journal of Media Studies and Humanities",
+      "name": "Media Scholar",
       "url": "https://mediascholar.in",
     },
     ...(paper.pageStart ? { "pageStart": String(paper.pageStart) } : {}),
     ...(paper.pageEnd ? { "pageEnd": String(paper.pageEnd) } : {}),
     "isPartOf": {
       "@type": "Periodical",
-      "name": "Media Scholar — Journal of Media Studies and Humanities",
+      "name": "Media Scholar",
       "issn": "3048-5029",
       ...(vol ? { "volumeNumber": String(vol.number) } : {}),
       ...(iss ? { "issueNumber": String(iss.number) } : {}),
@@ -157,9 +157,9 @@ export default async function PaperPage({ params }: { params: Promise<{ id: stri
   const pageUrl = `https://mediascholar.in/paper/${paper.id}`;
 
   const citations = {
-    apa: `${authorName} (${year}). ${paper.title}. *Media Scholar — Journal of Media Studies and Humanities*, ${volIss}. ${issn}.`,
-    mla: `${authorName}. "${paper.title}." *Media Scholar — Journal of Media Studies and Humanities*, ${volIss}, ${year}. ${issn}.`,
-    chicago: `${authorName}. "${paper.title}." *Media Scholar — Journal of Media Studies and Humanities* ${volIss} (${year}). ${issn}.`,
+    apa: `${authorName} (${year}). ${paper.title}. *Media Scholar*, ${volIss}. ${issn}.`,
+    mla: `${authorName}. "${paper.title}." *Media Scholar*, ${volIss}, ${year}. ${issn}.`,
+    chicago: `${authorName}. "${paper.title}." *Media Scholar* ${volIss} (${year}). ${issn}.`,
   };
 
   const paperData = {
@@ -203,7 +203,7 @@ export default async function PaperPage({ params }: { params: Promise<{ id: stri
       <PaperClient paper={paperData} />
 
       <footer style={{ backgroundColor: "#1a2744" }} className="text-white text-center py-6 text-sm mt-8">
-        <p>© {new Date().getFullYear()} Media Scholar — Journal of Media Studies and Humanities. ISSN: 3048-5029</p>
+        <p>© {new Date().getFullYear()} Media Scholar. ISSN: 3048-5029</p>
       </footer>
     </div>
   );

@@ -12,7 +12,7 @@ export default function ShareButtons({ title, authorName, doi, fileUrl, pageUrl 
   const url = pageUrl || (typeof window !== "undefined" ? window.location.href : "https://mediascholar.in");
   const pdfLink = fileUrl || url;
 
-  const text = `📄 "${title}"${authorName ? ` by ${authorName}` : ""} — Published in Media Scholar: Journal of Media Studies and Humanities (ISSN: 3048-5029)${doi ? ` | DOI: ${doi}` : ""}`;
+  const text = `📄 "${title}"${authorName ? ` by ${authorName}` : ""} — Published in Media Scholar (ISSN: 3048-5029)${doi ? ` | DOI: ${doi}` : ""}`;
 
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(pdfLink)}`;
   const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(pdfLink)}&summary=${encodeURIComponent(text)}`;

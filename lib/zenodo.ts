@@ -65,7 +65,7 @@ export async function depositToZenodo(
       publication_type: "article",
       description: submission.abstract
         ? submission.abstract
-        : `Published in Media Scholar — Journal of Media Studies and Humanities.`,
+        : `Published in Media Scholar.`,
       creators: [
         { name: creatorName, ...(affiliation ? { affiliation } : {}) },
         // Co-authors are stored as "Name, Institution" text
@@ -84,7 +84,7 @@ export async function depositToZenodo(
       access_right: "open",
       license: "cc-by",
       publication_date: pubDate,
-      journal_title: "Media Scholar — Journal of Media Studies and Humanities",
+      journal_title: "Media Scholar",
       journal_issn: "3048-5029",
       ...(submission.issue
         ? {

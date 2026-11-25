@@ -2,7 +2,7 @@ import Navbar from "@/components/Navbar";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Editorial Board | Media Scholar — Journal of Media Studies and Humanities",
+  title: "Editorial Board",
   description: "Meet the editorial board of Media Scholar journal — Editor-in-Chief, Associate Editors, and Advisory Board members. ISSN: 3048-5029.",
   alternates: { canonical: "https://mediascholar.in/editorial-board" },
 };

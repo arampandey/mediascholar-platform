@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Aims & Scope | Media Scholar — Journal of Media Studies and Humanities",
+  title: "Aims & Scope",
   description: "Media Scholar is a peer-reviewed, open-access bilingual journal (Hindi & English) publishing original research in media studies, mass communication, journalism, and humanities. ISSN: 3048-5029.",
   alternates: { canonical: "https://mediascholar.in/aims-and-scope" },
 };

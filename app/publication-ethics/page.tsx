@@ -2,7 +2,7 @@ import Navbar from "@/components/Navbar";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Publication Ethics and Malpractice Statement | Media Scholar — Journal of Media Studies and Humanities",
+  title: "Publication Ethics and Malpractice Statement",
   description:
     "Publication ethics and malpractice statement of Media Scholar: authorship, originality, conflicts of interest, peer review, use of AI tools, corrections, retractions and complaints. ISSN: 3048-5029.",
   alternates: { canonical: "https://mediascholar.in/publication-ethics" },

@@ -146,7 +146,7 @@ export async function POST(req: NextRequest) {
     title: paper.title,
     authorName: paper.author?.name || "Unknown Author",
     authorInstitution: paper.author?.institution,
-    journalTitle: "Media Scholar — Journal of Media Studies and Humanities",
+    journalTitle: "Media Scholar",
     issn: "3048-5029",
     volume: String(vol?.number || ""),
     issue: String(iss?.number || ""),

@@ -7,7 +7,7 @@ const geist = Geist({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: {
-    default: "MediaScholar — Journal of Media Studies and Humanities",
+    default: "Media Scholar | Peer-Reviewed Open Access Journal",
     template: "%s | Media Scholar",
   },
   description: "A peer-reviewed bilingual journal (Hindi & English) for media studies and communication research. ISSN: 3048-5029",
@@ -19,9 +19,6 @@ export const metadata: Metadata = {
     siteName: "Media Scholar",
     type: "website",
     locale: "en_IN",
-    url: "https://mediascholar.in",
-    title: "MediaScholar — Journal of Media Studies and Humanities",
-    description: "A peer-reviewed bilingual journal (Hindi & English) for media studies and communication research. ISSN: 3048-5029",
   },
   robots: {
     index: true,
