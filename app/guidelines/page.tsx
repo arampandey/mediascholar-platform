@@ -151,14 +151,12 @@ export default function GuidelinesPage() {
           <h2 className="font-extrabold text-gray-900 text-lg mb-3">Revision Policy</h2>
           <div className="space-y-4">
             <div className="flex gap-4 items-start">
-              <span className="mt-0.5 shrink-0 w-6 h-6 rounded-full bg-yellow-100 text-yellow-700 font-bold text-xs flex items-center justify-center">M</span>
               <div>
                 <h3 className="font-bold text-gray-900 text-sm mb-1">Minor Revision</h3>
                 <p className="text-sm text-gray-600 leading-relaxed">Authors must submit the revised manuscript within <strong>21 days</strong> of receiving the decision. Minor revisions involve corrections to language, clarity, referencing style, or minor structural adjustments. Authors must provide a point-by-point response letter addressing each reviewer comment. Failure to submit within 21 days without prior notification will result in the submission being treated as withdrawn.</p>
               </div>
             </div>
             <div className="flex gap-4 items-start">
-              <span className="mt-0.5 shrink-0 w-6 h-6 rounded-full bg-orange-100 text-orange-700 font-bold text-xs flex items-center justify-center">M</span>
               <div>
                 <h3 className="font-bold text-gray-900 text-sm mb-1">Major Revision</h3>
                 <p className="text-sm text-gray-600 leading-relaxed">Authors must submit the revised manuscript within <strong>45 days</strong>. Major revisions may involve significant restructuring, additional data collection or analysis, expanded literature review, or fundamental reconceptualisation. Authors must provide a detailed point-by-point response letter. Revised manuscripts may undergo a second round of peer review. If the major revision requirements are not satisfactorily addressed, the paper may be rejected. A one-time extension of 15 days may be requested before the deadline.</p>
@@ -232,7 +230,6 @@ export default function GuidelinesPage() {
         <div id="copyright" className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm scroll-mt-8">
           <h2 className="font-extrabold text-gray-900 text-lg mb-3">Copyright &amp; Licensing</h2>
           <div className="flex items-start gap-4">
-            <div className="shrink-0 bg-indigo-50 rounded-xl p-3 text-2xl">©</div>
             <div className="text-sm text-gray-600 leading-relaxed space-y-3">
               <p>
                 <strong>Authors retain full copyright</strong> of their work. Upon acceptance, authors grant Media Scholar a non-exclusive licence to publish and distribute the article in print and digital formats.
@@ -318,7 +315,6 @@ export default function GuidelinesPage() {
         <div id="publication-fee" className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm scroll-mt-8">
           <h2 className="font-extrabold text-gray-900 text-lg mb-3">Publication Fee</h2>
           <div className="bg-green-50 border border-green-200 rounded-xl p-5 flex items-start gap-4">
-            <span className="text-3xl shrink-0">🎓</span>
             <p className="text-sm text-green-800 leading-relaxed">
               <strong>Media Scholar does not charge any article processing fees (APCs), submission fees, or publication charges.</strong> All submitted papers are considered and all accepted papers are published entirely free of charge. The journal is funded through institutional support and is committed to remaining permanently free for both authors and readers.
             </p>
